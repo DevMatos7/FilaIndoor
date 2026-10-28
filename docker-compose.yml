@@ -1,0 +1,63 @@
+# Portas exclusivas do FilaIndoor (evitar conflito com Checklist/Carga):
+#   Web  5180  |  API  8010  |  Postgres  5455
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: filaindoor_db
+    environment:
+      POSTGRES_USER: fila
+      POSTGRES_PASSWORD: fila
+      POSTGRES_DB: filaindoor
+    ports:
+      - "5455:5432"
+    volumes:
+      - filaindoor_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fila -d filaindoor"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: filaindoor_api
+    environment:
+      DATABASE_URL: postgresql+psycopg://fila:fila@db:5432/filaindoor
+      SECRET_KEY: dev-secret
+      CORS_ORIGINS: http://localhost:5180,http://127.0.0.1:5180
+      PRINT_PROVIDER: mock
+      DEFAULT_KIOSK_TOKEN: kiosk-acougue-demo
+      PRINTER_HOST: host.docker.internal
+      PRINTER_PORT: "9100"
+      TOLEDO_ENABLED: "false"
+      TOLEDO_MODE: NATIVE
+      TOLEDO_MOCK: "false"
+      TOLEDO_API_BASE_URL: ""
+      TOLEDO_API_KEY: ""
+      ERP_PROVIDER: mock
+      REAL_PLUS_ENABLED: "true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8010:8000"
+    volumes:
+      - filaindoor_media:/app/storage/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: filaindoor_web
+    ports:
+      - "5180:80"
+    depends_on:
+      - api
+
+volumes:
+  filaindoor_pg:
+  filaindoor_media:
