@@ -2,54 +2,35 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { enqueueLocal, flushLocalOutbox, loadCache, saveCache } from "../services/edgeOffline";
-
-type TotemState =
-  | "idle"
-  | "processing"
-  | "success"
-  | "printer_error"
-  | "server_error"
-  | "offline";
-
-type QueueStatus = {
-  name: string;
-  department_name?: string;
-  store_id?: string | null;
-  waiting_count: number;
-  estimated_wait_seconds: number;
-  status: string;
-};
-
-type IssueResponse = {
-  ticket: {
-    id: string;
-    number: string;
-    type: string;
-    people_ahead?: number;
-    estimated_wait_seconds?: number;
-  };
-  print: {
-    ok: boolean;
-    message?: string;
-    provider?: string;
-  };
-  department_name?: string;
-};
+import { TotemBoot } from "../components/totem/TotemBoot";
+import { TotemHeader } from "../components/totem/TotemHeader";
+import { TotemShell } from "../components/totem/TotemShell";
+import { TotemStatusInfo } from "../components/totem/TotemStatusInfo";
+import { ServiceChoice } from "../components/totem/ServiceChoice";
+import { TicketSuccess } from "../components/totem/TicketSuccess";
+import { TotemError } from "../components/totem/TotemError";
+import { TotemProcessing } from "../components/totem/TotemProcessing";
+import { TotemUnavailable } from "../components/totem/TotemUnavailable";
+import type { IssueResponse, QueueStatus, TotemUiState } from "../components/totem/types";
 
 const apiBase = import.meta.env.VITE_API_URL || "/api/v1";
+const STATUS_POLL_MS = 30_000;
 
-function waitLabel(seconds: number) {
-  return `${Math.max(1, Math.round(seconds / 60))} min`;
-}
-
+/**
+ * State machine (preservada + closed/unavailable derivados):
+ * boot → idle → processing → success → idle
+ *                 ↘ printer_error → idle
+ *                 ↘ server_error → idle/retry
+ * offline / closed / unavailable → sem emissão
+ */
 export default function Totem() {
   const { queueId } = useParams();
   const [params] = useSearchParams();
   const token = params.get("token") || localStorage.getItem("kiosk_token") || "";
-  const [state, setState] = useState<TotemState>("idle");
+  const [state, setState] = useState<TotemUiState>("boot");
   const [status, setStatus] = useState<QueueStatus | null>(null);
   const [issued, setIssued] = useState<IssueResponse | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [booted, setBooted] = useState(false);
   const busyRef = useRef(false);
   const resetTimer = useRef<number | null>(null);
 
@@ -57,14 +38,51 @@ export default function Totem() {
     if (token) localStorage.setItem("kiosk_token", token);
   }, [token]);
 
+  const clearReset = () => {
+    if (resetTimer.current) {
+      window.clearTimeout(resetTimer.current);
+      resetTimer.current = null;
+    }
+  };
+
+  const scheduleIdle = useCallback(
+    (ms = 4500) => {
+      clearReset();
+      resetTimer.current = window.setTimeout(() => {
+        setIssued(null);
+        busyRef.current = false;
+        setState((s) => {
+          if (s === "closed" || s === "unavailable") return s;
+          return "idle";
+        });
+        void loadStatusRef.current();
+      }, ms);
+    },
+    [],
+  );
+
+  const loadStatusRef = useRef<() => Promise<void>>(async () => undefined);
+
   const loadStatus = useCallback(async () => {
-    if (!queueId || !token) return;
+    if (!queueId) return;
+    if (!token) {
+      setBooted(true);
+      setState((s) =>
+        s === "processing" || s === "success" || s === "printer_error" ? s : "unavailable",
+      );
+      return;
+    }
+
     if (!navigator.onLine) {
       const cached = loadCache<QueueStatus>("kiosk_status", queueId, 30 * 60 * 1000);
       if (cached) setStatus(cached);
-      setState((s) => (s === "processing" || s === "success" || s === "printer_error" ? s : "offline"));
+      setBooted(true);
+      setState((s) =>
+        s === "processing" || s === "success" || s === "printer_error" ? s : "offline",
+      );
       return;
     }
+
     try {
       const { data } = await axios.get<QueueStatus>(`${apiBase}/kiosk/${queueId}/status`, {
         headers: { "X-Kiosk-Token": token },
@@ -72,55 +90,78 @@ export default function Totem() {
       });
       setStatus(data);
       saveCache("kiosk_status", queueId, data);
-      setState((s) => (s === "offline" || s === "server_error" ? "idle" : s));
+      setBooted(true);
+      setState((s) => {
+        if (s === "processing" || s === "success" || s === "printer_error") return s;
+        if (data.status === "CLOSED") return "closed";
+        if (data.status !== "OPEN") return "closed"; // PAUSED etc. — backend só emite OPEN
+        if (s === "offline" || s === "server_error" || s === "unavailable" || s === "boot" || s === "closed") {
+          return "idle";
+        }
+        return s === "idle" ? "idle" : s;
+      });
       void flushLocalOutbox().catch(() => undefined);
     } catch {
       const cached = loadCache<QueueStatus>("kiosk_status", queueId, 30 * 60 * 1000);
+      setBooted(true);
       if (cached) {
         setStatus(cached);
-        setState((s) => (s === "processing" || s === "success" || s === "printer_error" ? s : "offline"));
+        if (!navigator.onLine) {
+          setState((s) =>
+            s === "processing" || s === "success" || s === "printer_error" ? s : "offline",
+          );
+        } else {
+          // Mantém idle se possível — não bloqueia emissão por falha de refresh
+          setState((s) => {
+            if (s === "processing" || s === "success" || s === "printer_error") return s;
+            if (s === "boot" || s === "offline" || s === "server_error" || s === "unavailable") {
+              return cached.status === "OPEN" ? "idle" : "closed";
+            }
+            return s;
+          });
+        }
       } else {
-        setState((s) => (s === "processing" || s === "success" || s === "printer_error" ? s : "server_error"));
+        setState((s) =>
+          s === "processing" || s === "success" || s === "printer_error" ? s : "server_error",
+        );
       }
     }
   }, [queueId, token]);
 
+  loadStatusRef.current = loadStatus;
+
   useEffect(() => {
     void loadStatus();
-    const id = window.setInterval(() => void loadStatus(), 8000);
+    const id = window.setInterval(() => void loadStatus(), STATUS_POLL_MS);
     const onOnline = () => void loadStatus();
-    const onOffline = () => setState("offline");
+    const onOffline = () =>
+      setState((s) =>
+        s === "processing" || s === "success" || s === "printer_error" ? s : "offline",
+      );
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     return () => {
       window.clearInterval(id);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
-      if (resetTimer.current) window.clearTimeout(resetTimer.current);
+      clearReset();
     };
   }, [loadStatus]);
 
-  function scheduleIdle(ms = 4500) {
-    if (resetTimer.current) window.clearTimeout(resetTimer.current);
-    resetTimer.current = window.setTimeout(() => {
-      setIssued(null);
-      setMessage(null);
-      busyRef.current = false;
-      setState("idle");
-      void loadStatus();
-    }, ms);
-  }
-
   async function issue(type: "NORMAL" | "PRIORITY") {
     if (!queueId || !token || busyRef.current) return;
+    if (status && status.status !== "OPEN") {
+      setState("closed");
+      return;
+    }
     if (!navigator.onLine) {
+      // Sem backend nem emissão local com número — indisponível comercial
       setState("offline");
       return;
     }
 
     busyRef.current = true;
     setState("processing");
-    setMessage(null);
     setIssued(null);
 
     const idempotencyKey = crypto.randomUUID();
@@ -140,14 +181,13 @@ export default function Totem() {
       setIssued(data);
       if (data.print?.ok) {
         setState("success");
-        setMessage("Imprimindo...");
       } else {
         setState("printer_error");
-        setMessage(data.print?.message || "Não foi possível imprimir.");
       }
       scheduleIdle(data.print?.ok ? 4000 : 7000);
       void loadStatus();
     } catch {
+      // Outbox preservado — cliente não vê termos Edge/API
       if (status?.store_id) {
         enqueueLocal({
           store_id: status.store_id,
@@ -156,107 +196,103 @@ export default function Totem() {
           event_id: idempotencyKey,
           payload: { queue_id: queueId, type, source: "KIOSK", deferred: true },
         });
-        setState("offline");
-        setMessage("Sem conexão com o edge. Pedido guardado para sincronizar.");
-      } else {
-        setState("server_error");
-        setMessage("Atendimento temporariamente indisponível. Procure um colaborador.");
       }
+      setState("server_error");
       busyRef.current = false;
-      scheduleIdle(5000);
+      scheduleIdle(8000);
     }
   }
 
-  const dept = status?.department_name || issued?.department_name || "Açougue";
-  const blocked = state === "processing" || state === "success" || state === "printer_error";
+  function handleRetry() {
+    if (busyRef.current) return;
+    clearReset();
+    setIssued(null);
+    setState("idle");
+    void loadStatus();
+  }
+
+  const dept = status?.department_name || issued?.department_name || status?.name || "Atendimento";
+  const blocked =
+    state === "processing" || state === "success" || state === "printer_error" || busyRef.current;
+  const showBoot = !booted && state === "boot";
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-brand-900 via-brand-700 to-brand-900 text-white">
-      <header className="px-6 py-5 text-center">
-        <p className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">REAL</p>
-        <p className="mt-1 text-lg uppercase tracking-[0.2em] text-brand-100">{dept}</p>
-        <p className="mt-2 text-sm text-brand-100/80">
-          {status?.status === "OPEN" || !status ? "Operação aberta" : `Fila: ${status.status}`}
-        </p>
-      </header>
+    <TotemShell>
+      {showBoot ? (
+        <TotemBoot />
+      ) : (
+        <>
+          <TotemHeader
+            department={dept}
+            prompt={state === "idle" ? "Como deseja ser atendido?" : undefined}
+          />
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-5 px-4 pb-8">
-        {state === "idle" && (
-          <>
-            <button
-              type="button"
-              disabled={blocked}
-              onClick={() => void issue("NORMAL")}
-              className="min-h-[140px] rounded-2xl bg-white px-6 py-8 text-center text-brand-900 shadow-lg transition active:scale-[0.99] disabled:opacity-60"
-            >
-              <span className="block font-display text-3xl font-bold sm:text-4xl">SENHA NORMAL</span>
-              <span className="mt-2 block text-base text-ink/70">Atendimento convencional</span>
-            </button>
-            <button
-              type="button"
-              disabled={blocked}
-              onClick={() => void issue("PRIORITY")}
-              className="min-h-[140px] rounded-2xl border-4 border-amber-300 bg-amber-400 px-6 py-8 text-center text-brand-900 shadow-lg transition active:scale-[0.99] disabled:opacity-60"
-              aria-label="Senha prioritária — atendimento preferencial"
-            >
-              <span className="block font-display text-3xl font-bold sm:text-4xl">SENHA PRIORITÁRIA</span>
-              <span className="mt-2 block text-base font-medium text-brand-900/80">
-                Preferencial — claramente identificada
-              </span>
-            </button>
-          </>
-        )}
+          <main className="safe-totem-x mx-auto flex w-full max-w-xl flex-1 flex-col justify-center gap-5 px-5 pb-4">
+            {state === "idle" && (
+              <ServiceChoice
+                disabled={blocked}
+                waitingCount={status?.waiting_count}
+                estimatedWaitSeconds={status?.estimated_wait_seconds}
+                onNormal={() => void issue("NORMAL")}
+                onPriority={() => void issue("PRIORITY")}
+              />
+            )}
 
-        {state === "processing" && (
-          <div className="rounded-2xl bg-white/10 px-6 py-16 text-center backdrop-blur">
-            <p className="font-display text-3xl font-semibold">Emitindo sua senha...</p>
-            <p className="mt-3 text-brand-100">Aguarde, não toque novamente.</p>
-          </div>
-        )}
+            {state === "processing" && <TotemProcessing />}
 
-        {state === "success" && issued && (
-          <div className="rounded-2xl bg-white px-6 py-12 text-center text-brand-900">
-            <p className="text-lg uppercase tracking-wide text-brand-700">Sua senha é</p>
-            <p className="mt-2 font-display text-7xl font-bold">{issued.ticket.number}</p>
-            <p className="mt-4 text-xl">{message || "Imprimindo..."}</p>
-          </div>
-        )}
+            {state === "success" && issued && (
+              <TicketSuccess
+                number={issued.ticket.number}
+                priority={issued.ticket.type === "PRIORITY" || issued.ticket.type === "PRIORITY_PLUS"}
+                printed
+              />
+            )}
 
-        {state === "printer_error" && issued && (
-          <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 px-6 py-10 text-center text-brand-900">
-            <p className="text-lg">Sua senha <strong>{issued.ticket.number}</strong> foi registrada.</p>
-            <p className="mt-4 text-xl font-semibold">Não foi possível imprimir.</p>
-            <p className="mt-2 text-base text-ink/80">Solicite ajuda a um colaborador.</p>
-            {message && <p className="mt-3 text-sm text-ink/60">{message}</p>}
-          </div>
-        )}
+            {state === "printer_error" && issued && (
+              <TotemError variant="printer" ticketNumber={issued.ticket.number} />
+            )}
 
-        {state === "offline" && (
-          <div className="rounded-2xl bg-white/10 px-6 py-12 text-center">
-            <p className="font-display text-2xl font-semibold">Sistema operando localmente</p>
-            <p className="mt-3 text-brand-100">Sem conexão no momento. A operação será retomada automaticamente.</p>
-          </div>
-        )}
+            {state === "server_error" && (
+              <TotemError variant="server" onRetry={handleRetry} />
+            )}
 
-        {state === "server_error" && (
-          <div className="rounded-2xl bg-red-50 px-6 py-12 text-center text-red-900">
-            <p className="font-display text-2xl font-semibold">Atendimento temporariamente indisponível.</p>
-            <p className="mt-3">{message || "Procure um colaborador."}</p>
-          </div>
-        )}
-      </main>
+            {state === "offline" && (
+              <TotemUnavailable
+                title="Atendimento temporariamente indisponível"
+                description="Procure um colaborador."
+              />
+            )}
 
-      <footer className="px-6 pb-8 text-center text-brand-100">
-        {status ? (
-          <>
-            <p className="text-lg font-medium">{status.waiting_count} pessoas aguardando</p>
-            <p className="mt-1 text-base">Espera aproximada: {waitLabel(status.estimated_wait_seconds)}</p>
-          </>
-        ) : (
-          <p className="text-sm opacity-80">Carregando informações da fila…</p>
-        )}
-        {!token && <p className="mt-3 text-sm text-amber-200">Token do totem ausente na URL (?token=…)</p>}
-      </footer>
-    </div>
+            {state === "closed" && (
+              <TotemUnavailable
+                title={
+                  status?.status === "PAUSED"
+                    ? "Atendimento pausado neste momento"
+                    : "Atendimento encerrado neste momento"
+                }
+                description="Procure um colaborador se precisar de ajuda."
+              />
+            )}
+
+            {state === "unavailable" && (
+              <TotemUnavailable
+                title="Atendimento temporariamente indisponível"
+                description="Procure um colaborador."
+              />
+            )}
+          </main>
+
+          {(state === "idle" || state === "processing") && (
+            <TotemStatusInfo
+              hint={
+                state === "processing"
+                  ? "Estamos preparando sua senha."
+                  : "Retire sua senha e continue suas compras normalmente."
+              }
+            />
+          )}
+        </>
+      )}
+    </TotemShell>
   );
 }

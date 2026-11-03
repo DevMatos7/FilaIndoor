@@ -21,6 +21,7 @@ import RealPlus from "./pages/RealPlus";
 import RealPlusAdmin from "./pages/RealPlusAdmin";
 import Toledo from "./pages/Toledo";
 import Totem from "./pages/Totem";
+import TotemDiagnostics from "./pages/TotemDiagnostics";
 
 function Private({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("token");
@@ -32,6 +33,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/totem/:queueId/diagnostics" element={<TotemDiagnostics />} />
       <Route path="/totem/:queueId" element={<Totem />} />
       <Route path="/operator/:queueId" element={<Operator />} />
       <Route path="/display/:queueId" element={<Display />} />
