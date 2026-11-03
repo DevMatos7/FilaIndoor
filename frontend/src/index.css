@@ -53,6 +53,18 @@ body.atmosphere-login {
     padding-left: max(1rem, env(safe-area-inset-left, 0px));
     padding-right: max(1rem, env(safe-area-inset-right, 0px));
   }
+
+  /* TV overscan / safe zone (~3–5%) for critical display content */
+  .display-safe {
+    padding-left: max(3vw, env(safe-area-inset-left, 0px));
+    padding-right: max(3vw, env(safe-area-inset-right, 0px));
+    padding-top: max(1.5vh, env(safe-area-inset-top, 0px));
+    padding-bottom: max(1.5vh, env(safe-area-inset-bottom, 0px));
+  }
+
+  .display-footer {
+    min-height: clamp(7.5rem, 18vh, 14rem);
+  }
 }
 
 @keyframes totemFade {
@@ -77,6 +89,15 @@ body.atmosphere-login {
   }
 }
 
+@keyframes displayFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   @keyframes totemFade {
     from {
@@ -97,6 +118,15 @@ body.atmosphere-login {
     to {
       opacity: 1;
       transform: none;
+    }
+  }
+
+  @keyframes displayFade {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 1;
     }
   }
 }

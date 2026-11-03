@@ -1,87 +1,49 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import axios from "axios";
-import { loadCache, saveCache } from "../services/edgeOffline";
+import { DisplayShell } from "../components/display/DisplayShell";
+import { DisplayBoot } from "../components/display/DisplayBoot";
+import { DisplayUnavailable } from "../components/display/DisplayUnavailable";
+import { MediaPlayer } from "../components/display/MediaPlayer";
+import { QueueFooter } from "../components/display/QueueFooter";
+import { QueueCallOverlay } from "../components/display/QueueCallOverlay";
+import type {
+  CallOverlay,
+  DisplayTicket,
+  PlayerConfig,
+  PlayerUiState,
+  PlaylistItem,
+  WsEvent,
+} from "../components/display/types";
+import {
+  buildWsUrl,
+  fetchPlayerConfig,
+  sendDisplayHeartbeat,
+  speakTicket,
+} from "../services/displayPlayer";
 
-type Ticket = { id: string; number: string; type?: string; status?: string };
-
-type PlaylistItem = {
-  id: string;
-  name: string;
-  type: string;
-  url: string;
-  mime_type?: string | null;
-  duration_seconds: number;
-};
-
-type PlayerConfig = {
-  store_id: string;
-  queue_id: string;
-  department: string;
-  ws_path: string;
-  config_version?: number;
-  device?: {
-    id: string;
-    device_uuid: string;
-    status: string;
-    config_version: number;
-  };
-  display: {
-    id: string;
-    name: string;
-    audio_enabled: boolean;
-    audio_template: string;
-  };
-  audio: { enabled: boolean; template: string; lang: string };
-  playlist?: PlaylistItem[];
-  queue: {
-    name: string;
-    current: Ticket | null;
-    last_called: Ticket[];
-    waiting_count: number;
-  } | null;
-};
-
-type WsEvent = {
-  event: string;
-  event_id: string;
-  timestamp: string;
-  data: {
-    ticket?: string;
-    ticket_id?: string;
-    department?: string;
-    queue_id?: string;
-    status?: string;
-  };
-};
-
-const apiBase = import.meta.env.VITE_API_URL || "/api/v1";
-
-function speak(template: string, number: string, department: string, lang: string) {
-  if (!("speechSynthesis" in window)) return;
-  const text = template
-    .replace("{number}", number.split("").join(" "))
-    .replace("{department}", department);
-  window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = lang || "pt-BR";
-  utter.rate = 0.95;
-  window.speechSynthesis.speak(utter);
-}
-
+/**
+ * UX-6A — Display Public Mode
+ *
+ * Arquitetura preparada para UX-6B:
+ * DisplayShell → MediaPlayer + QueueFooter (+ QueueCallOverlay)
+ * Sem LayoutResolver / zones / screen_overrides nesta sprint.
+ *
+ * Comportamento de overlay: se nova chamada chega durante overlay ativo,
+ * a atual é substituída e o timer de ~7s reinicia (regra pré-existente).
+ */
 export default function Display() {
   const { queueId } = useParams();
   const [params] = useSearchParams();
   const token = params.get("token") || "";
   const forceAudio = params.get("audio");
 
+  const [uiState, setUiState] = useState<PlayerUiState>("boot");
   const [config, setConfig] = useState<PlayerConfig | null>(null);
-  const [current, setCurrent] = useState<Ticket | null>(null);
-  const [lastCalled, setLastCalled] = useState<Ticket[]>([]);
-  const [overlay, setOverlay] = useState<{ number: string; department: string } | null>(null);
-  const [wsState, setWsState] = useState<"connecting" | "online" | "offline">("connecting");
-  const [error, setError] = useState<string | null>(null);
+  const [current, setCurrent] = useState<DisplayTicket | null>(null);
+  const [lastCalled, setLastCalled] = useState<DisplayTicket[]>([]);
+  const [overlay, setOverlay] = useState<CallOverlay | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
+  const [skipIds, setSkipIds] = useState<Set<string>>(() => new Set());
 
   const seenEvents = useRef<Set<string>>(new Set());
   const overlayTimer = useRef<number | null>(null);
@@ -94,9 +56,6 @@ export default function Display() {
   const forceAudioRef = useRef(forceAudio);
   forceAudioRef.current = forceAudio;
 
-  const audioEnabled =
-    forceAudio === "1" || forceAudio === "true" || !!config?.display.audio_enabled;
-
   useEffect(() => {
     aliveRef.current = true;
     intentionalCloseRef.current = false;
@@ -106,38 +65,31 @@ export default function Display() {
       setConfig(data);
       setCurrent(data.queue?.current || null);
       setLastCalled(data.queue?.last_called || []);
-      setError(null);
+      const hasMedia = (data.playlist?.length || 0) > 0;
+      setUiState(hasMedia ? "ready" : "fallback");
     }
 
-    async function fetchConfig(): Promise<PlayerConfig | null> {
+    async function loadConfig(): Promise<PlayerConfig | null> {
       if (!token) {
-        setError("Informe ?token= do display");
+        setUiState("unavailable");
         return null;
       }
-      const cacheId = `${queueId || "na"}:${token}`;
       try {
-        const { data } = await axios.get<PlayerConfig>(`${apiBase}/player/config`, {
-          headers: { "X-Display-Token": token },
-          params: { token },
-          timeout: 8000,
-        });
+        const { config: data, fromCache } = await fetchPlayerConfig(queueId, token);
         if (!aliveRef.current) return null;
-        saveCache("player_config", cacheId, data);
         applyConfig(data);
+        if (fromCache) {
+          console.info("[display] using cached player config (edge/offline)");
+        }
         return data;
       } catch {
-        const cached = loadCache<PlayerConfig>("player_config", cacheId, 60 * 60 * 1000);
-        if (cached && aliveRef.current) {
-          applyConfig(cached);
-          setError("Modo cache local (edge offline)");
-          return cached;
-        }
-        throw new Error("config unavailable");
+        if (aliveRef.current) setUiState("unavailable");
+        return null;
       }
     }
 
-    function showOverlay(number: string, department: string) {
-      setOverlay({ number, department });
+    function showOverlay(number: string, department: string, ticketType?: string) {
+      setOverlay({ number, department, ticketType });
       if (overlayTimer.current) window.clearTimeout(overlayTimer.current);
       overlayTimer.current = window.setTimeout(() => setOverlay(null), 7000);
 
@@ -145,7 +97,7 @@ export default function Display() {
       const force = forceAudioRef.current;
       const enabled = force === "1" || force === "true" || !!cfg?.display.audio_enabled;
       if (enabled && cfg) {
-        speak(cfg.audio.template, number, department, cfg.audio.lang);
+        speakTicket(cfg.audio.template, number, department, cfg.audio.lang);
       }
     }
 
@@ -170,26 +122,22 @@ export default function Display() {
         intentionalCloseRef.current = false;
       }
 
-      const proto = window.location.protocol === "https:" ? "wss" : "ws";
-      const url = `${proto}://${window.location.host}${cfg.ws_path}`;
-      setWsState("connecting");
-      const ws = new WebSocket(url);
+      const ws = new WebSocket(buildWsUrl(cfg.ws_path));
       wsRef.current = ws;
 
       ws.onopen = () => {
-        if (aliveRef.current) setWsState("online");
+        console.debug("[display] ws online");
       };
       ws.onclose = () => {
         clearPing();
         if (!aliveRef.current || intentionalCloseRef.current) return;
-        setWsState("offline");
+        console.debug("[display] ws offline — reconnecting");
         reconnectTimer.current = window.setTimeout(() => {
           const latest = configRef.current || cfg;
           connectWs(latest);
         }, 2500);
       };
       ws.onerror = () => {
-        setWsState("offline");
         ws.close();
       };
       ws.onmessage = (msg) => {
@@ -206,20 +154,21 @@ export default function Display() {
 
           if (evt.event === "ticket.called" || evt.event === "ticket.recalled") {
             const number = evt.data.ticket || "";
-            const department = evt.data.department || cfg.department || "Açougue";
+            const department = evt.data.department || cfg.department || "Atendimento";
             if (number) {
-              const ticket: Ticket = {
+              const ticket: DisplayTicket = {
                 id: evt.data.ticket_id || number,
                 number,
+                type: evt.data.ticket_type,
                 status: evt.data.status,
               };
               setCurrent(ticket);
               setLastCalled((prev) => [ticket, ...prev.filter((t) => t.id !== ticket.id)].slice(0, 5));
-              showOverlay(number, department);
+              showOverlay(number, department, evt.data.ticket_type);
             }
           }
           if (evt.event === "queue.updated") {
-            void fetchConfig();
+            void loadConfig();
           }
         } catch {
           // ignore malformed
@@ -233,46 +182,15 @@ export default function Display() {
 
     let heartbeatTimer: number | null = null;
 
-    async function sendHeartbeat(cfg: PlayerConfig) {
-      if (!cfg.device?.id || !token) return;
-      try {
-        const estimate =
-          typeof (navigator as Navigator & { storage?: { estimate?: () => Promise<{ quota?: number; usage?: number }> } })
-            .storage?.estimate === "function"
-            ? await (navigator as Navigator & { storage: { estimate: () => Promise<{ quota?: number; usage?: number }> } }).storage.estimate()
-            : null;
-        const freeMb =
-          estimate?.quota != null && estimate?.usage != null
-            ? Math.max(0, Math.round((estimate.quota - estimate.usage) / (1024 * 1024)))
-            : undefined;
-        await axios.post(
-          `${apiBase}/devices/${cfg.device.id}/heartbeat`,
-          {
-            online: true,
-            app_version: "1.0.0",
-            free_storage_mb: freeMb,
-            playlist_version: cfg.config_version ?? cfg.playlist?.length ?? 0,
-          },
-          { headers: { "X-Display-Token": token } },
-        );
-      } catch {
-        // telemetria best-effort
-      }
-    }
-
     (async () => {
-      try {
-        const cfg = await fetchConfig();
-        if (aliveRef.current && cfg) {
-          connectWs(cfg);
-          void sendHeartbeat(cfg);
-          heartbeatTimer = window.setInterval(() => {
-            const latest = configRef.current;
-            if (latest) void sendHeartbeat(latest);
-          }, 30000);
-        }
-      } catch {
-        if (aliveRef.current) setError("Falha ao carregar config do player");
+      const cfg = await loadConfig();
+      if (aliveRef.current && cfg) {
+        connectWs(cfg);
+        void sendDisplayHeartbeat(cfg, token);
+        heartbeatTimer = window.setInterval(() => {
+          const latest = configRef.current;
+          if (latest) void sendDisplayHeartbeat(latest, token);
+        }, 30000);
       }
     })();
 
@@ -290,13 +208,17 @@ export default function Display() {
     };
   }, [token, queueId]);
 
-  const playlist = config?.playlist || [];
+  const playlist = useMemo(() => {
+    const raw = config?.playlist || [];
+    return raw.filter((p) => !skipIds.has(p.id));
+  }, [config?.playlist, skipIds]);
+
   const slide = playlist.length > 0 ? playlist[slideIndex % playlist.length] : null;
 
   useEffect(() => {
-    if (playlist.length === 0) return;
     setSlideIndex(0);
-  }, [playlist.length, config?.store_id]);
+    setSkipIds(new Set());
+  }, [config?.store_id, config?.config_version, config?.playlist?.length]);
 
   useEffect(() => {
     if (!slide || playlist.length === 0) return;
@@ -307,73 +229,50 @@ export default function Display() {
     return () => window.clearTimeout(id);
   }, [slide, playlist.length]);
 
-  const lastLine = lastCalled
-    .filter((t) => t.id !== current?.id)
-    .slice(0, 3)
-    .map((t) => t.number)
-    .join(" • ");
+  function handleMediaFailed(item: PlaylistItem) {
+    setSkipIds((prev) => {
+      const next = new Set(prev);
+      next.add(item.id);
+      return next;
+    });
+    setSlideIndex((i) => i + 1);
+  }
+
+  const department = config?.department || config?.queue?.name || "Atendimento";
+
+  // All-media failed → branded fallback, still show footer if we have config
+  const effectiveState: PlayerUiState =
+    uiState === "ready" && playlist.length === 0 ? "fallback" : uiState;
+
+  if (effectiveState === "boot") {
+    return (
+      <DisplayShell>
+        <DisplayBoot />
+      </DisplayShell>
+    );
+  }
+
+  if (effectiveState === "unavailable") {
+    return (
+      <DisplayShell>
+        <DisplayUnavailable />
+      </DisplayShell>
+    );
+  }
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-brand-900 text-white">
-      <div className="absolute right-4 top-4 z-20 rounded-full bg-black/40 px-3 py-1 text-xs uppercase tracking-wide">
-        {wsState === "online" ? "Ao vivo" : wsState === "connecting" ? "Conectando…" : "Reconectando…"}
-        {audioEnabled ? " · Áudio" : " · Sem áudio"}
+    <DisplayShell>
+      <div className="flex h-full w-full flex-col">
+        {/* Media zone — protagonist during normal operation */}
+        <section className="relative min-h-0 flex-[1.35] overflow-hidden">
+          <MediaPlayer item={slide} onMediaFailed={handleMediaFailed} />
+          {/* Overlay sits above media; media stays mounted underneath */}
+          <QueueCallOverlay call={overlay} />
+        </section>
+
+        {/* Queue footer — context, never technical telemetry */}
+        <QueueFooter department={department} current={current} lastCalled={lastCalled} />
       </div>
-
-      <section className="relative flex flex-[1.35] items-center justify-center overflow-hidden bg-gradient-to-br from-brand-700 via-brand-900 to-ink">
-        {!slide && (
-          <>
-            <div
-              className="pointer-events-none absolute inset-0 opacity-30"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle at 20% 20%, #fff3 0, transparent 40%), radial-gradient(circle at 80% 60%, #1f6b4a55 0, transparent 45%)",
-              }}
-            />
-            <div className="relative z-10 px-6 text-center">
-              <p className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">REAL</p>
-              <p className="mt-3 text-lg text-brand-100 sm:text-xl">Ofertas e comunicação indoor</p>
-              <p className="mt-2 text-sm text-white/60">Sem mídia na loja — cadastre em /media</p>
-            </div>
-          </>
-        )}
-
-        {slide?.type === "IMAGE" && (
-          <img src={slide.url} alt={slide.name} className="absolute inset-0 h-full w-full object-cover" />
-        )}
-        {slide?.type === "VIDEO" && (
-          <video
-            key={slide.id}
-            src={slide.url}
-            className="absolute inset-0 h-full w-full object-cover"
-            autoPlay
-            muted
-            playsInline
-          />
-        )}
-        {slide?.type === "WEB" && (
-          <iframe title={slide.name} src={slide.url} className="absolute inset-0 h-full w-full border-0 bg-white" />
-        )}
-
-        {overlay && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center bg-brand-900/92 p-6 backdrop-blur-sm">
-            <div className="text-center">
-              <p className="font-display text-8xl font-bold tracking-tight sm:text-9xl">{overlay.number}</p>
-              <p className="mt-4 text-3xl uppercase tracking-[0.2em] text-brand-100">{overlay.department}</p>
-              <p className="mt-6 text-2xl text-white/90">Dirija-se ao balcão</p>
-            </div>
-          </div>
-        )}
-      </section>
-
-      <section className="flex flex-col justify-center border-t border-white/10 bg-ink px-6 py-8 sm:py-10">
-        <p className="text-sm uppercase tracking-[0.25em] text-brand-100">
-          {config?.department || config?.queue?.name || "Açougue"} · Senha atual
-        </p>
-        <p className="mt-2 font-display text-7xl font-bold tracking-tight sm:text-8xl">{current?.number || "—"}</p>
-        <p className="mt-4 text-lg text-white/70">Últimas {lastLine || "—"}</p>
-        {error && <p className="mt-3 text-sm text-amber-200">{error}</p>}
-      </section>
-    </div>
+    </DisplayShell>
   );
 }
