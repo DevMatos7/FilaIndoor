@@ -8,6 +8,8 @@ from app.modules.org.models.entities import Department
 from app.modules.queue.models.entities import Display, Queue
 from app.modules.queue.services.queue_service import QueueService
 from app.modules.devices.service import DeviceService, device_to_dict
+from app.modules.signage.layout_service import LayoutService
+from app.modules.signage.models import Channel
 from app.modules.signage.schedule_service import ScheduleService
 from app.modules.signage.service import SignageService
 
@@ -55,6 +57,12 @@ def player_config(
         ]
         schedule_meta = {**schedule_meta, "source": "assets_fallback"}
     device = DeviceService(db).ensure_for_display(display)
+    channel = db.get(Channel, display.channel_id) if display.channel_id else None
+    legacy_layout = channel.layout if channel else "queue_media_split"
+    layout = LayoutService(db).resolve_for_display(
+        channel_id=display.channel_id,
+        store_id=display.store_id,
+    )
     return {
         "config_version": device.config_version,
         "device": device_to_dict(device),
@@ -73,11 +81,14 @@ def player_config(
         "queue": status,
         "channel": {
             "id": display.channel_id,
-            "layout": "queue_media_split",
+            "layout": legacy_layout,
+            "layout_template_id": channel.layout_template_id if channel else None,
             "schedule": schedule_meta.get("schedule"),
             "source": schedule_meta.get("source"),
             "conflicts": schedule_meta.get("conflicts") or [],
         },
+        # UX-6B additive — old clients ignore this key
+        "layout": layout,
         "playlist": playlist,
         "audio": {
             "enabled": display.audio_enabled,

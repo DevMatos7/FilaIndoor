@@ -108,16 +108,16 @@ Sem: API, WS, token, playlist, channel, `/media`, conectando, áudio on/off.
 - Portrait não otimizado  
 - VISUAL VALIDATION pode ficar PENDING sem capturas reais  
 
-## Preparação UX-6B
+## Evolução UX-6B
 
-Componentes reutilizáveis:
-- `MediaPlayer`, `QueueCallOverlay`, `QueueFooter`  
-- Shell / boot / fallback / unavailable  
+A engine de layouts está documentada em [`08b-layout-engine.md`](./08b-layout-engine.md).
 
-Próximo passo natural:
+Composição atual:
 
 ```text
-Player → LayoutResolver → Zones
+DisplayShell → LayoutResolver → Zones
+             → QueueCallOverlay (ainda global; UX-6C)
 ```
 
-sem reescrever WS/TTS/config/MediaPlayer/Overlay.
+`MediaPlayer`, `QueueCallOverlay`, WS/TTS/heartbeat preservados.  
+`QueueFooter` evoluiu para variantes via `QueueZone`.

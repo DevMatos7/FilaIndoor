@@ -17,12 +17,14 @@ class ChannelCreate(BaseModel):
     store_id: str
     name: str = Field(min_length=1, max_length=180)
     layout: str = "queue_media_split"
+    layout_template_id: str | None = None
     default_playlist_id: str | None = None
 
 
 class ChannelUpdate(BaseModel):
     name: str | None = None
     layout: str | None = None
+    layout_template_id: str | None = None
     default_playlist_id: str | None = None
     active: bool | None = None
 

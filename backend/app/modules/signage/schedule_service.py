@@ -81,6 +81,7 @@ def channel_to_dict(ch: Channel, *, include_schedules: bool = True) -> dict[str,
         "store_id": ch.store_id,
         "name": ch.name,
         "layout": ch.layout,
+        "layout_template_id": ch.layout_template_id,
         "default_playlist_id": ch.default_playlist_id,
         "active": ch.active,
         "schedules": [schedule_to_dict(s) for s in ch.schedules] if include_schedules else [],
@@ -116,12 +117,14 @@ class ScheduleService:
         store_id: str,
         name: str,
         layout: str = "queue_media_split",
+        layout_template_id: str | None = None,
         default_playlist_id: str | None = None,
     ) -> dict[str, Any]:
         ch = Channel(
             store_id=store_id,
             name=name.strip(),
             layout=layout or "queue_media_split",
+            layout_template_id=layout_template_id,
             default_playlist_id=default_playlist_id,
         )
         self.db.add(ch)
@@ -131,7 +134,7 @@ class ScheduleService:
     def update_channel(self, channel_id: str, **fields: Any) -> dict[str, Any]:
         ch = self._channel(channel_id)
         for key, value in fields.items():
-            if value is None and key not in {"default_playlist_id"}:
+            if value is None and key not in {"default_playlist_id", "layout_template_id"}:
                 continue
             if hasattr(ch, key):
                 setattr(ch, key, value)

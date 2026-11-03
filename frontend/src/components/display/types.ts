@@ -14,6 +14,8 @@ export type PlaylistItem = {
   duration_seconds: number;
 };
 
+import type { ResolvedLayout } from "./layoutTypes";
+
 export type PlayerConfig = {
   store_id: string;
   queue_id: string;
@@ -34,6 +36,13 @@ export type PlayerConfig = {
   };
   audio: { enabled: boolean; template: string; lang: string };
   playlist?: PlaylistItem[];
+  /** UX-6B additive — may be absent in Edge cache antigo */
+  layout?: ResolvedLayout | null;
+  channel?: {
+    id?: string | null;
+    layout?: string;
+    layout_template_id?: string | null;
+  };
   queue: {
     name: string;
     current: DisplayTicket | null;

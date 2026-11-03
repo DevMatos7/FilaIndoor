@@ -3,8 +3,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { DisplayShell } from "../components/display/DisplayShell";
 import { DisplayBoot } from "../components/display/DisplayBoot";
 import { DisplayUnavailable } from "../components/display/DisplayUnavailable";
-import { MediaPlayer } from "../components/display/MediaPlayer";
-import { QueueFooter } from "../components/display/QueueFooter";
+import { LayoutResolver } from "../components/display/LayoutResolver";
 import { QueueCallOverlay } from "../components/display/QueueCallOverlay";
 import type {
   CallOverlay,
@@ -22,14 +21,13 @@ import {
 } from "../services/displayPlayer";
 
 /**
- * UX-6A — Display Public Mode
+ * UX-6B — Display + Layout Engine
  *
- * Arquitetura preparada para UX-6B:
- * DisplayShell → MediaPlayer + QueueFooter (+ QueueCallOverlay)
- * Sem LayoutResolver / zones / screen_overrides nesta sprint.
+ * DisplayShell
+ *   ├── LayoutResolver → zones (MEDIA / QUEUE / TEXT / CLOCK / TICKER)
+ *   └── QueueCallOverlay (global, acima das zones — UX-6C migrará para OverrideRenderer)
  *
- * Comportamento de overlay: se nova chamada chega durante overlay ativo,
- * a atual é substituída e o timer de ~7s reinicia (regra pré-existente).
+ * Cache antigo sem `layout` → emergency media_queue_footer (UX-6A equivalente).
  */
 export default function Display() {
   const { queueId } = useParams();
@@ -262,16 +260,17 @@ export default function Display() {
 
   return (
     <DisplayShell>
-      <div className="flex h-full w-full flex-col">
-        {/* Media zone — protagonist during normal operation */}
-        <section className="relative min-h-0 flex-[1.35] overflow-hidden">
-          <MediaPlayer item={slide} onMediaFailed={handleMediaFailed} />
-          {/* Overlay sits above media; media stays mounted underneath */}
-          <QueueCallOverlay call={overlay} />
-        </section>
-
-        {/* Queue footer — context, never technical telemetry */}
-        <QueueFooter department={department} current={current} lastCalled={lastCalled} />
+      <div className="relative h-full w-full overflow-hidden">
+        <LayoutResolver
+          layout={config?.layout}
+          mediaItem={slide}
+          onMediaFailed={handleMediaFailed}
+          department={department}
+          current={current}
+          lastCalled={lastCalled}
+        />
+        {/* Overlay global — acima de todas as zones (não acoplado ao LayoutResolver) */}
+        <QueueCallOverlay call={overlay} />
       </div>
     </DisplayShell>
   );
