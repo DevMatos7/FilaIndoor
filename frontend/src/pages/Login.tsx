@@ -1,5 +1,6 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Alert, Button, Card, CardContent, Input } from "../design-system";
 import api from "../services/api";
 
 export default function Login() {
@@ -37,50 +38,49 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
-      <form
-        onSubmit={onSubmit}
-        className="w-full max-w-md border border-brand-100 bg-white/80 p-8 shadow-sm backdrop-blur"
-      >
-        <h1 className="font-display text-3xl font-semibold text-brand-900">REAL Fila & Indoor</h1>
-        <p className="mt-2 text-sm text-ink/70">Acesso administrativo</p>
-        {expired && (
-          <p className="mt-4 border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900" role="status">
-            Sessão expirada ou inválida. Entre novamente para carregar lojas e dispositivos.
-          </p>
-        )}
-        <label className="mt-6 block text-sm font-medium">
-          E-mail
-          <input
-            className="mt-1 w-full border border-brand-100 bg-sand px-3 py-2 outline-none focus:border-brand-500"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            required
-          />
-        </label>
-        <label className="mt-4 block text-sm font-medium">
-          Senha
-          <input
-            className="mt-1 w-full border border-brand-100 bg-sand px-3 py-2 outline-none focus:border-brand-500"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            required
-          />
-        </label>
-        {error && (
-          <p className="mt-4 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-            {error}
-          </p>
-        )}
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-6 w-full bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-        >
-          {loading ? "Entrando…" : "Entrar"}
-        </button>
-      </form>
+      <Card className="w-full max-w-md shadow-ds-md backdrop-blur">
+        <CardContent className="p-8">
+          <form onSubmit={onSubmit}>
+            <h1 className="font-display text-3xl font-semibold text-brand-900">REAL Fila & Indoor</h1>
+            <p className="mt-2 text-sm text-ink/70">Acesso administrativo</p>
+
+            {expired && (
+              <Alert variant="warning" className="mt-4" title="Sessão expirada">
+                Entre novamente para carregar lojas e dispositivos.
+              </Alert>
+            )}
+
+            <div className="mt-6 space-y-4">
+              <Input
+                label="E-mail"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="username"
+              />
+              <Input
+                label="Senha"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+            </div>
+
+            {error && (
+              <Alert variant="danger" className="mt-4">
+                {error}
+              </Alert>
+            )}
+
+            <Button type="submit" className="mt-6 w-full" loading={loading}>
+              {loading ? "Entrando…" : "Entrar"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

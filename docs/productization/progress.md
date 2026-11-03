@@ -2,9 +2,9 @@
 
 | Sprint | Status | Notas |
 |--------|--------|-------|
-| UX-0 Auditoria visual / baseline | `READY FOR HOMOLOGATION` | Ver `00-current-state.md` |
-| UX-1 Design System | `PLANNED` | Aguardando autorização |
-| UX-2 App Shell + IA | `PLANNED` | — |
+| UX-0 Auditoria visual / baseline | `HOMOLOGATED` | `00-current-state.md` |
+| UX-1 Design System | `READY FOR HOMOLOGATION` | `03-design-system.md` · lucide-react · Login + Dashboard |
+| UX-2 App Shell + IA | `PLANNED` | Aguardando autorização |
 | UX-3 Command Center | `PLANNED` | — |
 | UX-4 Totem 2.0 | `PLANNED` | — |
 | UX-5 Operator 2.0 | `PLANNED` | — |
@@ -18,8 +18,24 @@
 | UX-11 Analytics 2.0 | `PLANNED` | — |
 | UX-12 Playwright + Visual QA | `PLANNED` | — |
 
-## Decisões UX-0
+## Decisões UX-1
 
-- Não instalar Playwright/lucide nesta sprint.
-- Screenshots live adiados (stack Docker offline no momento da auditoria); inventário B01–B12 documentado.
-- Backend e contratos de API preservados.
+- Design System em `frontend/src/design-system/` + tokens no Tailwind.
+- `brand-800` (#103a28) adicionado — corrige Pair.tsx.
+- Dependência única nova: `lucide-react`.
+- Migração validação: Login + Dashboard (não Command Center).
+- `npm run build` PASS.
+- Screenshots live: stack Docker não estava disponível nesta sprint; inventário documentado.
+
+## Critérios UX-1
+
+```text
+design-system/ ✓
+tokens ✓
+brand-800 ✓
+componentes obrigatórios ✓
+Login usa DS ✓
+Dashboard usa DS ✓
+build PASS ✓
+sem API / migration / rotas quebradas ✓
+```

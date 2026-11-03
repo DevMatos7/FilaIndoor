@@ -4,6 +4,8 @@
 
 :root {
   color-scheme: light;
+  --ds-focus-ring: #1f6b4a;
+  --ds-focus-offset: #ffffff;
 }
 
 body {
@@ -14,8 +16,26 @@ body {
     radial-gradient(circle at 90% 10%, #e8efe9 0%, transparent 35%),
     #f3f6f4;
   font-family: "DM Sans", Segoe UI, sans-serif;
+  color: #14201a;
 }
 
 #root {
   min-height: 100vh;
+}
+
+@layer base {
+  *:focus {
+    outline: none;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--ds-focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
 }

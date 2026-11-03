@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ListOrdered } from "lucide-react";
+import {
+  Alert,
+  Card,
+  CardContent,
+  EmptyState,
+  MetricCard,
+  PageHeader,
+  QueueStatus,
+  SkeletonMetric,
+} from "../design-system";
 import api, { QueueSummary } from "../services/api";
 
 type Summary = {
@@ -53,66 +64,66 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl font-semibold text-brand-900">Dashboard operacional</h1>
-          <p className="mt-1 text-ink/70">Visão rápida do dia e das filas ativas.</p>
-        </div>
-        <Link to="/analytics" className="text-sm font-medium text-brand-700 underline-offset-2 hover:underline">
-          Ver analytics completo →
-        </Link>
-      </div>
+      <PageHeader
+        title="Dashboard operacional"
+        description="Visão rápida do dia e das filas ativas."
+        actions={
+          <Link
+            to="/analytics"
+            className="text-sm font-medium text-brand-700 underline-offset-2 hover:underline"
+          >
+            Ver analytics completo →
+          </Link>
+        }
+      />
 
-      {loading && <p className="text-sm text-ink/60">Carregando…</p>}
-      {error && (
-        <p className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
-          {error}
-        </p>
-      )}
-
-      {!loading && k && (
+      {loading && (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-          {[
-            { label: "Atendimentos hoje", value: String(k.completed) },
-            { label: "Aguardando", value: String(k.waiting) },
-            { label: "Tempo médio espera", value: fmtSec(k.wait.avg_seconds) },
-            { label: "Tempo médio atendimento", value: fmtSec(k.service.avg_seconds) },
-            { label: "Maior espera", value: fmtSec(k.wait.max_seconds) },
-            { label: "Ausências", value: String(k.no_show) },
-          ].map((card) => (
-            <div key={card.label} className="border border-brand-100 bg-white/80 p-4">
-              <p className="text-xs uppercase tracking-wide text-ink/55">{card.label}</p>
-              <p className="mt-2 font-display text-3xl font-semibold text-brand-900">{card.value}</p>
-            </div>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonMetric key={i} />
           ))}
         </div>
       )}
 
-      {!loading && !error && queues.length === 0 && (
-        <div className="border border-dashed border-brand-500/40 bg-white/60 p-6">
-          <p className="font-medium">Nenhuma fila cadastrada</p>
-          <p className="mt-1 text-sm text-ink/70">Execute o seed do backend para criar a Fila Açougue.</p>
+      {error && <Alert variant="danger">{error}</Alert>}
+
+      {!loading && k && (
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+          <MetricCard label="Atendimentos hoje" value={String(k.completed)} />
+          <MetricCard label="Aguardando" value={String(k.waiting)} />
+          <MetricCard label="Tempo médio espera" value={fmtSec(k.wait.avg_seconds)} />
+          <MetricCard label="Tempo médio atendimento" value={fmtSec(k.service.avg_seconds)} />
+          <MetricCard label="Maior espera" value={fmtSec(k.wait.max_seconds)} />
+          <MetricCard label="Ausências" value={String(k.no_show)} />
         </div>
+      )}
+
+      {!loading && !error && queues.length === 0 && (
+        <EmptyState
+          icon={<ListOrdered className="h-8 w-8" aria-hidden />}
+          title="Nenhuma fila cadastrada"
+          description="Cadastre uma fila de atendimento para começar a acompanhar a operação da loja."
+        />
       )}
 
       {queues.length > 0 && (
         <div>
-          <h2 className="font-display text-xl font-semibold text-brand-900">Filas</h2>
+          <h2 className="font-sans text-section-title text-brand-900">Filas</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {queues.map((q) => (
-              <Link
-                key={q.id}
-                to={`/queues/${q.id}`}
-                className="border border-brand-100 bg-white/80 p-5 transition hover:border-brand-500"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-display text-xl font-semibold">{q.name}</h3>
-                  <span className="text-xs uppercase tracking-wide text-brand-700">{q.status}</span>
-                </div>
-                <p className="mt-2 text-sm text-ink/70">Estratégia: {q.priority_strategy}</p>
-                <p className="mt-1 text-sm text-ink/70">
-                  Prefixos {q.normal_prefix} / {q.priority_prefix}
-                </p>
+              <Link key={q.id} to={`/queues/${q.id}`} className="block">
+                <Card interactive className="h-full">
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="font-sans text-lg font-semibold text-brand-900">{q.name}</h3>
+                      <QueueStatus status={q.status} />
+                    </div>
+                    <p className="mt-2 text-sm text-ink/70">Estratégia: {q.priority_strategy}</p>
+                    <p className="mt-1 text-sm text-ink/70">
+                      Prefixos {q.normal_prefix} / {q.priority_prefix}
+                    </p>
+                  </CardContent>
+                </Card>
               </Link>
             ))}
           </div>
