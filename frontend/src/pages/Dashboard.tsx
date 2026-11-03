@@ -65,7 +65,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Dashboard operacional"
+        title="Início"
         description="Visão rápida do dia e das filas ativas."
         actions={
           <Link

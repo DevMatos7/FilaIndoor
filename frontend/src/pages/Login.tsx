@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Alert, Button, Card, CardContent, Input } from "../design-system";
 import api from "../services/api";
@@ -15,6 +15,11 @@ export default function Login() {
     const raw = params.get("next") || "/";
     return raw.startsWith("/") ? raw : "/";
   }, [params]);
+
+  useEffect(() => {
+    document.body.classList.add("atmosphere-login");
+    return () => document.body.classList.remove("atmosphere-login");
+  }, []);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();

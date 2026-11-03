@@ -1,22 +1,50 @@
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { StoreProvider } from "../context/StoreContext";
+import Breadcrumbs from "./Breadcrumbs";
+import MobileNavigation from "./MobileNavigation";
+import Sidebar from "./Sidebar";
+import Topbar from "./Topbar";
 
-const nav = [
-  { to: "/", label: "Dashboard" },
-  { to: "/analytics", label: "Analytics" },
-  { to: "/queues", label: "Filas" },
-  { to: "/history", label: "Histórico" },
-  { to: "/media", label: "Mídias" },
-  { to: "/playlists", label: "Playlists" },
-  { to: "/channels", label: "Canais" },
-  { to: "/devices", label: "Dispositivos" },
-  { to: "/edge", label: "Edge" },
-  { to: "/integrations", label: "CISS" },
-  { to: "/toledo", label: "Toledo" },
-  { to: "/real-plus", label: "REAL+" },
-];
+const SIDEBAR_KEY = "real-shell-sidebar";
 
-export default function AppLayout() {
+function readCollapsed(): boolean {
+  try {
+    return localStorage.getItem(SIDEBAR_KEY) === "collapsed";
+  } catch {
+    return false;
+  }
+}
+
+function Shell() {
+  const { pathname } = useLocation();
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(readCollapsed);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Tablet: inicia recolhida se ainda não houver preferência salva
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(SIDEBAR_KEY) != null) return;
+      if (window.matchMedia("(min-width: 768px) and (max-width: 1023px)").matches) {
+        setCollapsed(true);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  function toggleCollapsed() {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(SIDEBAR_KEY, next ? "collapsed" : "expanded");
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }
 
   function logout() {
     localStorage.removeItem("token");
@@ -24,43 +52,36 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="border-b border-brand-100 bg-brand-900 text-white lg:border-b-0 lg:border-r lg:border-brand-700">
-        <div className="px-5 py-6">
-          <Link to="/" className="font-display text-2xl font-semibold tracking-tight">
-            REAL Fila
-          </Link>
-          <p className="mt-1 text-sm text-brand-100/80">Atendimento & Indoor</p>
+    <div className="flex min-h-screen bg-surface-muted">
+      <div className="sticky top-0 hidden h-screen shrink-0 lg:block">
+        <Sidebar
+          pathname={pathname}
+          collapsed={collapsed}
+          onToggleCollapsed={toggleCollapsed}
+        />
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <Topbar onOpenMobileNav={() => setMobileOpen(true)} onLogout={logout} />
+        <div className="border-b border-brand-100/80 bg-surface px-4 py-2 sm:px-6">
+          <Breadcrumbs />
         </div>
-        <nav className="flex gap-2 overflow-x-auto px-3 pb-4 lg:flex-col lg:overflow-visible">
-          {nav.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === "/"}
-              className={({ isActive }) =>
-                `rounded-md px-3 py-2 text-sm font-medium transition ${
-                  isActive ? "bg-white/15 text-white" : "text-brand-100 hover:bg-white/10"
-                }`
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="hidden px-5 pb-6 lg:block">
-          <button
-            type="button"
-            onClick={logout}
-            className="text-sm text-brand-100 underline-offset-2 hover:underline"
-          >
-            Sair
-          </button>
-        </div>
-      </aside>
-      <main className="px-4 py-6 sm:px-8">
-        <Outlet />
-      </main>
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-[1400px]">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+
+      <MobileNavigation open={mobileOpen} onClose={() => setMobileOpen(false)} />
     </div>
+  );
+}
+
+export default function AppLayout() {
+  return (
+    <StoreProvider>
+      <Shell />
+    </StoreProvider>
   );
 }
