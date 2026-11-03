@@ -16,7 +16,8 @@ router = APIRouter(tags=["analytics"])
 def analytics_summary(
     day: date | None = Query(default=None, description="YYYY-MM-DD (UTC)"),
     queue_id: str | None = Query(default=None),
+    store_id: str | None = Query(default=None, description="Filtra filas da loja (ignorado se queue_id)"),
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(ANALYTICS_VIEW, QUEUE_VIEW, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return AnalyticsService(db).summary(day=day, queue_id=queue_id)
+    return AnalyticsService(db).summary(day=day, queue_id=queue_id, store_id=store_id)

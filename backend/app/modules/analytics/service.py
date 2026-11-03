@@ -9,6 +9,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.modules.org.models.entities import Department
 from app.modules.queue.models.entities import Queue, Ticket, utcnow
 from app.modules.queue.models.enums import TicketStatus
 
@@ -47,9 +48,20 @@ class AnalyticsService:
         *,
         day: date | None = None,
         queue_id: str | None = None,
+        store_id: str | None = None,
     ) -> dict[str, Any]:
         target = day or date.today()
         start, end = _day_bounds(target)
+
+        store_queue_ids: list[str] | None = None
+        if store_id and not queue_id:
+            dept_ids = list(self.db.scalars(select(Department.id).where(Department.store_id == store_id)).all())
+            if dept_ids:
+                store_queue_ids = list(
+                    self.db.scalars(select(Queue.id).where(Queue.department_id.in_(dept_ids))).all()
+                )
+            else:
+                store_queue_ids = []
 
         filters = [Ticket.issued_at >= start, Ticket.issued_at < end]
         queue_name = None
@@ -57,6 +69,12 @@ class AnalyticsService:
             filters.append(Ticket.queue_id == queue_id)
             q = self.db.get(Queue, queue_id)
             queue_name = q.name if q else None
+        elif store_queue_ids is not None:
+            if store_queue_ids:
+                filters.append(Ticket.queue_id.in_(store_queue_ids))
+            else:
+                # loja sem filas — resultado vazio
+                filters.append(Ticket.queue_id == "__none__")
 
         tickets = list(self.db.scalars(select(Ticket).where(*filters).order_by(Ticket.issued_at.asc())).all())
 
@@ -64,6 +82,11 @@ class AnalyticsService:
         live_waiting_q = select(Ticket).where(Ticket.status == TicketStatus.WAITING.value)
         if queue_id:
             live_waiting_q = live_waiting_q.where(Ticket.queue_id == queue_id)
+        elif store_queue_ids is not None:
+            if store_queue_ids:
+                live_waiting_q = live_waiting_q.where(Ticket.queue_id.in_(store_queue_ids))
+            else:
+                live_waiting_q = live_waiting_q.where(Ticket.queue_id == "__none__")
         live_waiting = list(self.db.scalars(live_waiting_q.order_by(Ticket.issued_at.asc()).limit(30)).all())
 
         issued = len(tickets)
@@ -121,6 +144,7 @@ class AnalyticsService:
         return {
             "date": target.isoformat(),
             "queue_id": queue_id,
+            "store_id": store_id,
             "queue_name": queue_name,
             "kpis": {
                 "issued": issued,
@@ -161,3 +185,6 @@ class AnalyticsService:
                 for t in live_waiting[:20]
             ],
         }
+
+    def summary_for_store(self, *, store_id: str, day: date | None = None) -> dict[str, Any]:
+        return self.summary(day=day, store_id=store_id)

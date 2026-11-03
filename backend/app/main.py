@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import get_settings
 from app.core.exceptions import AppError
 from app.modules.analytics.routes import router as analytics_router
+from app.modules.operations.routes import router as operations_router
 from app.modules.auth.routes import router as auth_router
 from app.modules.org.routes.org import router as org_router
 from app.modules.queue.routes.devices_admin import router as devices_admin_router
@@ -90,6 +91,7 @@ app.include_router(integration_router, prefix=api)
 app.include_router(toledo_router, prefix=api)
 app.include_router(real_plus_router, prefix=api)
 app.include_router(analytics_router, prefix=api)
+app.include_router(operations_router, prefix=api)
 app.include_router(signage_router, prefix=api)
 app.include_router(playlist_router, prefix=api)
 app.include_router(schedule_router, prefix=api)

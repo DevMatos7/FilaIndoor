@@ -3,7 +3,7 @@
 ## Domínios do produto (admin)
 
 ```text
-VISÃO GERAL → Início
+VISÃO GERAL → Início (= Command Center)
 ATENDIMENTO → Filas, Histórico
 INDOOR → Conteúdos, Playlists, Programação
 DISPOSITIVOS → Fleet, Edge
@@ -12,11 +12,13 @@ INTEGRAÇÕES → CISS, Toledo, REAL+
 CONFIGURAÇÕES → Config. de filas
 ```
 
-Itens futuros **ainda sem página** (não exibidos nesta sprint):
+**Decisão UX-3:** `Início` (`/`) é o Command Center. Não existe página duplicada
+“Central da operação”. “Ao vivo” só nasce se houver experiência distinta.
 
-- Central da operação (UX-3)
+Itens futuros **ainda sem página** (não exibidos):
+
 - Indoor → Visão geral / Telas (UX-7/10)
-- Atendimento → Ao vivo dedicado
+- Atendimento → Ao vivo dedicado (fora do escopo do Command Center)
 
 ---
 
@@ -24,7 +26,7 @@ Itens futuros **ainda sem página** (não exibidos nesta sprint):
 
 | Nav | Rota |
 |-----|------|
-| Início | `/` |
+| Início (Command Center) | `/` |
 | Filas | `/queues` (+ `/queues/:id`) |
 | Config. de filas | ativo em `/queues/:id/settings` |
 | Histórico | `/history` |
@@ -75,7 +77,7 @@ Arquivo: `frontend/src/context/StoreContext.tsx`
 
 | Página | StoreContext |
 |--------|--------------|
-| Dashboard | disponível via shell (KPIs ainda globais) |
+| Dashboard / Command Center | **migrada** — escopo por `selectedStore` |
 | Media | **migrada** — sem select local |
 | Playlists, Channels, Devices, Edge, Integrations | **legacy select** (débito) |
 

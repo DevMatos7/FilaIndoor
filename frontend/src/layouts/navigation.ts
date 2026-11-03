@@ -32,7 +32,8 @@ export type NavGroup = {
 
 /**
  * IA visual — URLs existentes preservadas.
- * Itens sem página própria (Central da operação, Indoor overview, Telas, Ao vivo)
+ * Início (/) = Command Center operacional (UX-3).
+ * Itens futuros sem página própria (Indoor overview, Telas, Ao vivo dedicado)
  * ficam fora até as sprints correspondentes.
  */
 export const NAV_GROUPS: NavGroup[] = [

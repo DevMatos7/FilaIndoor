@@ -4,8 +4,8 @@
 |--------|--------|-------|
 | UX-0 Auditoria visual / baseline | `HOMOLOGATED` | `00-current-state.md` |
 | UX-1 Design System | `HOMOLOGATED` | `03-design-system.md` |
-| UX-2 App Shell + IA | `READY FOR HOMOLOGATION` | `02-information-architecture.md` · `04-admin-shell.md` |
-| UX-3 Command Center | `PLANNED` | Aguardando autorização |
+| UX-2 App Shell + IA | `HOMOLOGATED` | `02-information-architecture.md` · `04-admin-shell.md` |
+| UX-3 Command Center | `READY FOR HOMOLOGATION` | `05-command-center.md` |
 | UX-4 Totem 2.0 | `PLANNED` | — |
 | UX-5 Operator 2.0 | `PLANNED` | — |
 | UX-6A Display Public Mode | `PLANNED` | — |
@@ -18,27 +18,32 @@
 | UX-11 Analytics 2.0 | `PLANNED` | — |
 | UX-12 Playwright + Visual QA | `PLANNED` | — |
 
-## Decisões UX-2
+## Decisões UX-3
 
-- Sidebar hierárquica por domínio; URLs existentes preservadas (sem `/indoor/*`).
-- StoreContext com prioridade `?store=` → localStorage → primeira loja.
-- Media migrada ao StoreContext; demais telas com **legacy store selector** (débito).
-- Logout disponível no menu do usuário (mobile incluso).
-- Background admin limpo; Login mantém atmosfera.
-- Focus trap Modal/Drawer permanece débito até UX-7/10.
+- `/` = Command Center; nav **Início** aponta para ele (sem “Central da operação”).
+- StoreContext obrigatório; agregador `GET /operations/overview?store_id=`.
+- Alertas = derived view (sem engine/tabela).
+- Polling 30s + AbortController; stale snapshot preservado.
+- Conteúdo = canal/playlist/agenda reais (sem “campanha” inventada).
+- Sem Recharts / Vitest / RTL / Playwright / migration / customer-facing.
 
-## Critérios UX-2
+## Critérios UX-3
 
 ```text
-sidebar hierárquica ✓
-topbar + store switcher ✓
+/ = Command Center ✓
 StoreContext ✓
-breadcrumbs ✓
-mobile drawer ✓
-collapsed sidebar ✓
-DS utilizado ✓
-rotas preservadas ✓
-customer-facing intacto ✓
-build PASS ✓
+KPIs operacionais ✓
+filas ao vivo ✓
+device health ✓
+alertas derivados ✓
+fluxo horário ✓
+conteúdo atual quando suportado ✓
+auto + manual refresh ✓
+loading skeleton ✓
+empty / partial / stale ✓
+responsividade + a11y ✓
+sem dados fictícios ✓
+sem migration ✓
+build PASS (ver relatório) ✓
 docs ✓
 ```
