@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import api from "../services/api";
 import { loadCache, readOutbox } from "../services/edgeOffline";
 import type { QueueStatus } from "../components/totem/types";
 
 const apiBase = import.meta.env.VITE_API_URL || "/api/v1";
 const APP_VERSION = "0.1.0";
+
+/** Roles que podem abrir diagnóstico do totem (além de JWT válido). */
+const DIAG_ROLES = new Set(["admin", "manager"]);
 
 function maskToken(token: string): string {
   if (!token) return "AUSENTE";
@@ -14,15 +18,16 @@ function maskToken(token: string): string {
 }
 
 /**
- * Diagnóstico TI — requer sessão admin (localStorage token).
- * Não exibe segredos completos.
+ * Diagnóstico TI — exige JWT válido via GET /auth/me (não basta token qualquer no localStorage).
+ * Tokens/segredos nunca aparecem completos.
  */
 export default function TotemDiagnostics() {
   const { queueId } = useParams();
   const [params] = useSearchParams();
-  const adminToken = localStorage.getItem("token");
+  const storedToken = localStorage.getItem("token");
   const kioskToken = params.get("token") || localStorage.getItem("kiosk_token") || "";
 
+  const [authState, setAuthState] = useState<"checking" | "ok" | "deny">("checking");
   const [online, setOnline] = useState(navigator.onLine);
   const [apiOk, setApiOk] = useState<"ok" | "fail" | "checking">("checking");
   const [status, setStatus] = useState<QueueStatus | null>(null);
@@ -30,6 +35,30 @@ export default function TotemDiagnostics() {
 
   const outbox = useMemo(() => readOutbox(), [online, apiOk]);
   const cached = queueId ? loadCache<QueueStatus>("kiosk_status", queueId, 30 * 60 * 1000) : null;
+
+  useEffect(() => {
+    if (!storedToken) {
+      setAuthState("deny");
+      return;
+    }
+    let alive = true;
+    (async () => {
+      try {
+        const { data } = await api.get<{ role: string }>("/auth/me");
+        if (!alive) return;
+        if (DIAG_ROLES.has(data.role)) setAuthState("ok");
+        else setAuthState("deny");
+      } catch {
+        if (alive) {
+          localStorage.removeItem("token");
+          setAuthState("deny");
+        }
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [storedToken]);
 
   useEffect(() => {
     const on = () => setOnline(true);
@@ -43,6 +72,7 @@ export default function TotemDiagnostics() {
   }, []);
 
   useEffect(() => {
+    if (authState !== "ok") return;
     let alive = true;
     (async () => {
       try {
@@ -56,10 +86,10 @@ export default function TotemDiagnostics() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [authState]);
 
   useEffect(() => {
-    if (!queueId || !kioskToken) return;
+    if (authState !== "ok" || !queueId || !kioskToken) return;
     let alive = true;
     (async () => {
       try {
@@ -83,16 +113,32 @@ export default function TotemDiagnostics() {
     return () => {
       alive = false;
     };
-  }, [queueId, kioskToken]);
+  }, [authState, queueId, kioskToken]);
 
-  if (!adminToken) {
+  if (authState === "checking") {
+    return (
+      <div className="flex min-h-[100dvh] items-center justify-center bg-surface-muted font-sans text-ink/70">
+        Verificando acesso…
+      </div>
+    );
+  }
+
+  if (authState === "deny") {
     return <Navigate to="/login" replace />;
   }
 
   const rows: Array<{ label: string; value: string }> = [
     { label: "Totem", value: "FilaIndoor Kiosk 2.0" },
     { label: "Queue ID", value: queueId || "—" },
-    { label: "Fila / departamento", value: status?.department_name || status?.name || cached?.department_name || cached?.name || "—" },
+    {
+      label: "Fila / departamento",
+      value:
+        status?.department_name ||
+        status?.name ||
+        cached?.department_name ||
+        cached?.name ||
+        "—",
+    },
     { label: "Status da fila", value: status?.status || cached?.status || "—" },
     { label: "Aguardando", value: String(status?.waiting_count ?? cached?.waiting_count ?? "—") },
     { label: "API base", value: apiBase },
@@ -139,7 +185,7 @@ export default function TotemDiagnostics() {
         </dl>
 
         <p className="mt-4 text-xs text-ink/50">
-          Rota protegida por sessão administrativa. Tokens e segredos nunca são exibidos por completo.
+          Acesso validado via /auth/me (roles admin/manager). Tokens nunca são exibidos por completo.
         </p>
       </div>
     </div>
