@@ -61,3 +61,6 @@ export { DeviceStatus } from "./patterns/DeviceStatus";
 export { QueueStatus } from "./patterns/QueueStatus";
 export { TicketBadge } from "./patterns/TicketBadge";
 export { SlaIndicator } from "./patterns/SlaIndicator";
+
+export { MediaCard, MediaCardSkeleton } from "./patterns/MediaCard";
+export type { MediaCardProps, MediaCardType } from "./patterns/MediaCard";

@@ -22,7 +22,7 @@ tokens → Tailwind → componentes → páginas (migração gradual)
 design-system/
 ├── tokens/          colors, typography, spacing, radius, shadow, motion
 ├── components/      Button, Input, Select, Card, MetricCard, …
-├── patterns/        DeviceStatus, QueueStatus, TicketBadge, SlaIndicator
+├── patterns/        DeviceStatus, QueueStatus, TicketBadge, SlaIndicator, MediaCard
 ├── utils/cn.ts
 └── index.ts         barrel público
 ```
@@ -153,7 +153,7 @@ Todos exibem **texto + ícone + cor**.
 
 1. Tailwind continua como motor — tokens TS documentam e alimentam patterns.
 2. Sem MUI/Chakra/shadcn; só `lucide-react`.
-3. Modal/Drawer leves — focus trap completo marcado como débito se uso intensificar.
+3. Modal/Drawer com portal + focus trap + ESC + scroll lock + restore (hardening UX-7). MediaCard é pattern real da biblioteca.
 4. EmptyState novo não usa copy de seed/`/media`.
 5. Source Serif mantida para customer-facing até UX-4/6.
 
@@ -161,7 +161,7 @@ Todos exibem **texto + ícone + cor**.
 
 ## 10. Débitos
 
-- Focus trap / portal completo em Modal/Drawer
 - Tooltip sem posicionamento avançado
 - Páginas legacy ainda com classes ad-hoc
 - Screenshots live dependem de Docker (ver progress)
+- MediaCard: thumbnails de vídeo via FFmpeg (futuro)

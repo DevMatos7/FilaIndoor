@@ -10,9 +10,9 @@
 | UX-5 Operator 2.0 | `HOMOLOGATED` | `07-operator.md` |
 | UX-6A Display Public Mode | `CODE HOMOLOGATED` | `08-display-public-mode.md` · VISUAL PENDING |
 | UX-6B Layout Engine | `CODE HOMOLOGATED` | `08b-layout-engine.md` · VISUAL PENDING |
-| UX-6C Screen Override | `READY FOR HOMOLOGATION` | `08c-screen-override.md` · VISUAL PENDING |
-| UX-7 Media Library | `PLANNED` | **não iniciar sem gate Display 2.0** |
-| UX-8 Playlist Studio | `PLANNED` | — |
+| UX-6C Screen Override | `CODE HOMOLOGATED` | `08c-screen-override.md` · VISUAL PENDING |
+| UX-7 Media Library 2.0 | `READY FOR HOMOLOGATION` | `09-media-library.md` · VISUAL PENDING |
+| UX-8 Playlist Studio | `PLANNED` | **não iniciar sem homologação** |
 | UX-9 Programming Studio | `PLANNED` | — |
 | UX-10 Screen & Device Fleet | `PLANNED` | — |
 | UX-11 Analytics 2.0 | `PLANNED` | — |
@@ -20,42 +20,40 @@
 
 ## DISPLAY 2.0 Gate
 
-Capacidade = UX-6A + UX-6B + UX-6C.
-
 | Dimensão | Status |
 |----------|--------|
-| CODE | PASS (após testes UX-6C) |
-| VISUAL | **PENDING** — exige capturas reais (footer/sidebar/queue_fullscreen + QUEUE_CALL + EMERGENCY @ 1920×1080) |
+| TECHNICAL | `HOMOLOGATED` (UX-6A+6B+6C) |
+| COMMERCIAL / VISUAL | **PENDING** — checklist 1920×1080 (footer/sidebar/queue_fullscreen/QUEUE_CALL/EMERGENCY) |
 
-Não marcar Display 2.0 como HOMOLOGATED comercialmente sem validação visual.
+Falta de screenshots **não** bloqueia UX-7; bloqueia piloto/comercial do Display.
 
-## Decisões UX-6C
+## Decisões UX-7
 
-- `screen_overrides` + `ScreenOverrideService` (prioridade centralizada).
-- QUEUE_CALL via call/recall best-effort; core queue independente.
-- WS: `override` embutido em `ticket.*`; admin via `screen.override.*`.
-- Player: `active_overrides` aditivo.
-- Frontend: OverrideManager / Resolver / Renderer; layout permanece montado.
-- Pre-flight UX-6B uniqueness: PASS (índice parcial global já existia).
+- 0 migrations; MediaAsset atual + `usage_count` calculado.
+- StoreContext obrigatório; busca/filtro/sort client-side.
+- Drawer novo conteúdo + details; ConfirmDialog delete.
+- Focus trap/portal/restore obrigatório (débito UX-1 fechado).
+- Delete bloqueado se asset em playlist.
+- PATCH nome/notes/duration; sem replace de arquivo.
 
 ## Débitos (roadmap)
 
-- UX-4: Offline issue / Edge local ticketing.
-- UX-5+: Operator Presence / Capacity; NEXT auto_complete legado.
-- UX-6*: **VISUAL VALIDATION PENDING** (Display 2.0 gate).
-- UX-6C: Queue Call Buffer/FIFO; editor visual overrides; screen group target; analytics; Retail Media campaign entity.
+- Display 2.0 VISUAL GATE.
+- UX-7: pagination/virtualization; FFmpeg thumbs; expiration/approval; duplicate; replace file.
+- UX-8+: Playlist Studio consome Media Library.
 - Git: push sequencial quando auth disponível.
 
-## Critérios UX-6C
+## Critérios UX-7
 
 ```text
-screen_overrides + migration ✓
-priority centralizada ✓
-target scopes + tenant validation ✓
-queue/recall integration + core safety ✓
-player active_overrides ✓
-OverrideManager/Resolver/Renderer ✓
-legacy adapter + rolling deploy ✓
+biblioteca visual + MediaCard ✓
+StoreContext / AbortController ✓
+busca / filtros / ordenação ✓
+Drawer create IMAGE/VIDEO/WEB ✓
+details + edit + delete seguro ✓
+focus trap Drawer/Modal ✓
+usage_count + store isolation ✓
+APIs player/playlist preservadas ✓
 build + testes ✓
 VISUAL VALIDATION PENDING
 ```

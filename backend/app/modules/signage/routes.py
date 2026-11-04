@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, File, Form, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.permissions import QUEUE_ADMIN, QUEUE_MANAGER, SIGNAGE_ADMIN, SIGNAGE_EDITOR, SIGNAGE_VIEWER
 from app.db.session import get_db
 from app.modules.auth.deps import require_permissions
 from app.modules.org.models.entities import User
-from app.modules.signage.service import SignageService, asset_to_dict
+from app.modules.signage.service import SignageService
 
 router = APIRouter(tags=["media"])
 
@@ -17,6 +18,27 @@ class WebMediaRequest(BaseModel):
     url: str
     duration_seconds: int | None = 15
     notes: str | None = None
+
+
+class MediaUpdateRequest(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=180)
+    notes: str | None = None
+    duration_seconds: int | None = Field(default=None, ge=1, le=86400)
+    store_id: str | None = None
+
+
+@router.get("/media/limits")
+def media_limits(
+    _: User = Depends(require_permissions(SIGNAGE_VIEWER, SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
+):
+    """Limites conhecidos do upload — aditivo UX-7."""
+    s = get_settings()
+    return {
+        "image_max_mb": s.media_max_image_mb,
+        "video_max_mb": s.media_max_video_mb,
+        "image_mimes": ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"],
+        "video_mimes": ["video/mp4", "video/webm"],
+    }
 
 
 @router.get("/media")
@@ -32,10 +54,11 @@ def list_media(
 @router.get("/media/{asset_id}")
 def get_media(
     asset_id: str,
+    store_id: str | None = Query(default=None),
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_VIEWER, SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return asset_to_dict(SignageService(db).get(asset_id))
+    return SignageService(db).get_dict(asset_id, store_id=store_id)
 
 
 @router.post("/media", status_code=201)
@@ -77,14 +100,31 @@ def create_web_media(
     )
 
 
+@router.patch("/media/{asset_id}")
+def update_media(
+    asset_id: str,
+    body: MediaUpdateRequest,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
+):
+    return SignageService(db).update(
+        asset_id,
+        store_id=body.store_id,
+        name=body.name,
+        notes=body.notes,
+        duration_seconds=body.duration_seconds,
+    )
+
+
 @router.delete("/media/{asset_id}")
 def delete_media(
     asset_id: str,
     hard: bool = False,
+    store_id: str | None = Query(default=None),
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
     service = SignageService(db)
     if hard:
-        return service.hard_delete(asset_id)
-    return service.soft_delete(asset_id)
+        return service.hard_delete(asset_id, store_id=store_id)
+    return service.soft_delete(asset_id, store_id=store_id)

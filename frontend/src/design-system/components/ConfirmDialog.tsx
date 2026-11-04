@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useRef } from "react";
 import { Button } from "./Button";
 import { Modal } from "./Modal";
 
@@ -25,14 +25,17 @@ export function ConfirmDialog({
   danger = false,
   loading = false,
 }: ConfirmDialogProps) {
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
   return (
     <Modal
       open={open}
       onClose={onClose}
       title={title}
+      initialFocusRef={danger ? cancelRef : undefined}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose} disabled={loading}>
+          <Button ref={cancelRef} variant="ghost" onClick={onClose} disabled={loading}>
             {cancelLabel}
           </Button>
           <Button

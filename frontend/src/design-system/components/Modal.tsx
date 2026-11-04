@@ -1,6 +1,8 @@
-import { ReactNode, useEffect, useId, useRef } from "react";
+import { ReactNode, RefObject, useId, useRef } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "../utils/cn";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 import { IconButton } from "./IconButton";
 
 export type ModalProps = {
@@ -10,31 +12,32 @@ export type ModalProps = {
   children: ReactNode;
   footer?: ReactNode;
   className?: string;
+  /** Prefer this element on open (e.g. Cancel on destructive confirm). */
+  initialFocusRef?: RefObject<HTMLElement | null>;
 };
 
-/** Modal leve. Débito: focus trap completo / portal se uso intensificar. */
-export function Modal({ open, onClose, title, children, footer, className }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  footer,
+  className,
+  initialFocusRef,
+}: ModalProps) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    panelRef.current?.focus();
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  useFocusTrap(open, panelRef, onClose, { initialFocusRef });
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="presentation">
       <button
         type="button"
         className="absolute inset-0 bg-brand-950/50"
         aria-label="Fechar"
+        tabIndex={-1}
         onClick={onClose}
       />
       <div
@@ -59,6 +62,7 @@ export function Modal({ open, onClose, title, children, footer, className }: Mod
           <div className="flex justify-end gap-2 border-t border-brand-100 px-4 py-3">{footer}</div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

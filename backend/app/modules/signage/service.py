@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.core.exceptions import ConflictError, NotFoundError, ValidationError
-from app.modules.signage.models import MediaAsset
+from app.core.exceptions import ConflictError, ForbiddenError, NotFoundError, ValidationError
+from app.modules.signage.models import MediaAsset, PlaylistItem
 from app.modules.signage.storage import checksum, delete_key, save_bytes
 
 IMAGE_MIME = {
@@ -24,8 +24,8 @@ VIDEO_MIME = {
 }
 
 
-def asset_to_dict(a: MediaAsset) -> dict[str, Any]:
-    return {
+def asset_to_dict(a: MediaAsset, *, usage_count: int | None = None) -> dict[str, Any]:
+    data: dict[str, Any] = {
         "id": a.id,
         "store_id": a.store_id,
         "name": a.name,
@@ -44,6 +44,9 @@ def asset_to_dict(a: MediaAsset) -> dict[str, Any]:
         "created_at": a.created_at.isoformat() if a.created_at else None,
         "updated_at": a.updated_at.isoformat() if a.updated_at else None,
     }
+    if usage_count is not None:
+        data["usage_count"] = usage_count
+    return data
 
 
 class SignageService:
@@ -51,12 +54,27 @@ class SignageService:
         self.db = db
         self.settings = get_settings()
 
+    def _usage_counts(self, asset_ids: list[str]) -> dict[str, int]:
+        if not asset_ids:
+            return {}
+        rows = self.db.execute(
+            select(PlaylistItem.asset_id, func.count())
+            .where(PlaylistItem.asset_id.in_(asset_ids))
+            .group_by(PlaylistItem.asset_id)
+        ).all()
+        return {str(aid): int(cnt) for aid, cnt in rows}
+
+    def _assert_store(self, asset: MediaAsset, store_id: str | None) -> None:
+        if store_id and asset.store_id != store_id:
+            raise ForbiddenError("Conteúdo não pertence à loja")
+
     def list_assets(
         self,
         *,
         store_id: str | None = None,
         media_type: str | None = None,
         active_only: bool = True,
+        include_usage: bool = True,
     ) -> list[dict[str, Any]]:
         stmt = select(MediaAsset).order_by(MediaAsset.created_at.desc())
         if store_id:
@@ -65,13 +83,24 @@ class SignageService:
             stmt = stmt.where(MediaAsset.media_type == media_type.upper())
         if active_only:
             stmt = stmt.where(MediaAsset.active.is_(True))
-        return [asset_to_dict(a) for a in self.db.scalars(stmt).all()]
+        assets = list(self.db.scalars(stmt).all())
+        counts = self._usage_counts([a.id for a in assets]) if include_usage else {}
+        return [
+            asset_to_dict(a, usage_count=counts.get(a.id, 0) if include_usage else None)
+            for a in assets
+        ]
 
-    def get(self, asset_id: str) -> MediaAsset:
+    def get(self, asset_id: str, *, store_id: str | None = None) -> MediaAsset:
         asset = self.db.get(MediaAsset, asset_id)
         if not asset or not asset.active:
             raise NotFoundError("Mídia não encontrada")
+        self._assert_store(asset, store_id)
         return asset
+
+    def get_dict(self, asset_id: str, *, store_id: str | None = None) -> dict[str, Any]:
+        asset = self.get(asset_id, store_id=store_id)
+        count = self._usage_counts([asset.id]).get(asset.id, 0)
+        return asset_to_dict(asset, usage_count=count)
 
     def create_web(
         self,
@@ -145,16 +174,65 @@ class SignageService:
             delete_key(key)
             raise
 
-    def soft_delete(self, asset_id: str) -> dict[str, Any]:
-        asset = self.get(asset_id)
+    def update(
+        self,
+        asset_id: str,
+        *,
+        store_id: str | None = None,
+        name: str | None = None,
+        notes: str | None = None,
+        duration_seconds: int | None = None,
+    ) -> dict[str, Any]:
+        asset = self.get(asset_id, store_id=store_id)
+        if name is not None:
+            clean = name.strip()
+            if not clean:
+                raise ValidationError("Nome obrigatório")
+            conflict = self.db.scalar(
+                select(MediaAsset).where(
+                    MediaAsset.store_id == asset.store_id,
+                    MediaAsset.name == clean,
+                    MediaAsset.active.is_(True),
+                    MediaAsset.id != asset.id,
+                )
+            )
+            if conflict:
+                raise ConflictError("Já existe conteúdo ativo com este nome na loja")
+            asset.name = clean
+        if notes is not None:
+            asset.notes = notes
+        if duration_seconds is not None:
+            if duration_seconds < 1:
+                raise ValidationError("Duração inválida")
+            asset.duration_seconds = duration_seconds
+        self.db.commit()
+        self.db.refresh(asset)
+        count = self._usage_counts([asset.id]).get(asset.id, 0)
+        return asset_to_dict(asset, usage_count=count)
+
+    def soft_delete(self, asset_id: str, *, store_id: str | None = None) -> dict[str, Any]:
+        asset = self.get(asset_id, store_id=store_id)
+        used = self._usage_counts([asset.id]).get(asset.id, 0)
+        if used > 0:
+            raise ConflictError(
+                "Este conteúdo está sendo utilizado em uma ou mais playlists. "
+                "Remova-o das playlists antes de excluir."
+            )
         asset.active = False
         self.db.commit()
         return {"id": asset.id, "active": False}
 
-    def hard_delete(self, asset_id: str) -> dict[str, Any]:
+    def hard_delete(self, asset_id: str, *, store_id: str | None = None) -> dict[str, Any]:
         asset = self.db.get(MediaAsset, asset_id)
         if not asset:
             raise NotFoundError("Mídia não encontrada")
+        self._assert_store(asset, store_id)
+        used = self._usage_counts([asset.id]).get(asset.id, 0)
+        if used > 0:
+            raise ConflictError(
+                "Este conteúdo está sendo utilizado em uma ou mais playlists. "
+                "Remova-o das playlists antes de excluir."
+            )
         key = asset.storage_key
         self.db.delete(asset)
         self.db.commit()
@@ -174,4 +252,4 @@ class SignageService:
         self.db.add(asset)
         self.db.commit()
         self.db.refresh(asset)
-        return asset_to_dict(asset)
+        return asset_to_dict(asset, usage_count=0)
