@@ -22,7 +22,7 @@ tokens → Tailwind → componentes → páginas (migração gradual)
 design-system/
 ├── tokens/          colors, typography, spacing, radius, shadow, motion
 ├── components/      Button, Input, Select, Card, MetricCard, …
-├── patterns/        DeviceStatus, QueueStatus, TicketBadge, SlaIndicator, MediaCard
+├── patterns/        DeviceStatus, QueueStatus, TicketBadge, SlaIndicator, MediaCard (+ MediaPicker/Studio em components/media)
 ├── utils/cn.ts
 └── index.ts         barrel público
 ```

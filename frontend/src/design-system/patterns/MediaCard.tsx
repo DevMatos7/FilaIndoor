@@ -15,6 +15,8 @@ export type MediaCardProps = {
   height?: number | null;
   createdAtLabel?: string | null;
   highlighted?: boolean;
+  /** Picker selection state (keyboard + aria). */
+  selected?: boolean;
   onOpen?: () => void;
   menu?: ReactNode;
   className?: string;
@@ -49,6 +51,7 @@ export function MediaCard({
   height,
   createdAtLabel,
   highlighted,
+  selected,
   onOpen,
   menu,
   className,
@@ -57,6 +60,7 @@ export function MediaCard({
   const type = (mediaType || "").toUpperCase();
   const duration = type === "VIDEO" ? fmtDuration(durationSeconds) : null;
   const dims = width && height ? `${width} × ${height}` : null;
+  const isSelected = !!selected;
 
   function onKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     if (!onOpen) return;
@@ -70,12 +74,14 @@ export function MediaCard({
     <div
       role={onOpen ? "button" : undefined}
       tabIndex={onOpen ? 0 : undefined}
+      aria-pressed={onOpen ? isSelected : undefined}
       onClick={onOpen}
       onKeyDown={onKeyDown}
       className={cn(
         "group flex flex-col overflow-hidden rounded-ds border border-brand-100 bg-surface text-left transition",
         "hover:border-brand-300 hover:shadow-ds focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600",
-        highlighted && "ring-2 ring-brand-500 ring-offset-2",
+        (highlighted || isSelected) && "ring-2 ring-brand-500 ring-offset-2",
+        isSelected && "border-brand-600",
         onOpen && "cursor-pointer",
         className,
       )}

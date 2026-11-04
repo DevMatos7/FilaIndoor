@@ -11,9 +11,9 @@
 | UX-6A Display Public Mode | `CODE HOMOLOGATED` | `08-display-public-mode.md` · VISUAL PENDING |
 | UX-6B Layout Engine | `CODE HOMOLOGATED` | `08b-layout-engine.md` · VISUAL PENDING |
 | UX-6C Screen Override | `CODE HOMOLOGATED` | `08c-screen-override.md` · VISUAL PENDING |
-| UX-7 Media Library 2.0 | `READY FOR HOMOLOGATION` | `09-media-library.md` · VISUAL PENDING |
-| UX-8 Playlist Studio | `PLANNED` | **não iniciar sem homologação** |
-| UX-9 Programming Studio | `PLANNED` | — |
+| UX-7 Media Library 2.0 | `CODE HOMOLOGATED` | `09-media-library.md` · VISUAL PENDING |
+| UX-8 Playlist Studio | `READY FOR HOMOLOGATION` | `10-playlist-studio.md` · VISUAL PENDING |
+| UX-9 Programming Studio | `PLANNED` | **não iniciar sem homologação** |
 | UX-10 Screen & Device Fleet | `PLANNED` | — |
 | UX-11 Analytics 2.0 | `PLANNED` | — |
 | UX-12 Playwright + Visual QA | `PLANNED` | — |
@@ -22,38 +22,35 @@
 
 | Dimensão | Status |
 |----------|--------|
-| TECHNICAL | `HOMOLOGATED` (UX-6A+6B+6C) |
-| COMMERCIAL / VISUAL | **PENDING** — checklist 1920×1080 (footer/sidebar/queue_fullscreen/QUEUE_CALL/EMERGENCY) |
+| TECHNICAL | `HOMOLOGATED` |
+| COMMERCIAL / VISUAL | **PENDING** |
 
-Falta de screenshots **não** bloqueia UX-7; bloqueia piloto/comercial do Display.
+## Decisões UX-8
 
-## Decisões UX-7
+- 0 migrations; duração efetiva = item.duration (player alinhado).
+- MediaPicker multi-select (ordem = seleção) + bulk API.
+- Delete playlist bloqueado se channel/schedule/display em uso.
+- Preview admin local (StudioPreview), Play explícito, muted.
+- StoreContext + `?playlist=` deep-link.
+- Persistência por ação (Salvando/Salvo).
 
-- 0 migrations; MediaAsset atual + `usage_count` calculado.
-- StoreContext obrigatório; busca/filtro/sort client-side.
-- Drawer novo conteúdo + details; ConfirmDialog delete.
-- Focus trap/portal/restore obrigatório (débito UX-1 fechado).
-- Delete bloqueado se asset em playlist.
-- PATCH nome/notes/duration; sem replace de arquivo.
+## Débitos
 
-## Débitos (roadmap)
+- Display 2.0 visual gate.
+- UX-7: pagination/virtualization.
+- UX-8: virtualization timeline; layout preview; versioning.
+- UX-9+: Scheduling Studio.
 
-- Display 2.0 VISUAL GATE.
-- UX-7: pagination/virtualization; FFmpeg thumbs; expiration/approval; duplicate; replace file.
-- UX-8+: Playlist Studio consome Media Library.
-- Git: push sequencial quando auth disponível.
-
-## Critérios UX-7
+## Critérios UX-8
 
 ```text
-biblioteca visual + MediaCard ✓
-StoreContext / AbortController ✓
-busca / filtros / ordenação ✓
-Drawer create IMAGE/VIDEO/WEB ✓
-details + edit + delete seguro ✓
-focus trap Drawer/Modal ✓
-usage_count + store isolation ✓
-APIs player/playlist preservadas ✓
+Studio visual + timeline ✓
+MediaPicker ✓
+reorder drag + keyboard ✓
+duration total + edit ✓
+preview ✓
+referential delete ✓
+player order/duration ✓
 build + testes ✓
-VISUAL VALIDATION PENDING
+VISUAL PENDING
 ```

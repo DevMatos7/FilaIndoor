@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -23,21 +23,29 @@ class PlaylistUpdate(BaseModel):
     description: str | None = None
     active: bool | None = None
     is_default: bool | None = None
+    store_id: str | None = None
 
 
 class PlaylistItemCreate(BaseModel):
     asset_id: str
-    duration_seconds: int | None = None
+    duration_seconds: int | None = Field(default=None, ge=1, le=86400)
     position: int | None = None
 
 
+class PlaylistItemsBulkCreate(BaseModel):
+    asset_ids: list[str] = Field(min_length=1)
+    store_id: str | None = None
+
+
 class PlaylistItemUpdate(BaseModel):
-    duration_seconds: int | None = None
+    duration_seconds: int | None = Field(default=None, ge=1, le=86400)
     active: bool | None = None
+    store_id: str | None = None
 
 
 class ReorderRequest(BaseModel):
     item_ids: list[str]
+    store_id: str | None = None
 
 
 @router.get("/playlists")
@@ -61,10 +69,11 @@ def create_playlist(
 @router.get("/playlists/{playlist_id}")
 def get_playlist(
     playlist_id: str,
+    store_id: str | None = Query(default=None),
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_VIEWER, SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return PlaylistService(db).get(playlist_id)
+    return PlaylistService(db).get(playlist_id, store_id=store_id)
 
 
 @router.patch("/playlists/{playlist_id}")
@@ -74,26 +83,42 @@ def patch_playlist(
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return PlaylistService(db).update(playlist_id, **body.model_dump(exclude_unset=True))
+    data = body.model_dump(exclude_unset=True)
+    store_id = data.pop("store_id", None)
+    return PlaylistService(db).update(playlist_id, store_id=store_id, **data)
 
 
 @router.delete("/playlists/{playlist_id}")
 def delete_playlist(
     playlist_id: str,
+    store_id: str | None = Query(default=None),
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return PlaylistService(db).delete(playlist_id)
+    return PlaylistService(db).delete(playlist_id, store_id=store_id)
 
 
 @router.post("/playlists/{playlist_id}/items", status_code=201)
 def add_item(
     playlist_id: str,
     body: PlaylistItemCreate,
+    store_id: str | None = Query(default=None),
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return PlaylistService(db).add_item(playlist_id, **body.model_dump())
+    return PlaylistService(db).add_item(playlist_id, store_id=store_id, **body.model_dump())
+
+
+@router.post("/playlists/{playlist_id}/items/bulk", status_code=201)
+def add_items_bulk(
+    playlist_id: str,
+    body: PlaylistItemsBulkCreate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
+):
+    return PlaylistService(db).add_items(
+        playlist_id, asset_ids=body.asset_ids, store_id=body.store_id
+    )
 
 
 @router.patch("/playlists/{playlist_id}/items/reorder")
@@ -103,7 +128,9 @@ def reorder_items(
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return PlaylistService(db).reorder(playlist_id, body.item_ids)
+    return PlaylistService(db).reorder(
+        playlist_id, body.item_ids, store_id=body.store_id
+    )
 
 
 @router.patch("/playlists/{playlist_id}/items/{item_id}")
@@ -114,14 +141,17 @@ def patch_item(
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return PlaylistService(db).update_item(playlist_id, item_id, **body.model_dump(exclude_unset=True))
+    data = body.model_dump(exclude_unset=True)
+    store_id = data.pop("store_id", None)
+    return PlaylistService(db).update_item(playlist_id, item_id, store_id=store_id, **data)
 
 
 @router.delete("/playlists/{playlist_id}/items/{item_id}")
 def remove_item(
     playlist_id: str,
     item_id: str,
+    store_id: str | None = Query(default=None),
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return PlaylistService(db).remove_item(playlist_id, item_id)
+    return PlaylistService(db).remove_item(playlist_id, item_id, store_id=store_id)
