@@ -20,7 +20,9 @@ from app.modules.signage.playlist_routes import router as playlist_router
 from app.modules.signage.routes import router as signage_router
 from app.modules.signage.schedule_routes import router as schedule_router
 from app.modules.signage.layout_routes import router as layout_router
+from app.modules.signage.override_routes import router as override_router
 from app.modules.signage.storage import media_root
+from app.modules.signage import models as signage_models  # noqa: F401
 from app.modules.devices.routes import router as device_mgmt_router
 from app.modules.devices import models as device_models  # noqa: F401
 from app.modules.edge.routes import router as edge_router
@@ -97,6 +99,7 @@ app.include_router(signage_router, prefix=api)
 app.include_router(playlist_router, prefix=api)
 app.include_router(schedule_router, prefix=api)
 app.include_router(layout_router, prefix=api)
+app.include_router(override_router, prefix=api)
 app.include_router(realtime_router)
 
 # Arquivos de mídia (Sprint 7) — /media/files/{store_id}/...

@@ -8,7 +8,8 @@ Engine **data-driven** para composição da TV:
 Player → LayoutResolver → LayoutTemplate → Zones → ZoneRenderer
 ```
 
-Sem página React por layout. Sem editor visual. Sem screen_overrides (UX-6C).
+Sem página React por layout. Sem editor visual.  
+Overrides são camada separada — ver [`08c-screen-override.md`](./08c-screen-override.md).
 
 ## Modelo de dados
 
@@ -111,7 +112,7 @@ Channel create/update aceita `layout_template_id` opcional.
 DisplayShell
   ├── LayoutResolver
   │     └── ZoneRenderer*
-  └── QueueCallOverlay   ← global, acima (UX-6C)
+  └── OverrideRenderer   ← UX-6C (camada independente)
 ```
 
 ## Edge / cache / rolling deploy
@@ -132,11 +133,11 @@ DisplayShell
 
 ## Limitations / débitos
 
-- QueueCallOverlay ainda hardcoded (UX-6C)  
 - Ticker sem marquee  
 - Sem templates portrait dedicados (`media_queue_portrait` futuro)  
 - Sem editor admin  
-- VISUAL VALIDATION pode ficar PENDING  
+- VISUAL VALIDATION (Display 2.0) pode ficar PENDING — ver UX-6C  
+
 
 ## Riscos mitigados
 

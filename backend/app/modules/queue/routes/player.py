@@ -10,6 +10,7 @@ from app.modules.queue.services.queue_service import QueueService
 from app.modules.devices.service import DeviceService, device_to_dict
 from app.modules.signage.layout_service import LayoutService
 from app.modules.signage.models import Channel
+from app.modules.signage.override_service import ScreenOverrideService
 from app.modules.signage.schedule_service import ScheduleService
 from app.modules.signage.service import SignageService
 
@@ -63,6 +64,7 @@ def player_config(
         channel_id=display.channel_id,
         store_id=display.store_id,
     )
+    active_overrides = ScreenOverrideService(db).resolve_active_for_display(display)
     return {
         "config_version": device.config_version,
         "device": device_to_dict(device),
@@ -89,6 +91,8 @@ def player_config(
         },
         # UX-6B additive — old clients ignore this key
         "layout": layout,
+        # UX-6C additive — recovery after reload/reconnect
+        "active_overrides": active_overrides,
         "playlist": playlist,
         "audio": {
             "enabled": display.audio_enabled,

@@ -4,9 +4,9 @@ import { DisplayShell } from "../components/display/DisplayShell";
 import { DisplayBoot } from "../components/display/DisplayBoot";
 import { DisplayUnavailable } from "../components/display/DisplayUnavailable";
 import { LayoutResolver } from "../components/display/LayoutResolver";
-import { QueueCallOverlay } from "../components/display/QueueCallOverlay";
+import { OverrideRenderer } from "../components/display/OverrideRenderer";
+import { useOverrideManager } from "../components/display/useOverrideManager";
 import type {
-  CallOverlay,
   DisplayTicket,
   PlayerConfig,
   PlayerUiState,
@@ -21,13 +21,11 @@ import {
 } from "../services/displayPlayer";
 
 /**
- * UX-6B — Display + Layout Engine
+ * UX-6C — Display + Layout Engine + Screen Override Engine
  *
  * DisplayShell
- *   ├── LayoutResolver → zones (MEDIA / QUEUE / TEXT / CLOCK / TICKER)
- *   └── QueueCallOverlay (global, acima das zones — UX-6C migrará para OverrideRenderer)
- *
- * Cache antigo sem `layout` → emergency media_queue_footer (UX-6A equivalente).
+ *   ├── LayoutResolver → zones (always mounted when ready)
+ *   └── OverrideRenderer → absolute inset-0 above layout
  */
 export default function Display() {
   const { queueId } = useParams();
@@ -39,12 +37,10 @@ export default function Display() {
   const [config, setConfig] = useState<PlayerConfig | null>(null);
   const [current, setCurrent] = useState<DisplayTicket | null>(null);
   const [lastCalled, setLastCalled] = useState<DisplayTicket[]>([]);
-  const [overlay, setOverlay] = useState<CallOverlay | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
   const [skipIds, setSkipIds] = useState<Set<string>>(() => new Set());
 
   const seenEvents = useRef<Set<string>>(new Set());
-  const overlayTimer = useRef<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<number | null>(null);
   const pingTimer = useRef<number | null>(null);
@@ -53,6 +49,47 @@ export default function Display() {
   const configRef = useRef<PlayerConfig | null>(null);
   const forceAudioRef = useRef(forceAudio);
   forceAudioRef.current = forceAudio;
+
+  const overrides = useOverrideManager({
+    storeId: config?.store_id,
+    queueId: queueId || config?.queue_id,
+    displayId: config?.display?.id,
+    channelId: config?.display?.channel_id || config?.channel?.id,
+  });
+
+  const handleWsRef = useRef(overrides.handleWsEvent);
+  handleWsRef.current = overrides.handleWsEvent;
+  const markSpokenRef = useRef(overrides.markSpoken);
+  markSpokenRef.current = overrides.markSpoken;
+  const wasSpokenRef = useRef(overrides.wasSpoken);
+  wasSpokenRef.current = overrides.wasSpoken;
+
+  // Boot / reload — recover active overrides from player config (after ctx is ready)
+  useEffect(() => {
+    if (!config) return;
+    overrides.seedFromConfig(config.active_overrides || []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seed on config identity / version
+  }, [config?.display?.id, config?.config_version, config?.active_overrides]);
+
+  // TTS for QUEUE_CALL — dedupe by override.id
+  useEffect(() => {
+    const o = overrides.current;
+    if (!o || (o.override_type || "").toUpperCase() !== "QUEUE_CALL") return;
+    if (wasSpokenRef.current(o.id)) return;
+
+    const cfg = configRef.current;
+    const force = forceAudioRef.current;
+    const enabled = force === "1" || force === "true" || !!cfg?.display.audio_enabled;
+    if (!enabled || !cfg) return;
+
+    const p = o.payload || {};
+    const number = String(p.ticket_number || "");
+    const department = String(p.department_name || cfg.department || "Atendimento");
+    if (!number) return;
+
+    markSpokenRef.current(o.id);
+    speakTicket(cfg.audio.template, number, department, cfg.audio.lang);
+  }, [overrides.current]);
 
   useEffect(() => {
     aliveRef.current = true;
@@ -83,19 +120,6 @@ export default function Display() {
       } catch {
         if (aliveRef.current) setUiState("unavailable");
         return null;
-      }
-    }
-
-    function showOverlay(number: string, department: string, ticketType?: string) {
-      setOverlay({ number, department, ticketType });
-      if (overlayTimer.current) window.clearTimeout(overlayTimer.current);
-      overlayTimer.current = window.setTimeout(() => setOverlay(null), 7000);
-
-      const cfg = configRef.current;
-      const force = forceAudioRef.current;
-      const enabled = force === "1" || force === "true" || !!cfg?.display.audio_enabled;
-      if (enabled && cfg) {
-        speakTicket(cfg.audio.template, number, department, cfg.audio.lang);
       }
     }
 
@@ -148,21 +172,24 @@ export default function Display() {
             if (first) seenEvents.current.delete(first);
           }
 
-          if (evt.data.queue_id && queueId && evt.data.queue_id !== queueId) return;
+          handleWsRef.current(evt.event, evt.data as Record<string, unknown>, evt.event_id);
 
+          // Queue board updates (orthogonal to override layer)
           if (evt.event === "ticket.called" || evt.event === "ticket.recalled") {
-            const number = evt.data.ticket || "";
-            const department = evt.data.department || cfg.department || "Atendimento";
-            if (number) {
-              const ticket: DisplayTicket = {
-                id: evt.data.ticket_id || number,
-                number,
-                type: evt.data.ticket_type,
-                status: evt.data.status,
-              };
-              setCurrent(ticket);
-              setLastCalled((prev) => [ticket, ...prev.filter((t) => t.id !== ticket.id)].slice(0, 5));
-              showOverlay(number, department, evt.data.ticket_type);
+            if (evt.data.queue_id && queueId && evt.data.queue_id !== queueId) {
+              // still may be STORE-scoped override handled above; skip board update
+            } else {
+              const number = evt.data.ticket || "";
+              if (number) {
+                const ticket: DisplayTicket = {
+                  id: evt.data.ticket_id || number,
+                  number,
+                  type: evt.data.ticket_type,
+                  status: evt.data.status,
+                };
+                setCurrent(ticket);
+                setLastCalled((prev) => [ticket, ...prev.filter((t) => t.id !== ticket.id)].slice(0, 5));
+              }
             }
           }
           if (evt.event === "queue.updated") {
@@ -198,7 +225,6 @@ export default function Display() {
       if (reconnectTimer.current) window.clearTimeout(reconnectTimer.current);
       if (heartbeatTimer) window.clearInterval(heartbeatTimer);
       clearPing();
-      if (overlayTimer.current) window.clearTimeout(overlayTimer.current);
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;
@@ -238,7 +264,6 @@ export default function Display() {
 
   const department = config?.department || config?.queue?.name || "Atendimento";
 
-  // All-media failed → branded fallback, still show footer if we have config
   const effectiveState: PlayerUiState =
     uiState === "ready" && playlist.length === 0 ? "fallback" : uiState;
 
@@ -269,8 +294,7 @@ export default function Display() {
           current={current}
           lastCalled={lastCalled}
         />
-        {/* Overlay global — acima de todas as zones (não acoplado ao LayoutResolver) */}
-        <QueueCallOverlay call={overlay} />
+        <OverrideRenderer override={overrides.current} />
       </div>
     </DisplayShell>
   );

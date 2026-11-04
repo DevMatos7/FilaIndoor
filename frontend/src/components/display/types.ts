@@ -15,6 +15,7 @@ export type PlaylistItem = {
 };
 
 import type { ResolvedLayout } from "./layoutTypes";
+import type { ScreenOverride } from "./overrideTypes";
 
 export type PlayerConfig = {
   store_id: string;
@@ -33,11 +34,14 @@ export type PlayerConfig = {
     name: string;
     audio_enabled: boolean;
     audio_template: string;
+    channel_id?: string | null;
   };
   audio: { enabled: boolean; template: string; lang: string };
   playlist?: PlaylistItem[];
   /** UX-6B additive — may be absent in Edge cache antigo */
   layout?: ResolvedLayout | null;
+  /** UX-6C additive — may be absent in Edge cache antigo */
+  active_overrides?: ScreenOverride[];
   channel?: {
     id?: string | null;
     layout?: string;
@@ -62,6 +66,8 @@ export type WsEvent = {
     department?: string;
     queue_id?: string;
     status?: string;
+    override?: ScreenOverride;
+    override_id?: string;
   };
 };
 

@@ -32,6 +32,29 @@ def _toledo_notify_safe(db: Session, ticket: dict) -> None:
         pass
 
 
+def _queue_call_override_safe(db: Session, *, queue_id: str, ticket: dict, event: str) -> dict | None:
+    """Digital Signage side-effect — never fails ticket.called / ticket.recalled."""
+    try:
+        from app.modules.queue.services.events import department_name, resolve_store_id
+        from app.modules.queue.models.entities import Queue
+        from app.modules.signage.override_service import ScreenOverrideService
+
+        store_id = resolve_store_id(db, queue_id)
+        if not store_id:
+            return None
+        queue = db.get(Queue, queue_id)
+        dept = department_name(db, queue) if queue else (ticket.get("department_name") or "Atendimento")
+        return ScreenOverrideService(db).create_queue_call_from_ticket(
+            store_id=store_id,
+            queue_id=queue_id,
+            ticket=ticket,
+            department=dept,
+            event=event,
+        )
+    except Exception:
+        return None
+
+
 @router.get("/queues")
 def list_queues(
     db: Session = Depends(get_db),
@@ -169,7 +192,14 @@ def call_next(
         auto_complete_current=body.auto_complete_current,
         auto_start=body.auto_start,
     )
-    publish_queue_event(db, queue_id=queue_id, event="ticket.called", ticket=ticket)
+    override = _queue_call_override_safe(db, queue_id=queue_id, ticket=ticket, event="ticket.called")
+    publish_queue_event(
+        db,
+        queue_id=queue_id,
+        event="ticket.called",
+        ticket=ticket,
+        extra={"override": override} if override else None,
+    )
     publish_queue_event(db, queue_id=queue_id, event="queue.updated")
     _toledo_notify_safe(db, ticket)
     return ticket
@@ -196,7 +226,15 @@ def recall(
         operator_id=body.operator_id or user.id,
         terminal_id=body.terminal_id,
     )
-    publish_queue_event(db, queue_id=ticket["queue_id"], event="ticket.recalled", ticket=ticket)
+    queue_id = ticket["queue_id"]
+    override = _queue_call_override_safe(db, queue_id=queue_id, ticket=ticket, event="ticket.recalled")
+    publish_queue_event(
+        db,
+        queue_id=queue_id,
+        event="ticket.recalled",
+        ticket=ticket,
+        extra={"override": override} if override else None,
+    )
     _toledo_notify_safe(db, ticket)
     return ticket
 

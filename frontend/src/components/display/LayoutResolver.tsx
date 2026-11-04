@@ -14,7 +14,7 @@ type Props = {
 
 /**
  * Renders data-driven layout zones. Invalid/missing layout → UX-6A emergency footer layout.
- * QueueCallOverlay is intentionally NOT owned here (UX-6C OverrideRenderer swap).
+ * Overrides are intentionally NOT owned here — OverrideRenderer is a sibling layer.
  */
 export function LayoutResolver({
   layout,

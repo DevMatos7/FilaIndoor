@@ -108,16 +108,17 @@ Sem: API, WS, token, playlist, channel, `/media`, conectando, áudio on/off.
 - Portrait não otimizado  
 - VISUAL VALIDATION pode ficar PENDING sem capturas reais  
 
-## Evolução UX-6B
+## Evolução UX-6B / UX-6C
 
-A engine de layouts está documentada em [`08b-layout-engine.md`](./08b-layout-engine.md).
+- Layouts: [`08b-layout-engine.md`](./08b-layout-engine.md)  
+- Overrides: [`08c-screen-override.md`](./08c-screen-override.md)
 
-Composição atual:
+Composição Display 2.0:
 
 ```text
 DisplayShell → LayoutResolver → Zones
-             → QueueCallOverlay (ainda global; UX-6C)
+             → OverrideRenderer (EMERGENCY > QUEUE_CALL > MANUAL > CAMPAIGN)
 ```
 
-`MediaPlayer`, `QueueCallOverlay`, WS/TTS/heartbeat preservados.  
-`QueueFooter` evoluiu para variantes via `QueueZone`.
+`QueueCallOverlay` foi substituído por `QueueCallOverride` via Screen Override Engine.  
+VISUAL VALIDATION do bloco Display 2.0 permanece PENDING até capturas reais.

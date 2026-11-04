@@ -132,6 +132,30 @@ class LayoutZone(Base):
     template: Mapped[LayoutTemplate] = relationship(back_populates="zones")
 
 
+class ScreenOverride(Base):
+    """Interrupção temporária da TV (UX-6C) — camada acima do Layout Engine."""
+
+    __tablename__ = "screen_overrides"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    store_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    override_type: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
+    priority: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    target_scope: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
+    target_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    payload: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    starts_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    cancelled_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    dedupe_key: Mapped[str | None] = mapped_column(String(180), nullable=True, index=True)
+    source_type: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    source_id: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    created_by_user_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+
+
 class Channel(Base):
     """Canal de conteúdo indoor (Sprint 9)."""
 
