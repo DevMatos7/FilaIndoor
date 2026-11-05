@@ -31,8 +31,9 @@ P3: 3 NON-BLOCKING
 DISPLAY 2.0: GO
 PRODUCTIZATION: CONDITIONAL GO
 PILOT: GO WITH CONDITIONS
-RELEASE DELIVERY: NO-GO UNTIL REMOTE PUBLICATION
+RELEASE DELIVERY: GO (rc-pilot-1 @ 95ae83a)
 ```
+Atualizado na abertura da FASE 2 (2026-11-05).
 
 | Gate | Decisão final |
 |------|----------------|
@@ -48,7 +49,7 @@ RELEASE DELIVERY: NO-GO UNTIL REMOTE PUBLICATION
 | UX-12 Playwright + Visual QA | HOMOLOGATED |
 | Display 2.0 | **GO** |
 | Productization | **CONDITIONAL GO** |
-| Release Delivery | **NO-GO** |
+| Release Delivery | **GO** (`rc-pilot-1`) |
 
 O CONDITIONAL GO permanece apropriado: P2 de scrim Display e P3 de cobertura visual **não** são bloqueadores após 83 testes backend, 15/15 E2E, build PASS, P0=0 e P1=0.
 
@@ -125,6 +126,6 @@ O backlog de **Productization está encerrado.** Não há UX-13.
 Plano formal: `docs/pilot/00-phase-2-charter.md`  
 Gate ativo: **P0 Release Candidate** (`docs/pilot/01-release-candidate.md`)
 
-Instalação (P1) permanece bloqueada até Release Delivery GO (push + tag RC) + inventário/SLA.
+Release Delivery: **GO**. Instalação (P1) permanece bloqueada até fechar P0 humano (inventário + SLA + aceite ONLINE-DEPENDENT da loja).
 
 Resiliência Piloto 1: **ONLINE-DEPENDENT** (confirmada no charter).

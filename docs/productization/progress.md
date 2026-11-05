@@ -31,8 +31,10 @@ UX-0 → UX-12: COMPLETE
 DISPLAY 2.0: GO
 PRODUCTIZATION: CONDITIONAL GO
 PILOT: GO WITH CONDITIONS
-RELEASE DELIVERY: NO-GO UNTIL REMOTE PUBLICATION
+RELEASE DELIVERY: GO (rc-pilot-1)
 ```
+
+Gate ativo FASE 2: **P0** (SLA + inventário + aceite loja) — ver `docs/pilot/`.
 
 ## Gates
 
@@ -41,11 +43,11 @@ RELEASE DELIVERY: NO-GO UNTIL REMOTE PUBLICATION
 | Display 2.0 | **GO** |
 | Productization | **CONDITIONAL GO** |
 | Pilot | **GO WITH CONDITIONS** |
-| Release Delivery | **NO-GO** (push pendente) |
+| Release Delivery | **GO** (`rc-pilot-1` @ `95ae83a`) |
 
 ## Backlog Productization
 
 **ENCERRADO.** Sem UX-13. Sem novas features nesta fase.
 
 **FASE 2 — PILOTO OPERACIONAL:** `OPEN` → `docs/pilot/`  
-Gate ativo: **P0 Release Candidate** (push + tag RC ainda pendentes).
+Gate ativo: **P0 Release Candidate** (remoto/tag OK; pendências humanas).

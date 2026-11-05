@@ -2,8 +2,8 @@
 
 | Gate | Nome | Status |
 |------|------|--------|
-| P0 | Release Candidate | `IN PROGRESS` |
-| P1 | Instalação loja piloto | `BLOCKED` |
+| P0 | Release Candidate | `IN PROGRESS` — remoto + tag OK; falta SLA + inventário + aceite loja |
+| P1 | Instalação loja piloto | `BLOCKED` (aguarda fechamento P0 humano) |
 | P2 | Operação assistida | `PLANNED` |
 | P3 | Observação 7 / 14 / 30 dias | `PLANNED` |
 | P4 | Lições e defeitos reais | `PLANNED` |
@@ -16,8 +16,19 @@
 - Productization: **CONDITIONAL GO** / Display 2.0: **GO**
 - Sem features novas durante P0–P3
 
-## Bloqueio atual
+## Release Delivery
 
-**Release Delivery:** `main` local ahead do `origin/main` → instalação (P1) proibida até push + tag RC.
+| Item | Status |
+|------|--------|
+| Push `main` | **GO** (`95ae83a`) |
+| Tag `rc-pilot-1` | **GO** |
+| RELEASE DELIVERY | **GO** |
 
-Docs: `00-phase-2-charter.md` · `01-release-candidate.md` · `02-install-checklist.md` · `03-measurement-plan.md`
+Ver `rc-notes.md`.
+
+## Próximo passo
+
+1. Confirmar SLA do piloto (600/900 ou outra política)  
+2. Preencher `02-install-checklist.md` (loja, devices, contatos)  
+3. Colher aceite ONLINE-DEPENDENT  
+4. Fechar P0 → liberar **P1 Instalação**

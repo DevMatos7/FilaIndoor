@@ -13,7 +13,7 @@
 |------|-----------|
 | **PRODUCTIZATION** | **CONDITIONAL GO** |
 | **DISPLAY 2.0** | **GO** |
-| **RELEASE DELIVERY** | **NO-GO** (branch `main` ahead 11+ commits do remote; push pendente) |
+| **RELEASE DELIVERY** | **GO** (`rc-pilot-1` @ `95ae83a` — atualizado na FASE 2) |
 | CODE VALIDATION | PASS |
 | E2E VALIDATION | PASS (15/15 Chromium) |
 | VISUAL VALIDATION | PASS |
@@ -198,8 +198,9 @@ Totem → Ticket → Queue Engine → Operator → Display Call (QUEUE_CALL) →
 |-------|--------|
 | Commits UX-0…UX-11 presentes no histórico local | PASS |
 | Histórico preservado (sem squash indevido nesta fase) | PASS |
-| Push remoto | **PENDENTE** — `main` ahead do `origin/main` |
-| RELEASE DELIVERY | **NO-GO** até publicação |
+| Push remoto | **GO** — `main` = `95ae83a` |
+| Tag RC | **GO** — `rc-pilot-1` |
+| RELEASE DELIVERY | **GO** |
 
 O gate de **qualidade local do produto** é independente do release delivery.
 
@@ -227,7 +228,7 @@ O gate de **qualidade local do produto** é independente do release delivery.
 | Display 2.0 | **GO** |
 | Productization | **CONDITIONAL GO** |
 | Pilot | **GO WITH CONDITIONS** (ONLINE-DEPENDENT) |
-| Release Delivery | **NO-GO** até publicação remota |
+| Release Delivery | **GO** (`rc-pilot-1`) |
 
 ## 13. STOP
 

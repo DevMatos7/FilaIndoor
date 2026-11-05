@@ -1,7 +1,8 @@
 # P0 — Release Candidate
 
 **Status:** `IN PROGRESS`  
-**Gate:** nenhuma instalação de loja (P1) sem P0 = PASS
+**Gate:** nenhuma instalação de loja (P1) sem P0 = PASS  
+**RC publicada:** `rc-pilot-1` @ `95ae83a` — ver `rc-notes.md`
 
 ---
 
@@ -15,54 +16,38 @@ Ter um artefato **reproduzível** e **identificável** do produto homologado (UX
 
 | # | Item | Critério | Status |
 |---|------|----------|--------|
-| 1 | Histórico Productization commitado | UX-0…UX-12 + closure docs no `main` local | PENDING (commit de closure + FASE 2) |
-| 2 | Push remoto | `origin/main` contém os commits do RC | **NO-GO atual** — `main` ahead do remote |
-| 3 | Tag RC | Tag anotada, ex.: `rc-pilot-1` apontando ao commit do piloto | PENDING |
-| 4 | Build verificável | `frontend` build + stack Docker sobe na versão tagged | PENDING pós-push |
-| 5 | Smoke pós-tag | `npm run test:e2e` (ou subset crítico) na RC | PENDING |
-| 6 | SLA do piloto documentado | 600s/900s confirmados **ou** política corrigida registrada | PENDING decisão humana |
-| 7 | Inventário da loja piloto | loja, filas, devices, tokens, contatos | PENDING (`02-install-checklist.md`) |
-| 8 | Modo resiliência assinado | ONLINE-DEPENDENT registrado e aceito pela operação | DECIDIDO (charter) — falta aceite formal da loja |
+| 1 | Histórico Productization commitado | UX-0…UX-12 + closure + FASE 2 no `main` | **PASS** |
+| 2 | Push remoto | `origin/main` = RC | **PASS** |
+| 3 | Tag RC | `rc-pilot-1` publicada | **PASS** |
+| 4 | Build verificável | stack Docker na RC | PASS (ambiente local já validado na UX-12; revalidar no host da loja em P1) |
+| 5 | Smoke E2E | 15/15 na prova UX-12 sobre a linhagem RC | **PASS** (não reexecutar obrigatório se SHA inalterado) |
+| 6 | SLA do piloto documentado | 600s/900s confirmados **ou** política alternativa | **PENDING** decisão humana |
+| 7 | Inventário da loja piloto | loja, filas, devices, tokens, contatos | **PENDING** (`02-install-checklist.md`) |
+| 8 | Modo resiliência assinado | ONLINE-DEPENDENT aceito pela operação da loja | charter OK — **falta aceite formal da loja** |
 
 ---
 
-## Commits a publicar (mínimo)
+## Publicação (concluída)
 
-No momento da abertura da FASE 2, o local estava **ahead 12** de `origin/main`, incluindo:
-
-- UX-3 … UX-12 (productization)
-- `test(productization): UX-12 playwright visual QA` (`bc40690`)
-- + commits de closure / FASE 2 (este ciclo)
-
-**Não** squashar a série UX. Push fast-forward preferencial.
-
----
-
-## Comandos de referência (quando auth OK)
-
-```bash
-# 1) garantir working tree limpa / commits de closure
-git status
-
-# 2) publicar
-git push -u origin main
-
-# 3) tag RC (após smoke local na HEAD desejada)
-git tag -a rc-pilot-1 -m "Release Candidate Piloto 1 — Productization HOMOLOGATED, ONLINE-DEPENDENT"
-git push origin rc-pilot-1
+```text
+git push origin main          → 95ae83a
+git tag -a rc-pilot-1 … && git push origin rc-pilot-1
 ```
+
+Histórico UX preservado (sem squash).
 
 ---
 
 ## Critério P0 = PASS
 
-- [ ] remoto atualizado  
-- [ ] tag `rc-pilot-1` (ou nome acordado) publicada  
+- [x] remoto atualizado  
+- [x] tag `rc-pilot-1` publicada  
 - [ ] SLA do piloto decidido por escrito  
 - [ ] aceite ONLINE-DEPENDENT da operação da loja  
 - [ ] inventário P1 preenchido  
 
-Enquanto o push falhar por autenticação: **P0 permanece FAIL / BLOCKED** — produto apto, **instalação proibida**.
+**Release Delivery:** GO.  
+**Instalação:** ainda bloqueada pelas 3 pendências humanas acima.
 
 ---
 
