@@ -1,5 +1,7 @@
 # Productization — Progresso
 
+> **FASE ENCERRADA.** Ver `17-productization-closure.md`.
+
 | Sprint | Status | Notas |
 |--------|--------|-------|
 | UX-0 Auditoria visual / baseline | `HOMOLOGATED` | `00-current-state.md` |
@@ -16,57 +18,34 @@
 | UX-9 Programming Studio | `HOMOLOGATED` | `11-programming-studio.md` |
 | UX-10 Screen & Device Fleet | `HOMOLOGATED` | `12-screen-device-fleet.md` |
 | UX-11 Analytics 2.0 | `HOMOLOGATED` | `13-analytics-2.md` |
-| UX-12 Playwright + Visual QA | `READY FOR FINAL HOMOLOGATION` | `14` · `15` · `16` |
+| UX-12 Playwright + Visual QA | `HOMOLOGATED` | `14` · `15` · `16` · `17` |
 
-## DISPLAY 2.0 Gate
-
-| Dimensão | Status |
-|----------|--------|
-| TECHNICAL | `HOMOLOGATED` |
-| COMMERCIAL / VISUAL | **GO** (evidências em `screenshots/final/display/`) |
-
-## Productization Gate
-
-| Dimensão | Status |
-|----------|--------|
-| FUNCTIONAL | PASS |
-| VISUAL | PASS |
-| RESPONSIVE | PASS |
-| ACCESSIBILITY | PASS WITH DEBT |
-| DATA INTEGRITY | PASS |
-| SECURITY | PASS |
-| REGRESSION | PASS |
-| DOCUMENTATION | PASS |
-| **PRODUCTIZATION** | **CONDITIONAL GO** |
-| **RELEASE DELIVERY** | **NO-GO** (push pendente) |
-
-## Decisões UX-12
-
-- Prova em ambiente real Docker + Playwright Chromium (15/15).
-- Evidência visual definitiva: `docs/productization/screenshots/final/`.
-- READMEs UX-6…11 PENDING preservados; não substituem o final.
-- P0=0 · P1=0 · P2 overlay polish não bloqueante.
-- Edge local ticketing: decisão de piloto explícita (blocker **se** exigir emissão offline).
-- Proof of Play: não blocker para queue+signage operacional.
-- STOP após UX-12 — sem novas features.
-
-## Critérios UX-12
+## Status oficial da fase
 
 ```text
-Playwright instalado ✓
-config reproduzível ✓
-fixtures determinísticas ✓
-login / shell / CC / Totem / Operator / Display ✓
-Media / Playlist / Programming / Fleet / Analytics ✓
-responsive matrix ✓
-keyboard/focus (drawer) ✓
-visual screenshots ✓
-defect register ✓
-P0=0 P1=0 ✓
-backend regression PASS ✓
-frontend build PASS ✓
-final report ✓
-Display 2.0 GO ✓
-Productization CONDITIONAL GO ✓
-VISUAL VALIDATION: PASS
+PRODUCTIZATION UX/UI & INDOOR 2.0
+FINAL STATUS: HOMOLOGATED
+
+UX-0 → UX-12: COMPLETE
+
+DISPLAY 2.0: GO
+PRODUCTIZATION: CONDITIONAL GO
+PILOT: GO WITH CONDITIONS
+RELEASE DELIVERY: NO-GO UNTIL REMOTE PUBLICATION
 ```
+
+## Gates
+
+| Gate | Decisão final |
+|------|----------------|
+| Display 2.0 | **GO** |
+| Productization | **CONDITIONAL GO** |
+| Pilot | **GO WITH CONDITIONS** |
+| Release Delivery | **NO-GO** (push pendente) |
+
+## Backlog Productization
+
+**ENCERRADO.** Sem UX-13. Sem novas features nesta fase.
+
+**FASE 2 — PILOTO OPERACIONAL:** `OPEN` → `docs/pilot/`  
+Gate ativo: **P0 Release Candidate** (push + tag RC ainda pendentes).

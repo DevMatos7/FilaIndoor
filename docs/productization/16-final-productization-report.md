@@ -47,7 +47,7 @@
 | UX-9 | HOMOLOGATED |
 | UX-10 | HOMOLOGATED |
 | UX-11 | HOMOLOGATED |
-| UX-12 | READY FOR FINAL HOMOLOGATION |
+| UX-12 | HOMOLOGATED |
 
 ---
 
@@ -151,12 +151,13 @@ Totem → Ticket → Queue Engine → Operator → Display Call (QUEUE_CALL) →
 
 ## 9. Débitos — classificação para decisão de piloto
 
-### PILOT BLOCKERS (decisão explícita)
+### PILOT BLOCKERS (decisão explícita — homologação final)
 
-| Item | Decisão UX-12 |
-|------|----------------|
-| **Edge local ticketing real** | **PILOT BLOCKER se** o piloto exigir emissão de senha com backend inacessível. **Aceitável pós-piloto** se loja tiver conectividade estável e aceitar risk window. **Não implementado na UX-12.** |
+| Item | Decisão |
+|------|---------|
+| **Edge local ticketing real** | **Piloto 1 = ONLINE-DEPENDENT** (risco aceito e monitorado). Não obrigatório para validar produto. Vira blocker **somente** se a promessa for continuidade com backend/rede central fora. Se a loja mostrar queda frequente → **primeira sprint pós-piloto**. Não implementado. |
 | Store isolation / token leak / ticket duplicate | Não observados — se surgirem = hard NO-GO |
+| Release Delivery | **Blocker de instalação** até `git push` + commit identificável |
 
 ### POST-PILOT
 
@@ -216,8 +217,22 @@ O gate de **qualidade local do produto** é independente do release delivery.
 
 ---
 
-## 12. STOP
+## 12. Homologação final (registrada)
 
-Após UX-12: **não** iniciar Proof of Play, Device Commands, Edge Local Ticketing, Store Timezone, nem nova sprint de feature.
+**UX-12 FINAL HOMOLOGATION: PASS** — ver `17-productization-closure.md`.
 
-Próximo passo: **homologação humana final** + decisão de piloto (especialmente Edge local ticketing) + push remoto quando autenticação disponível.
+| Gate | Decisão |
+|------|---------|
+| Productization fase | **HOMOLOGATED** (encerrada) |
+| Display 2.0 | **GO** |
+| Productization | **CONDITIONAL GO** |
+| Pilot | **GO WITH CONDITIONS** (ONLINE-DEPENDENT) |
+| Release Delivery | **NO-GO** até publicação remota |
+
+## 13. STOP
+
+Backlog Productization **encerrado**. Sem UX-13.
+
+Não iniciar: Proof of Play, Device Commands, Edge Local Ticketing, Store Timezone, Operator Presence, Retail Media, editor de layouts, forecasting/IA.
+
+**FASE 2 aberta:** `docs/pilot/` — gate **P0 Release Candidate**. Publicar remoto + tag RC antes de qualquer instalação (P1).
