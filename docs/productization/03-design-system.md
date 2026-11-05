@@ -158,6 +158,7 @@ Todos exibem **texto + ícone + cor**.
 5. Source Serif mantida para customer-facing até UX-4/6.
 6. **PriorityBadge** (UX-9): ícone + texto + cor para `NORMAL` / `HIGH` / `EMERGENCY` (Schedule). Não reutilizar para ScreenOverride.
 7. **DeviceStatus** (UX-1/UX-10): fonte única de badge de saúde ONLINE/DEGRADED/OFFLINE/DISABLED no Fleet — não criar badge paralelo.
+8. **Analytics charts (UX-11):** Recharts apenas em Analytics; ChartCard local na página (title/summary/loading/empty). Não promover a DS até reuso real.
 
 ---
 

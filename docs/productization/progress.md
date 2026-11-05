@@ -14,9 +14,9 @@
 | UX-7 Media Library 2.0 | `CODE HOMOLOGATED` | `09-media-library.md` · VISUAL PENDING |
 | UX-8 Playlist Studio | `CODE HOMOLOGATED` | `10-playlist-studio.md` · VISUAL PENDING |
 | UX-9 Programming Studio | `CODE HOMOLOGATED` | `11-programming-studio.md` · VISUAL PENDING |
-| UX-10 Screen & Device Fleet | `READY FOR HOMOLOGATION` | `12-screen-device-fleet.md` · VISUAL PENDING |
-| UX-11 Analytics 2.0 | `PLANNED` | **não iniciar sem homologação** |
-| UX-12 Playwright + Visual QA | `PLANNED` | — |
+| UX-10 Screen & Device Fleet | `CODE HOMOLOGATED` | `12-screen-device-fleet.md` · VISUAL PENDING |
+| UX-11 Analytics 2.0 | `READY FOR HOMOLOGATION` | `13-analytics-2.md` · VISUAL PENDING |
+| UX-12 Playwright + Visual QA | `PLANNED` | **não iniciar sem homologação** |
 
 ## DISPLAY 2.0 Gate
 
@@ -51,26 +51,34 @@
 - Channel assign só em Display; cross-store 422; tokens mascarados no fleet.
 - Store timezone permanece débito arquitetural.
 
+## Decisões UX-11
+
+- 0 migrations; `GET /analytics/overview` com cohorts documentados.
+- P90 sobre observações individuais; zero ≠ missing.
+- SLA 600/900s auditável (numerador/denominador); unknown ≠ falha.
+- Device snapshot = “Situação atual da frota” (não uptime do período).
+- Dependência frontend: `recharts@2.15.0`.
+- `/analytics/summary` preservado para Command Center.
+
 ## Débitos
 
 - Display 2.0 visual gate (COMMERCIAL/VISUAL PENDING).
 - Store timezone.
-- Proof of Play / playback_events.
-- Device Commands / remote refresh-reboot-screenshot.
-- ScreenGroup override target; fleet pagination.
-- UX-7/8/9 débitos visuais e de edição avançada.
+- Proof of Play / playback_events / uptime histórico.
+- CSV export, heatmap, forecasting, capacidade operador.
+- Device Commands; ScreenGroup override; débitos visuais UX-6…10.
 
-## Critérios UX-10
+## Critérios UX-11
 
 ```text
-Fleet /devices ✓
-StoreContext ✓
-status = CC ✓
-channel assign ✓
-cross-store 422 ✓
-programmed ≠ confirmed ✓
-token masked ✓
-player config após channel ✓
+Analytics 2.0 ✓
+data dictionary ✓
+P90 correto ✓
+SLA auditável ✓
+StoreContext + período ✓
+queue filter ✓
+device snapshot rotulado ✓
+sem PoP / sem uptime fake ✓
 build + testes ✓
 VISUAL PENDING
 ```
