@@ -1,0 +1,3897 @@
+{
+  "empresa": {
+    "idempresa": 1,
+    "nomefantasia": "Supermercado Real",
+    "razaosocial": "Casagrande & Cia Ltda - EPP"
+  },
+  "store": {
+    "id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
+    "name": "Loja Campo Novo",
+    "timezone": "America/Sao_Paulo"
+  },
+  "mapping": {
+    "company_code": "1",
+    "location_code": null,
+    "active": true
+  },
+  "availability": {
+    "promo_expired": 20,
+    "regular_un": 40,
+    "kg": 30,
+    "recent": 20,
+    "qty": 1,
+    "no_stock": 20
+  },
+  "meta": {
+    "notes": {
+      "promo_active": "NOT AVAILABLE IN SAMPLE",
+      "qty_multi_tier": "NOT AVAILABLE IN SAMPLE",
+      "qty_single": "AVAILABLE"
+    },
+    "gertec": {
+      "compared": 6,
+      "match": 6,
+      "mismatch": 0,
+      "missing": 25
+    }
+  },
+  "price_source_status": "CONFIRMED",
+  "sample_size": 31,
+  "sync_runs_1": [
+    {
+      "id": "49d3e1af-4293-417b-aa0c-5337bca61967",
+      "source_system": "CISS",
+      "entity": "PRODUCT",
+      "store_id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
+      "status": "SUCCESS",
+      "started_at": "2026-11-05T21:46:32.826803Z",
+      "finished_at": "2026-11-05T21:46:35.673357Z",
+      "records_read": 4000,
+      "records_inserted": 1970,
+      "records_updated": 30,
+      "records_skipped": 2000,
+      "records_failed": 0,
+      "watermark_before": "2026-11-05T17:30:50.182880",
+      "watermark_after": "2026-11-05T17:45:14.037840",
+      "error_summary": null
+    },
+    {
+      "id": "0de1df6b-d7a1-4fec-8932-120f66368624",
+      "source_system": "CISS",
+      "entity": "PRICE",
+      "store_id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
+      "status": "SUCCESS",
+      "started_at": "2026-11-05T21:46:36.097175Z",
+      "finished_at": "2026-11-05T21:46:52.755937Z",
+      "records_read": 5000,
+      "records_inserted": 5000,
+      "records_updated": 0,
+      "records_skipped": 0,
+      "records_failed": 0,
+      "watermark_before": "2026-11-04T07:10:11.027000",
+      "watermark_after": "2026-11-04T07:10:11.027000",
+      "error_summary": null
+    },
+    {
+      "id": "24a67937-05ec-4f80-9326-1ca1d85ae4b6",
+      "source_system": "CISS",
+      "entity": "PROMOTION",
+      "store_id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
+      "status": "SUCCESS",
+      "started_at": "2026-11-05T21:46:52.764069Z",
+      "finished_at": "2026-11-05T21:46:53.079749Z",
+      "records_read": 0,
+      "records_inserted": 0,
+      "records_updated": 0,
+      "records_skipped": 0,
+      "records_failed": 0,
+      "watermark_before": null,
+      "watermark_after": null,
+      "error_summary": null
+    },
+    {
+      "id": "a8e27597-86c2-4260-ad80-5bec6ce3d1ca",
+      "source_system": "CISS",
+      "entity": "AVAILABILITY",
+      "store_id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
+      "status": "SUCCESS",
+      "started_at": "2026-11-05T21:46:53.086641Z",
+      "finished_at": "2026-11-05T21:47:16.573066Z",
+      "records_read": 2000,
+      "records_inserted": 429,
+      "records_updated": 1,
+      "records_skipped": 1570,
+      "records_failed": 0,
+      "watermark_before": null,
+      "watermark_after": null,
+      "error_summary": null
+    }
+  ],
+  "sync_runs_2": [
+    {
+      "id": "eef6fd2d-9919-4ddb-bf6c-9cb6c5e8fed6",
+      "source_system": "CISS",
+      "entity": "PRODUCT",
+      "store_id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
+      "status": "SUCCESS",
+      "started_at": "2026-11-05T21:47:17.607512Z",
+      "finished_at": "2026-11-05T21:47:22.667407Z",
+      "records_read": 4000,
+      "records_inserted": 223,
+      "records_updated": 2021,
+      "records_skipped": 1756,
+      "records_failed": 0,
+      "watermark_before": "2026-11-05T17:45:14.037840",
+      "watermark_after": "2026-11-05T17:47:00.689270",
+      "error_summary": null
+    },
+    {
+      "id": "c38c2030-19fe-45d4-a18e-781a4e1e5149",
+      "source_system": "CISS",
+      "entity": "PRICE",
+      "store_id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
+      "status": "SUCCESS",
+      "started_at": "2026-11-05T21:47:23.611192Z",
+      "finished_at": "2026-11-05T21:47:37.207722Z",
+      "records_read": 5000,
+      "records_inserted": 5000,
+      "records_updated": 0,
+      "records_skipped": 0,
+      "records_failed": 0,
+      "watermark_before": "2026-11-04T07:10:11.027000",
+      "watermark_after": "2026-11-04T07:10:11.027000",
+      "error_summary": null
+    },
+    {
+      "id": "a2714f89-51f7-4e6d-857b-e3915b47dbf8",
+      "source_system": "CISS",
+      "entity": "PROMOTION",
+      "store_id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
+      "status": "SUCCESS",
+      "started_at": "2026-11-05T21:47:38.194241Z",
+      "finished_at": "2026-11-05T21:47:38.875917Z",
+      "records_read": 0,
+      "records_inserted": 0,
+      "records_updated": 0,
+      "records_skipped": 0,
+      "records_failed": 0,
+      "watermark_before": null,
+      "watermark_after": null,
+      "error_summary": null
+    },
+    {
+      "id": "5bdea3a9-9d62-49bb-8e73-58663a991f31",
+      "source_system": "CISS",
+      "entity": "AVAILABILITY",
+      "store_id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
+      "status": "SUCCESS",
+      "started_at": "2026-11-05T21:47:38.884778Z",
+      "finished_at": "2026-11-05T21:47:58.396169Z",
+      "records_read": 2000,
+      "records_inserted": 1,
+      "records_updated": 436,
+      "records_skipped": 1563,
+      "records_failed": 0,
+      "watermark_before": null,
+      "watermark_after": null,
+      "error_summary": null
+    }
+  ],
+  "duration_1_s": 44.77,
+  "duration_2_s": 42.73,
+  "watermarks_before": {
+    "PRODUCT": "2026-11-05T17:30:50.182880",
+    "PRICE": "2026-11-04T07:10:11.027000",
+    "PROMOTION": null,
+    "AVAILABILITY": null
+  },
+  "watermarks_after": {
+    "PRODUCT": "2026-11-05T17:47:00.689270",
+    "PRICE": "2026-11-04T07:10:11.027000",
+    "PROMOTION": null,
+    "AVAILABILITY": null
+  },
+  "idempotency": {
+    "products_before": 6820,
+    "products_after": 6821,
+    "active_prices_before": 5026,
+    "active_prices_after": 5026,
+    "product_duplicates": 1
+  },
+  "health": {
+    "store_id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
+    "store_name": "Loja Campo Novo",
+    "timezone": "America/Sao_Paulo",
+    "timezone_valid": true,
+    "timezone_error": null,
+    "source": "CISS",
+    "mapping": {
+      "configured": true,
+      "company_code": "1",
+      "location_code": null
+    },
+    "status": "FRESH",
+    "entities": [
+      {
+        "entity": "PRODUCT",
+        "count": 6821,
+        "last_success_at": "2026-11-05T21:47:22.667388Z",
+        "lag_seconds": 59.002884,
+        "status": "FRESH"
+      },
+      {
+        "entity": "PRICE",
+        "count": 5026,
+        "last_success_at": "2026-11-05T21:47:37.207706Z",
+        "lag_seconds": 44.463199,
+        "status": "FRESH"
+      },
+      {
+        "entity": "PROMOTION",
+        "count": 0,
+        "last_success_at": "2026-11-05T21:47:38.875895Z",
+        "lag_seconds": 42.795592,
+        "status": "FRESH"
+      },
+      {
+        "entity": "AVAILABILITY",
+        "count": 683,
+        "last_success_at": "2026-11-05T21:47:58.396137Z",
+        "lag_seconds": 23.275921,
+        "status": "FRESH"
+      }
+    ]
+  },
+  "reconcile_summary": {
+    "match": 31,
+    "mismatch": 0,
+    "not_comparable": 0
+  },
+  "field_summary": {
+    "regular": {
+      "MATCH": 31,
+      "MISMATCH": 0,
+      "NOT_COMPARABLE": 0
+    },
+    "unit": {
+      "MATCH": 31,
+      "MISMATCH": 0,
+      "NOT_COMPARABLE": 0
+    },
+    "promo": {
+      "MATCH": 31,
+      "MISMATCH": 0,
+      "NOT_COMPARABLE": 0
+    },
+    "qty_tiers": {
+      "MATCH": 31,
+      "MISMATCH": 0,
+      "NOT_COMPARABLE": 0
+    },
+    "api_regular": {
+      "MATCH": 31,
+      "MISMATCH": 0,
+      "NOT_COMPARABLE": 0
+    },
+    "api_unit": {
+      "MATCH": 31,
+      "MISMATCH": 0,
+      "NOT_COMPARABLE": 0
+    },
+    "stock": {
+      "MATCH": 31,
+      "MISMATCH": 0,
+      "NOT_COMPARABLE": 0
+    },
+    "gertec": {
+      "MATCH": 6,
+      "MISMATCH": 0,
+      "NOT_COMPARABLE": 25
+    },
+    "store_company": {
+      "MATCH": 31,
+      "MISMATCH": 0,
+      "NOT_COMPARABLE": 0
+    }
+  },
+  "sample": [
+    {
+      "source_product_id": "100153:100153",
+      "idproduto": 100153,
+      "idsubproduto": 100153,
+      "description": "MEXIRICA MORGOTE KG",
+      "unit": "KG",
+      "ciss_regular": 5.98,
+      "ciss_promo": 4.98,
+      "promo_start": "2018-09-12",
+      "promo_end": "2018-09-19",
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "promo_expired"
+      ],
+      "promo_status": "AFTER_END",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "2544a45b-c7c3-4bb2-83de-6023651abf28",
+        "description": "MEXIRICA MORGOTE KG",
+        "unit": "KG",
+        "regular": 5.98,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "2544a45b-c7c3-4bb2-83de-6023651abf28",
+        "source_product_id": "100153:100153",
+        "unit": "KG",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 5.98
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "167059:167059",
+      "idproduto": 167059,
+      "idsubproduto": 167059,
+      "description": "SUCO PO FRESH LARANJA 15G",
+      "unit": "UN",
+      "ciss_regular": 0.78,
+      "ciss_promo": 0.59,
+      "promo_start": "2017-08-31",
+      "promo_end": "2017-11-30",
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "promo_expired"
+      ],
+      "promo_status": "AFTER_END",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "f7e0157a-99ba-4945-ad6f-9aa6ce60e1a3",
+        "description": "SUCO PO FRESH LARANJA 15G",
+        "unit": "UN",
+        "regular": 0.78,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "f7e0157a-99ba-4945-ad6f-9aa6ce60e1a3",
+        "source_product_id": "167059:167059",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 0.78
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "159731:159731",
+      "idproduto": 159731,
+      "idsubproduto": 159731,
+      "description": "TEMP ADORALLE CARNE/LEG/ARROZ 50G",
+      "unit": "UN",
+      "ciss_regular": 2.69,
+      "ciss_promo": 2.29,
+      "promo_start": "2017-08-10",
+      "promo_end": "2017-09-19",
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "promo_expired"
+      ],
+      "promo_status": "AFTER_END",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 1
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "82d56716-03f3-41df-ba6a-f02eaca75702",
+        "description": "TEMP ADORALLE CARNE/LEG/ARROZ 50G",
+        "unit": "UN",
+        "regular": 2.69,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "82d56716-03f3-41df-ba6a-f02eaca75702",
+        "source_product_id": "159731:159731",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 2.69
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "189261:189261",
+      "idproduto": 189261,
+      "idsubproduto": 189261,
+      "description": "BOMBOM LACTA SONHO VALSA 20G",
+      "unit": "UN",
+      "ciss_regular": 0.99,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "qty"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [
+        {
+          "min_qty": 50.0,
+          "amount": 0.99,
+          "status": "A"
+        }
+      ],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": 0.99,
+      "gertec_vs_politica": "MATCH",
+      "canonical": {
+        "product_id": "979b128e-ed27-46d0-bebe-372f3f031f7e",
+        "description": "BOMBOM LACTA SONHO VALSA 20G",
+        "unit": "UN",
+        "regular": 0.99,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [
+          {
+            "min_qty": 50.0,
+            "amount": 0.99
+          }
+        ],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "979b128e-ed27-46d0-bebe-372f3f031f7e",
+        "source_product_id": "189261:189261",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 0.99
+          },
+          {
+            "price_kind": "QUANTITY",
+            "amount": 0.99,
+            "min_qty": 50.0
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "MATCH",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "115235:115237",
+      "idproduto": 115235,
+      "idsubproduto": 115237,
+      "description": "CS PE  CASAGRANDE",
+      "unit": "KG",
+      "ciss_regular": 12.35,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "kg"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 1
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "d58f681f-67ee-4c94-b551-c0b0f9788398",
+        "description": "CS PE  CASAGRANDE",
+        "unit": "KG",
+        "regular": 12.35,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "d58f681f-67ee-4c94-b551-c0b0f9788398",
+        "source_product_id": "115235:115237",
+        "unit": "KG",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 12.35
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "127:127",
+      "idproduto": 127,
+      "idsubproduto": 127,
+      "description": "CS LOMBO SADIA TEMP CONG KG",
+      "unit": "KG",
+      "ciss_regular": 20.79,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "kg"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 1
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "af23f4f1-5054-44b5-9e7c-907e15c66a4b",
+        "description": "CS LOMBO SADIA TEMP CONG KG",
+        "unit": "KG",
+        "regular": 20.79,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "af23f4f1-5054-44b5-9e7c-907e15c66a4b",
+        "source_product_id": "127:127",
+        "unit": "KG",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 20.79
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "135:135",
+      "idproduto": 135,
+      "idsubproduto": 135,
+      "description": "PRES SADIA COZ S/CAPA GORDURA",
+      "unit": "KG",
+      "ciss_regular": 31.98,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "kg"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          },
+          {
+            "local": 6,
+            "qty": 0.0
+          },
+          {
+            "local": 10,
+            "qty": 0.0
+          },
+          {
+            "local": 11,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 5
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "59651858-dad3-4c17-9f9b-f47b4512af66",
+        "description": "PRES SADIA COZ S/CAPA GORDURA",
+        "unit": "KG",
+        "regular": 31.98,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "59651858-dad3-4c17-9f9b-f47b4512af66",
+        "source_product_id": "135:135",
+        "unit": "KG",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 31.98
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "167406:167406",
+      "idproduto": 167406,
+      "idsubproduto": 167406,
+      "description": "SALGADINHO FEST REAL KG",
+      "unit": "KG",
+      "ciss_regular": 26.99,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "kg"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 1
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "d7fe44f4-b9b6-4d73-b1ad-25799cc1f8f9",
+        "description": "SALGADINHO FEST REAL KG",
+        "unit": "KG",
+        "regular": 26.99,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "d7fe44f4-b9b6-4d73-b1ad-25799cc1f8f9",
+        "source_product_id": "167406:167406",
+        "unit": "KG",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 26.99
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "5109:5109",
+      "idproduto": 5109,
+      "idsubproduto": 5109,
+      "description": "NEUTRALIZ ODORES BOM AR AERO CED/LAR 360ML",
+      "unit": "UN",
+      "ciss_regular": 8.99,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 10,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "d2022b7d-b28b-4ffc-9586-ffc1c6275ed7",
+        "description": "NEUTRALIZ ODORES BOM AR AERO CED/LAR 360ML",
+        "unit": "UN",
+        "regular": 8.99,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "d2022b7d-b28b-4ffc-9586-ffc1c6275ed7",
+        "source_product_id": "5109:5109",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 8.99
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157042:157042",
+      "idproduto": 157042,
+      "idsubproduto": 157042,
+      "description": "VINHO ITA VALDORELLA CHIANTI TTO  750ML",
+      "unit": "UN",
+      "ciss_regular": 56.88,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 1
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "de13d3d6-3ae1-48d3-bf8c-ad41ddf23fdc",
+        "description": "VINHO ITA VALDORELLA CHIANTI TTO  750ML",
+        "unit": "UN",
+        "regular": 56.88,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "de13d3d6-3ae1-48d3-bf8c-ad41ddf23fdc",
+        "source_product_id": "157042:157042",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 56.88
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157043:157043",
+      "idproduto": 157043,
+      "idsubproduto": 157043,
+      "description": "BALA TIC TAC MACA VERDE/MARACUJA 16G",
+      "unit": "UN",
+      "ciss_regular": 1.49,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "86aede12-5731-4072-b225-d370f91b7dc7",
+        "description": "BALA TIC TAC MACA VERDE/MARACUJA 16G",
+        "unit": "UN",
+        "regular": 1.49,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "86aede12-5731-4072-b225-d370f91b7dc7",
+        "source_product_id": "157043:157043",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 1.49
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157046:157046",
+      "idproduto": 157046,
+      "idsubproduto": 157046,
+      "description": "ABS INT DAYS S/ABAS 40UN",
+      "unit": "UN",
+      "ciss_regular": 10.49,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "aa958575-7e07-4567-8007-9bffcf80599b",
+        "description": "ABS INT DAYS S/ABAS 40UN",
+        "unit": "UN",
+        "regular": 10.49,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "aa958575-7e07-4567-8007-9bffcf80599b",
+        "source_product_id": "157046:157046",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 10.49
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "1:1",
+      "idproduto": 1,
+      "idsubproduto": 1,
+      "description": "PRODUTO GERAL",
+      "unit": "UN",
+      "ciss_regular": 988.0,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "no_stock"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 2,
+            "qty": 0.0
+          },
+          {
+            "local": 6,
+            "qty": 0.0
+          },
+          {
+            "local": 10,
+            "qty": 0.0
+          },
+          {
+            "local": 11,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 5
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "6ac01ca5-60ce-4b8f-96df-24d8103fe21e",
+        "description": "PRODUTO GERAL",
+        "unit": "UN",
+        "regular": 988.0,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "6ac01ca5-60ce-4b8f-96df-24d8103fe21e",
+        "source_product_id": "1:1",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 988.0
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "2:2",
+      "idproduto": 2,
+      "idsubproduto": 2,
+      "description": "PEIXE TAMBACU CASA PEIXE C/ESC KG",
+      "unit": "KG",
+      "ciss_regular": 13.49,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "no_stock"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          },
+          {
+            "local": 6,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 3
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "008ad562-6219-4394-96f3-494394cf419f",
+        "description": "PEIXE TAMBACU CASA PEIXE C/ESC KG",
+        "unit": "KG",
+        "regular": 13.49,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "008ad562-6219-4394-96f3-494394cf419f",
+        "source_product_id": "2:2",
+        "unit": "KG",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 13.49
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "9:9",
+      "idproduto": 9,
+      "idsubproduto": 9,
+      "description": "JILO",
+      "unit": "KG",
+      "ciss_regular": 4.98,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "no_stock"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "8cb4e397-430d-447b-ab56-7e8fa936bcb8",
+        "description": "JILO",
+        "unit": "KG",
+        "regular": 4.98,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "8cb4e397-430d-447b-ab56-7e8fa936bcb8",
+        "source_product_id": "9:9",
+        "unit": "KG",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 4.98
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "142883:245726",
+      "idproduto": 142883,
+      "idsubproduto": 245726,
+      "description": "CESTA NATAL PREMIUM ATACADO",
+      "unit": "UN",
+      "ciss_regular": 123.58,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "recent"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [],
+        "total": 0,
+        "locals_count": 0
+      },
+      "gertec_price": 123.58,
+      "gertec_vs_politica": "MATCH",
+      "canonical": {
+        "product_id": "d447cc05-d279-4110-9866-89ca40e918f7",
+        "description": "CESTA NATAL PREMIUM ATACADO",
+        "unit": "UN",
+        "regular": 123.58,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "d447cc05-d279-4110-9866-89ca40e918f7",
+        "source_product_id": "142883:245726",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 123.58
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "MATCH",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "142883:245728",
+      "idproduto": 142883,
+      "idsubproduto": 245728,
+      "description": "CESTA NATAL PREMIUM ATACADO",
+      "unit": "UN",
+      "ciss_regular": 155.87,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "recent"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [],
+        "total": 0,
+        "locals_count": 0
+      },
+      "gertec_price": 155.87,
+      "gertec_vs_politica": "MATCH",
+      "canonical": {
+        "product_id": "3177b366-862c-428d-8ffa-77336114d8db",
+        "description": "CESTA NATAL PREMIUM ATACADO",
+        "unit": "UN",
+        "regular": 155.87,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "3177b366-862c-428d-8ffa-77336114d8db",
+        "source_product_id": "142883:245728",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 155.87
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "MATCH",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "142883:245724",
+      "idproduto": 142883,
+      "idsubproduto": 245724,
+      "description": "CESTA NATAL PREMIUM ATACADO",
+      "unit": "UN",
+      "ciss_regular": 128.98,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "recent"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [],
+        "total": 0,
+        "locals_count": 0
+      },
+      "gertec_price": 128.98,
+      "gertec_vs_politica": "MATCH",
+      "canonical": {
+        "product_id": "f62cbac1-5a61-4834-8863-b1ab91d7311a",
+        "description": "CESTA NATAL PREMIUM ATACADO",
+        "unit": "UN",
+        "regular": 128.98,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "f62cbac1-5a61-4834-8863-b1ab91d7311a",
+        "source_product_id": "142883:245724",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 128.98
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "MATCH",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157047:157047",
+      "idproduto": 157047,
+      "idsubproduto": 157047,
+      "description": "FAQUEIRO TRAMONTINA 42 PCS C/ESTOJO ACO INOX",
+      "unit": "UN",
+      "ciss_regular": 551.89,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "29bfba14-a201-49e8-add0-2d668586fa24",
+        "description": "FAQUEIRO TRAMONTINA 42 PCS C/ESTOJO ACO INOX",
+        "unit": "UN",
+        "regular": 551.89,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "29bfba14-a201-49e8-add0-2d668586fa24",
+        "source_product_id": "157047:157047",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 551.89
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157048:157048",
+      "idproduto": 157048,
+      "idsubproduto": 157048,
+      "description": "SABON LIQ TRICOFACIL MOR 2LT",
+      "unit": "UN",
+      "ciss_regular": 24.69,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 1
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "b672dea6-717a-49d2-b911-8bbc36ec6a66",
+        "description": "SABON LIQ TRICOFACIL MOR 2LT",
+        "unit": "UN",
+        "regular": 24.69,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "b672dea6-717a-49d2-b911-8bbc36ec6a66",
+        "source_product_id": "157048:157048",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 24.69
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157049:157049",
+      "idproduto": 157049,
+      "idsubproduto": 157049,
+      "description": "SABON LIQ TRICOFACIL NEUTRO 2LT",
+      "unit": "UN",
+      "ciss_regular": 21.59,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 1
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "d1f23e0c-1b39-49d9-a49a-8377a6a8d6a6",
+        "description": "SABON LIQ TRICOFACIL NEUTRO 2LT",
+        "unit": "UN",
+        "regular": 21.59,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "d1f23e0c-1b39-49d9-a49a-8377a6a8d6a6",
+        "source_product_id": "157049:157049",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 21.59
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157050:157050",
+      "idproduto": 157050,
+      "idsubproduto": 157050,
+      "description": "ESPONJA LIMPPANO MULTIUSO 3UN",
+      "unit": "UN",
+      "ciss_regular": 3.39,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [],
+        "total": 0,
+        "locals_count": 0
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "88344932-e3be-44df-8008-eff7dd8108e1",
+        "description": "ESPONJA LIMPPANO MULTIUSO 3UN",
+        "unit": "UN",
+        "regular": 3.39,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "88344932-e3be-44df-8008-eff7dd8108e1",
+        "source_product_id": "157050:157050",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 3.39
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157051:157051",
+      "idproduto": 157051,
+      "idsubproduto": 157051,
+      "description": "PASSA FIO DENTAL D.CLEAN LV60PG50 UN",
+      "unit": "UN",
+      "ciss_regular": 13.98,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "c26878fc-d3d8-4750-960e-0461c4589287",
+        "description": "PASSA FIO DENTAL D.CLEAN LV60PG50 UN",
+        "unit": "UN",
+        "regular": 13.98,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "c26878fc-d3d8-4750-960e-0461c4589287",
+        "source_product_id": "157051:157051",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 13.98
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157293:157293",
+      "idproduto": 157293,
+      "idsubproduto": 157293,
+      "description": "COLA CASCOLA EXTRA SEM TOLUOL 30GR",
+      "unit": "UN",
+      "ciss_regular": 4.99,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 1
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "4ef4576e-7133-4bb6-9a5d-4eb2ef4a8423",
+        "description": "COLA CASCOLA EXTRA SEM TOLUOL 30GR",
+        "unit": "UN",
+        "regular": 4.99,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "4ef4576e-7133-4bb6-9a5d-4eb2ef4a8423",
+        "source_product_id": "157293:157293",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 4.99
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157053:157053",
+      "idproduto": 157053,
+      "idsubproduto": 157053,
+      "description": "ESC DENTALCLEAN 5500 SENSITIVE ULT MAC UN",
+      "unit": "UN",
+      "ciss_regular": 15.9,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "382ed5d9-8cbb-4d1b-872e-973430f8f8e1",
+        "description": "ESC DENTALCLEAN 5500 SENSITIVE ULT MAC UN",
+        "unit": "UN",
+        "regular": 15.9,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "382ed5d9-8cbb-4d1b-872e-973430f8f8e1",
+        "source_product_id": "157053:157053",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 15.9
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157054:157054",
+      "idproduto": 157054,
+      "idsubproduto": 157054,
+      "description": "RACAO P/CAES ADUL SOMAXX PCT 15KG",
+      "unit": "UN",
+      "ciss_regular": 136.59,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "d35f8546-ecf7-40c1-b754-572376213f4c",
+        "description": "RACAO P/CAES ADUL SOMAXX PCT 15KG",
+        "unit": "UN",
+        "regular": 136.59,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "d35f8546-ecf7-40c1-b754-572376213f4c",
+        "source_product_id": "157054:157054",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 136.59
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157055:157055",
+      "idproduto": 157055,
+      "idsubproduto": 157055,
+      "description": "RACAO P/CAES RPM CANISTER EQUIL PCT 15KG",
+      "unit": "UN",
+      "ciss_regular": 99.89,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "6b8cf3d4-0001-497b-9b42-154784e69729",
+        "description": "RACAO P/CAES RPM CANISTER EQUIL PCT 15KG",
+        "unit": "UN",
+        "regular": 99.89,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "6b8cf3d4-0001-497b-9b42-154784e69729",
+        "source_product_id": "157055:157055",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 99.89
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157294:157294",
+      "idproduto": 157294,
+      "idsubproduto": 157294,
+      "description": "COLA CASCOLA FLEXITE USO GERAL 50GR",
+      "unit": "UN",
+      "ciss_regular": 3.49,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          },
+          {
+            "local": 3,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 2
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "1959b26f-b126-4d26-b21f-cc3016a47e78",
+        "description": "COLA CASCOLA FLEXITE USO GERAL 50GR",
+        "unit": "UN",
+        "regular": 3.49,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "1959b26f-b126-4d26-b21f-cc3016a47e78",
+        "source_product_id": "157294:157294",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 3.49
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "157056:157056",
+      "idproduto": 157056,
+      "idsubproduto": 157056,
+      "description": "RACAO P/CAES FILHOTE NUTRI CANISTER NAT PCT 15KG",
+      "unit": "UN",
+      "ciss_regular": 99.89,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "regular_un"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [
+          {
+            "local": 1,
+            "qty": 0.0
+          }
+        ],
+        "total": 0.0,
+        "locals_count": 1
+      },
+      "gertec_price": null,
+      "gertec_vs_politica": "NOT_COMPARABLE",
+      "canonical": {
+        "product_id": "86581644-a1b8-453b-a1e6-6e59d4808410",
+        "description": "RACAO P/CAES FILHOTE NUTRI CANISTER NAT PCT 15KG",
+        "unit": "UN",
+        "regular": 99.89,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "86581644-a1b8-453b-a1e6-6e59d4808410",
+        "source_product_id": "157056:157056",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 99.89
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "NOT_COMPARABLE",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "146018:146018",
+      "idproduto": 146018,
+      "idsubproduto": 146018,
+      "description": "CESTA BASICA ATACADO",
+      "unit": "UN",
+      "ciss_regular": 123.95,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "recent"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [],
+        "total": 0,
+        "locals_count": 0
+      },
+      "gertec_price": 123.95,
+      "gertec_vs_politica": "MATCH",
+      "canonical": {
+        "product_id": "383bda1b-9ae4-4574-8cfa-579ebf09585d",
+        "description": "CESTA BASICA ATACADO",
+        "unit": "UN",
+        "regular": 123.95,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "383bda1b-9ae4-4574-8cfa-579ebf09585d",
+        "source_product_id": "146018:146018",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 123.95
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "MATCH",
+        "store_company": "MATCH"
+      }
+    },
+    {
+      "source_product_id": "212427:245211",
+      "idproduto": 212427,
+      "idsubproduto": 245211,
+      "description": "CESTA DIA DAS CRIANCAS REAL",
+      "unit": "UN",
+      "ciss_regular": 83.9,
+      "ciss_promo": 0.0,
+      "promo_start": null,
+      "promo_end": null,
+      "promo_min_qty": 0.0,
+      "idempresa": 1,
+      "tags": [
+        "recent"
+      ],
+      "promo_status": "NO_PROMO",
+      "qty_tiers": [],
+      "stock": {
+        "by_local": [],
+        "total": 0,
+        "locals_count": 0
+      },
+      "gertec_price": 83.9,
+      "gertec_vs_politica": "MATCH",
+      "canonical": {
+        "product_id": "f22f8d42-8cce-4692-95d4-f8665019ce63",
+        "description": "CESTA DIA DAS CRIANCAS REAL",
+        "unit": "UN",
+        "regular": 83.9,
+        "promo_active": null,
+        "promo_start": null,
+        "promo_end": null,
+        "qty_tiers": [],
+        "available": false,
+        "stock_qty": 0.0
+      },
+      "api": {
+        "id": "f22f8d42-8cce-4692-95d4-f8665019ce63",
+        "source_product_id": "212427:245211",
+        "unit": "UN",
+        "prices": [
+          {
+            "price_kind": "REGULAR",
+            "amount": 83.9
+          }
+        ],
+        "promotion": null,
+        "availability": {
+          "available": false,
+          "current_stock_qty": 0.0
+        }
+      },
+      "results": {
+        "regular": "MATCH",
+        "unit": "MATCH",
+        "promo": "MATCH",
+        "qty_tiers": "MATCH",
+        "api_regular": "MATCH",
+        "api_unit": "MATCH",
+        "stock": "MATCH",
+        "gertec": "MATCH",
+        "store_company": "MATCH"
+      }
+    }
+  ],
+  "reconcile_results": [
+    {
+      "product_id": "2544a45b-c7c3-4bb2-83de-6023651abf28",
+      "source_product_id": "100153:100153",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "MEXIRICA MORGOTE KG",
+          "source": "MEXIRICA MORGOTE KG",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "KG",
+          "source": "KG",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 5.98,
+          "source": 5.98,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "f7e0157a-99ba-4945-ad6f-9aa6ce60e1a3",
+      "source_product_id": "167059:167059",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "SUCO PO FRESH LARANJA 15G",
+          "source": "SUCO PO FRESH LARANJA 15G",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 0.78,
+          "source": 0.78,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "82d56716-03f3-41df-ba6a-f02eaca75702",
+      "source_product_id": "159731:159731",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "TEMP ADORALLE CARNE/LEG/ARROZ 50G",
+          "source": "TEMP ADORALLE CARNE/LEG/ARROZ 50G",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 2.69,
+          "source": 2.69,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "979b128e-ed27-46d0-bebe-372f3f031f7e",
+      "source_product_id": "189261:189261",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "BOMBOM LACTA SONHO VALSA 20G",
+          "source": "BOMBOM LACTA SONHO VALSA 20G",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 0.99,
+          "source": 0.99,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [
+            [
+              50.0,
+              0.99
+            ]
+          ],
+          "source": [
+            [
+              50.0,
+              0.99
+            ]
+          ],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "d58f681f-67ee-4c94-b551-c0b0f9788398",
+      "source_product_id": "115235:115237",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "CS PE  CASAGRANDE",
+          "source": "CS PE  CASAGRANDE",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "KG",
+          "source": "KG",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 12.35,
+          "source": 12.35,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "af23f4f1-5054-44b5-9e7c-907e15c66a4b",
+      "source_product_id": "127:127",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "CS LOMBO SADIA TEMP CONG KG",
+          "source": "CS LOMBO SADIA TEMP CONG KG",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "KG",
+          "source": "KG",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 20.79,
+          "source": 20.79,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "59651858-dad3-4c17-9f9b-f47b4512af66",
+      "source_product_id": "135:135",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "PRES SADIA COZ S/CAPA GORDURA",
+          "source": "PRES SADIA COZ S/CAPA GORDURA",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "KG",
+          "source": "KG",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 31.98,
+          "source": 31.98,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "d7fe44f4-b9b6-4d73-b1ad-25799cc1f8f9",
+      "source_product_id": "167406:167406",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "SALGADINHO FEST REAL KG",
+          "source": "SALGADINHO FEST REAL KG",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "KG",
+          "source": "KG",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 26.99,
+          "source": 26.99,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "d2022b7d-b28b-4ffc-9586-ffc1c6275ed7",
+      "source_product_id": "5109:5109",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "NEUTRALIZ ODORES BOM AR AERO CED/LAR 360ML",
+          "source": "NEUTRALIZ ODORES BOM AR AERO CED/LAR 360ML",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 8.99,
+          "source": 8.99,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "de13d3d6-3ae1-48d3-bf8c-ad41ddf23fdc",
+      "source_product_id": "157042:157042",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "VINHO ITA VALDORELLA CHIANTI TTO  750ML",
+          "source": "VINHO ITA VALDORELLA CHIANTI TTO  750ML",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 56.88,
+          "source": 56.88,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "86aede12-5731-4072-b225-d370f91b7dc7",
+      "source_product_id": "157043:157043",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "BALA TIC TAC MACA VERDE/MARACUJA 16G",
+          "source": "BALA TIC TAC MACA VERDE/MARACUJA 16G",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 1.49,
+          "source": 1.49,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "aa958575-7e07-4567-8007-9bffcf80599b",
+      "source_product_id": "157046:157046",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "ABS INT DAYS S/ABAS 40UN",
+          "source": "ABS INT DAYS S/ABAS 40UN",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 10.49,
+          "source": 10.49,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "6ac01ca5-60ce-4b8f-96df-24d8103fe21e",
+      "source_product_id": "1:1",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "PRODUTO GERAL",
+          "source": "PRODUTO GERAL",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 988.0,
+          "source": 988.0,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "008ad562-6219-4394-96f3-494394cf419f",
+      "source_product_id": "2:2",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "PEIXE TAMBACU CASA PEIXE C/ESC KG",
+          "source": "PEIXE TAMBACU CASA PEIXE C/ESC KG",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "KG",
+          "source": "KG",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 13.49,
+          "source": 13.49,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "8cb4e397-430d-447b-ab56-7e8fa936bcb8",
+      "source_product_id": "9:9",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "JILO",
+          "source": "JILO",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "KG",
+          "source": "KG",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 4.98,
+          "source": 4.98,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "d447cc05-d279-4110-9866-89ca40e918f7",
+      "source_product_id": "142883:245726",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "CESTA NATAL PREMIUM ATACADO",
+          "source": "CESTA NATAL PREMIUM ATACADO",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 123.58,
+          "source": 123.58,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "3177b366-862c-428d-8ffa-77336114d8db",
+      "source_product_id": "142883:245728",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "CESTA NATAL PREMIUM ATACADO",
+          "source": "CESTA NATAL PREMIUM ATACADO",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 155.87,
+          "source": 155.87,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "f62cbac1-5a61-4834-8863-b1ab91d7311a",
+      "source_product_id": "142883:245724",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "CESTA NATAL PREMIUM ATACADO",
+          "source": "CESTA NATAL PREMIUM ATACADO",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 128.98,
+          "source": 128.98,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "29bfba14-a201-49e8-add0-2d668586fa24",
+      "source_product_id": "157047:157047",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "FAQUEIRO TRAMONTINA 42 PCS C/ESTOJO ACO INOX",
+          "source": "FAQUEIRO TRAMONTINA 42 PCS C/ESTOJO ACO INOX",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 551.89,
+          "source": 551.89,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "b672dea6-717a-49d2-b911-8bbc36ec6a66",
+      "source_product_id": "157048:157048",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "SABON LIQ TRICOFACIL MOR 2LT",
+          "source": "SABON LIQ TRICOFACIL MOR 2LT",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 24.69,
+          "source": 24.69,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "d1f23e0c-1b39-49d9-a49a-8377a6a8d6a6",
+      "source_product_id": "157049:157049",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "SABON LIQ TRICOFACIL NEUTRO 2LT",
+          "source": "SABON LIQ TRICOFACIL NEUTRO 2LT",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 21.59,
+          "source": 21.59,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "88344932-e3be-44df-8008-eff7dd8108e1",
+      "source_product_id": "157050:157050",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "ESPONJA LIMPPANO MULTIUSO 3UN",
+          "source": "ESPONJA LIMPPANO MULTIUSO 3UN",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 3.39,
+          "source": 3.39,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "c26878fc-d3d8-4750-960e-0461c4589287",
+      "source_product_id": "157051:157051",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "PASSA FIO DENTAL D.CLEAN LV60PG50 UN",
+          "source": "PASSA FIO DENTAL D.CLEAN LV60PG50 UN",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 13.98,
+          "source": 13.98,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "4ef4576e-7133-4bb6-9a5d-4eb2ef4a8423",
+      "source_product_id": "157293:157293",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "COLA CASCOLA EXTRA SEM TOLUOL 30GR",
+          "source": "COLA CASCOLA EXTRA SEM TOLUOL 30GR",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 4.99,
+          "source": 4.99,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "382ed5d9-8cbb-4d1b-872e-973430f8f8e1",
+      "source_product_id": "157053:157053",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "ESC DENTALCLEAN 5500 SENSITIVE ULT MAC UN",
+          "source": "ESC DENTALCLEAN 5500 SENSITIVE ULT MAC UN",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 15.9,
+          "source": 15.9,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "d35f8546-ecf7-40c1-b754-572376213f4c",
+      "source_product_id": "157054:157054",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "RACAO P/CAES ADUL SOMAXX PCT 15KG",
+          "source": "RACAO P/CAES ADUL SOMAXX PCT 15KG",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 136.59,
+          "source": 136.59,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "6b8cf3d4-0001-497b-9b42-154784e69729",
+      "source_product_id": "157055:157055",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "RACAO P/CAES RPM CANISTER EQUIL PCT 15KG",
+          "source": "RACAO P/CAES RPM CANISTER EQUIL PCT 15KG",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 99.89,
+          "source": 99.89,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "1959b26f-b126-4d26-b21f-cc3016a47e78",
+      "source_product_id": "157294:157294",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "COLA CASCOLA FLEXITE USO GERAL 50GR",
+          "source": "COLA CASCOLA FLEXITE USO GERAL 50GR",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 3.49,
+          "source": 3.49,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "86581644-a1b8-453b-a1e6-6e59d4808410",
+      "source_product_id": "157056:157056",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "RACAO P/CAES FILHOTE NUTRI CANISTER NAT PCT 15KG",
+          "source": "RACAO P/CAES FILHOTE NUTRI CANISTER NAT PCT 15KG",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 99.89,
+          "source": 99.89,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "383bda1b-9ae4-4574-8cfa-579ebf09585d",
+      "source_product_id": "146018:146018",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "CESTA BASICA ATACADO",
+          "source": "CESTA BASICA ATACADO",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 123.95,
+          "source": 123.95,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    },
+    {
+      "product_id": "f22f8d42-8cce-4692-95d4-f8665019ce63",
+      "source_product_id": "212427:245211",
+      "status": "MATCH",
+      "fields": {
+        "product": {
+          "local": "CESTA DIA DAS CRIANCAS REAL",
+          "source": "CESTA DIA DAS CRIANCAS REAL",
+          "result": "MATCH"
+        },
+        "unit": {
+          "local": "UN",
+          "source": "UN",
+          "result": "MATCH"
+        },
+        "regular_price": {
+          "local": 83.9,
+          "source": 83.9,
+          "result": "MATCH"
+        },
+        "promotion": {
+          "local": null,
+          "source": null,
+          "result": "MATCH"
+        },
+        "promotion_validity": {
+          "local_starts": null,
+          "local_expires": null,
+          "source_starts": null,
+          "source_expires": null,
+          "result": "MATCH"
+        },
+        "quantity_tiers": {
+          "local": [],
+          "source": [],
+          "result": "MATCH"
+        },
+        "availability": {
+          "local": false,
+          "source": false,
+          "result": "MATCH"
+        }
+      }
+    }
+  ],
+  "gertec_confirmation": {
+    "compared": 50,
+    "match": 50,
+    "mismatch": 0
+  }
+}

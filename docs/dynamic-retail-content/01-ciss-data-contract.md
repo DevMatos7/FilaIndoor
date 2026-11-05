@@ -35,13 +35,13 @@
 | subgroup_code | `PRODUTO` | `IDSUBGRUPO` | → `SUBGRUPO` | Subgrupo | N |
 | active (master) | `PRODUTO_GRADE` | `FLAGINATIVO` | `T`=inativo · `F`=ativo | Flag CISS T/F | N |
 | sellable_store | `PRODUTO_EMPRESA` | `FLAGPERMITEVENDA` | `IDEMPRESA`+`IDPRODUTO`(+sub) | Comercializável na empresa | N |
-| regular_price | `POLITICA_PRECO_PRODUTO` | `VALPRECOVAREJO` | por `IDEMPRESA`+produto+sub | Preço varejo vigente da loja | Y |
-| promotion_price | `POLITICA_PRECO_PRODUTO` | `VALPROMVAREJO` | idem | Preço promo varejo | Y |
+| regular_price | `POLITICA_PRECO_PRODUTO` | `VALPRECOVAREJO` → **`CAST(... AS DOUBLE)`** | por `IDEMPRESA`+produto+sub | Preço varejo vigente da loja. ODBC IBM devolve DECIMAL sem escala (2.19→2190000); DOUBLE corrige. | Y |
+| promotion_price | `POLITICA_PRECO_PRODUTO` | `VALPROMVAREJO` → **`CAST(... AS DOUBLE)`** | idem | Preço promo varejo (mesma correção de escala) | Y |
 | promotion_start | `POLITICA_PRECO_PRODUTO` | `DTINIPROMOCAOVAR` | DATE | Início promo varejo | Y |
 | promotion_end | `POLITICA_PRECO_PRODUTO` | `DTFIMPROMOCAOVAR` | DATE | Fim promo varejo | Y |
 | promo_min_qty | `POLITICA_PRECO_PRODUTO` | `QTDMINPROMVAREJO` | | Qtd mínima promo | Y |
 | price_source_updated_at | `POLITICA_PRECO_PRODUTO` | `DTALTERACAO` / `DTALTERACAOVAR` | | Watermark de preço | Y |
-| quantity_price | `PRODUTO_DESCONTO_QTDE` | `VALPRECOVAREJO` + `QTDPRODUTO` | `IDEMPRESA` | Preço por quantidade | N amount |
+| quantity_price | `PRODUTO_DESCONTO_QTDE` | `VALPRECOVAREJO` + `QTDPRODUTO` → **`CAST(... AS DOUBLE)`** | `IDEMPRESA` · ignora `TIPOSTATUS` I/N | Preço por quantidade (ODBC também corrompe escala de QTD) | N amount |
 | stock_qty | `PRODUTO_GRADE_SALDO_EST_VW` | `QTDATUALESTOQUE` | `IDEMPRESA`+produto+sub (+local) | Saldo | N |
 | image_path | `PRODUTO_GRADE_IMAGENS` | `PATHIMAGEM` | `FLAGIMAGEMPADRAO` | Path no ERP — **não** baixamos binário no Módulo 1 | Y |
 
@@ -71,7 +71,7 @@
 | `PRODUTO_GRADE.VALPRECOVAREJO` como preço **por loja** | **NOT CONFIRMED** — existe no grade; política por empresa é a fonte confirmada para TV |
 | `PRODUTO_PRECO_DIA` | vazia — **NOT CONFIRMED** uso operacional |
 | `CAMPANHA_PROMOCIONAL` | vazia neste DB — **NOT CONFIRMED** |
-| Preço “efetivo” PDV (frontbox) vs política | **NOT CONFIRMED** — reconciliar amostra com operação antes do Módulo 2 |
+| Preço “efetivo” PDV (frontbox) vs política | **CONFIRMED** via `EMP1_BUSCA_PRECO_GERTEC_VW` ↔ `POLITICA_PRECO_PRODUTO.VALPRECOVAREJO` (50/50 MATCH, empresa 1). UI frontbox ainda sem screenshot. |
 | Imagem utilizável via URL pública | **NOT CONFIRMED** — só path; ProductMedia no Módulo 4 |
 | `LOCAL_ESTOQUE` table | **NOT PRESENT**; saldo via view |
 | Timestamp incremental universal confiável | Parcial — usar `DTALTERACAO` / `DTALTERACAOVAR` com watermark; full scan controlado se necessário |
@@ -96,7 +96,8 @@ Nunca assumir `store.id == IDEMPRESA`.
 Usar `retail_store_sources`:
 - `store_id` (UUID app)
 - `company_code` = `IDEMPRESA` (string)
-- `location_code` opcional (local de estoque preferencial) — **NOT CONFIRMED** default por loja
+- `location_code` opcional (local de estoque preferencial) — **NOT CONFIRMED** default por loja  
+- Estoque canônico atual = **soma** `QTDATUALESTOQUE` por `IDEMPRESA`+SKU (múltiplos `IDLOCALESTOQUE`)
 
 ---
 

@@ -104,6 +104,22 @@ def retail_reconcile(
     return RetailReconciliationService(db).reconcile(body.store_id, body.product_ids)
 
 
+def _product_payload(r: RetailProduct) -> dict:
+    return {
+        "id": r.id,
+        "source_product_id": r.source_product_id,
+        "description": r.description,
+        "commercial_description": r.commercial_description,
+        "gtin": r.gtin,
+        "unit": r.unit,
+        "section_code": r.section_code,
+        "section_name": r.section_name,
+        "group_code": r.group_code,
+        "active": r.active,
+        "synced_at": r.synced_at.isoformat() + "Z" if r.synced_at else None,
+    }
+
+
 @router.get("/retail-products")
 def list_retail_products(
     store_id: str | None = None,
@@ -126,19 +142,78 @@ def list_retail_products(
             or needle in (r.source_product_id or "").lower()
             or needle in (r.gtin or "").lower()
         ]
-    return [
-        {
-            "id": r.id,
-            "source_product_id": r.source_product_id,
-            "description": r.description,
-            "commercial_description": r.commercial_description,
-            "gtin": r.gtin,
-            "unit": r.unit,
-            "section_code": r.section_code,
-            "section_name": r.section_name,
-            "group_code": r.group_code,
-            "active": r.active,
-            "synced_at": r.synced_at.isoformat() + "Z" if r.synced_at else None,
-        }
-        for r in rows
-    ]
+    return [_product_payload(r) for r in rows]
+
+
+@router.get("/retail-products/{product_id}")
+def get_retail_product(
+    product_id: str,
+    store_id: str | None = Query(None),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions(RETAIL_DATA_VIEWER, RETAIL_CONTENT_VIEWER, RETAIL_CONTENT_ADMIN)),
+):
+    """Detalhe canônico + preços/promo/estoque da loja (camada entregue à futura UI)."""
+    from app.core.exceptions import NotFoundError
+    from app.modules.retail.models import RetailPrice, RetailPromotion, RetailStoreProduct
+
+    prod = db.get(RetailProduct, product_id)
+    if not prod:
+        raise NotFoundError("Produto retail não encontrado")
+    payload = _product_payload(prod)
+    if store_id:
+        prices = list(
+            db.scalars(
+                select(RetailPrice)
+                .where(
+                    RetailPrice.store_id == store_id,
+                    RetailPrice.product_id == product_id,
+                    RetailPrice.active.is_(True),
+                )
+                .order_by(RetailPrice.price_kind, RetailPrice.min_qty)
+            ).all()
+        )
+        promo = db.scalar(
+            select(RetailPromotion).where(
+                RetailPromotion.store_id == store_id,
+                RetailPromotion.product_id == product_id,
+                RetailPromotion.active.is_(True),
+            )
+        )
+        sp = db.scalar(
+            select(RetailStoreProduct).where(
+                RetailStoreProduct.store_id == store_id,
+                RetailStoreProduct.product_id == product_id,
+            )
+        )
+        payload["store_id"] = store_id
+        payload["prices"] = [
+            {
+                "price_kind": p.price_kind,
+                "amount": p.amount,
+                "min_qty": p.min_qty,
+                "condition_text": p.condition_text,
+                "starts_at": p.starts_at.isoformat() + "Z" if p.starts_at else None,
+                "expires_at": p.expires_at.isoformat() + "Z" if p.expires_at else None,
+            }
+            for p in prices
+        ]
+        payload["promotion"] = (
+            {
+                "promo_amount": promo.promo_amount,
+                "starts_at": promo.starts_at.isoformat() + "Z" if promo.starts_at else None,
+                "expires_at": promo.expires_at.isoformat() + "Z" if promo.expires_at else None,
+                "condition_text": promo.condition_text,
+            }
+            if promo
+            else None
+        )
+        payload["availability"] = (
+            {
+                "sellable": sp.sellable,
+                "available": sp.available,
+                "current_stock_qty": sp.current_stock_qty,
+            }
+            if sp
+            else None
+        )
+    return payload

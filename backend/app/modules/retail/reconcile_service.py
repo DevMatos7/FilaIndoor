@@ -23,6 +23,23 @@ def _cmp(a: Any, b: Any) -> str:
         return "MATCH" if abs(a - b) < 0.005 else "MISMATCH"
     if isinstance(a, datetime) and isinstance(b, datetime):
         return "MATCH" if a.replace(microsecond=0) == b.replace(microsecond=0) else "MISMATCH"
+    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
+        if len(a) != len(b):
+            return "MISMATCH"
+        for x, y in zip(a, b):
+            if _cmp(x, y) != "MATCH":
+                return "MISMATCH"
+        return "MATCH"
+    if isinstance(a, tuple) and isinstance(b, tuple):
+        if len(a) != len(b):
+            return "MISMATCH"
+        for x, y in zip(a, b):
+            if isinstance(x, (int, float)) and isinstance(y, (int, float)):
+                if abs(float(x) - float(y)) >= 0.005:
+                    return "MISMATCH"
+            elif x != y:
+                return "MISMATCH"
+        return "MATCH"
     return "MATCH" if a == b else "MISMATCH"
 
 
@@ -39,16 +56,64 @@ class RetailReconciliationService:
             raise ValidationError("máximo 100 produtos por reconciliação")
         source = self.sync.get_store_source(store_id)
 
-        # load CISS/mock snapshot for company
-        source_products = {
-            p.source_product_id: p for p in self.provider.fetch_products(limit=5000)
-        }
-        source_prices = self.provider.fetch_prices(company_code=source.company_code, limit=10000)
-        source_promos = self.provider.fetch_promotions(company_code=source.company_code, limit=10000)
-        source_avail = {
-            a.source_product_id: a
-            for a in self.provider.fetch_availability(company_code=source.company_code, limit=10000)
-        }
+        # Resolve local products first so we can fetch CISS by exact keys (not only top-N).
+        local_products: list[RetailProduct] = []
+        for pid in product_ids:
+            prod = self.db.get(RetailProduct, pid)
+            if prod:
+                local_products.append(prod)
+
+        source_ids = [p.source_product_id for p in local_products]
+        source_products = {p.source_product_id: p for p in self.provider.fetch_products(limit=5000)}
+        if hasattr(self.provider, "fetch_products_by_ids") and source_ids:
+            for p in self.provider.fetch_products_by_ids(source_ids):  # type: ignore[attr-defined]
+                source_products[p.source_product_id] = p
+
+        if hasattr(self.provider, "fetch_prices_for_products") and source_ids:
+            source_prices = self.provider.fetch_prices_for_products(  # type: ignore[attr-defined]
+                company_code=source.company_code, source_product_ids=source_ids
+            )
+        else:
+            source_prices = self.provider.fetch_prices(company_code=source.company_code, limit=10000)
+
+        source_promos = [
+            p
+            for p in (
+                self.provider.fetch_promotions(company_code=source.company_code, limit=10000)
+                if not hasattr(self.provider, "fetch_prices_for_products")
+                else []
+            )
+        ]
+        if hasattr(self.provider, "fetch_prices_for_products"):
+            from app.modules.retail.dto import CanonicalPromotion
+
+            for price in source_prices:
+                if price.price_kind != "PROMOTION":
+                    continue
+                source_promos.append(
+                    CanonicalPromotion(
+                        source_product_id=price.source_product_id,
+                        promo_amount=price.amount,
+                        source_promotion_id=price.source_ref,
+                        starts_at=price.starts_at,
+                        expires_at=price.expires_at,
+                        active=price.active,
+                        source_updated_at=price.source_updated_at,
+                    )
+                )
+
+        if hasattr(self.provider, "fetch_availability_for_products") and source_ids:
+            source_avail = {
+                a.source_product_id: a
+                for a in self.provider.fetch_availability_for_products(  # type: ignore[attr-defined]
+                    company_code=source.company_code, source_product_ids=source_ids
+                )
+            }
+        else:
+            source_avail = {
+                a.source_product_id: a
+                for a in self.provider.fetch_availability(company_code=source.company_code, limit=10000)
+            }
 
         results = []
         for pid in product_ids:
@@ -127,6 +192,34 @@ class RetailReconciliationService:
                     (_day(local_promo.starts_at), _day(local_promo.expires_at)) if local_promo else None,
                     (_day(src_promo.starts_at), _day(src_promo.expires_at)) if src_promo else None,
                 ),
+            }
+
+            local_qty = list(
+                self.db.scalars(
+                    select(RetailPrice)
+                    .where(
+                        RetailPrice.store_id == store_id,
+                        RetailPrice.product_id == prod.id,
+                        RetailPrice.price_kind == "QUANTITY",
+                        RetailPrice.active.is_(True),
+                    )
+                    .order_by(RetailPrice.min_qty)
+                ).all()
+            )
+            src_qty = sorted(
+                [
+                    p
+                    for p in source_prices
+                    if p.source_product_id == prod.source_product_id and p.price_kind == "QUANTITY" and p.active
+                ],
+                key=lambda p: (p.min_qty or 0),
+            )
+            local_tiers = [(p.min_qty, p.amount) for p in local_qty]
+            source_tiers = [(p.min_qty, p.amount) for p in src_qty]
+            fields["quantity_tiers"] = {
+                "local": local_tiers,
+                "source": source_tiers,
+                "result": _cmp(local_tiers, source_tiers) if local_tiers or source_tiers else "MATCH",
             }
 
             sp = self.db.scalar(

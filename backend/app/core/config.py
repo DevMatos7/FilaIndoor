@@ -40,9 +40,15 @@ class Settings(BaseSettings):
     erp_only_in_stock_min_qty: float = 0.01
 
     # DRC-1 Retail Data Foundation — CISS DB2 read-only
+    # Fonte operacional: backend/.env
+    #   DB2_CONN_STRING  (ODBC sem DRIVER=)
+    #   DB2_SCHEMA / DB2_FALLBACK_HOST / DB2_FALLBACK_PORT / IBM_DB_HOME
     retail_provider: str = "mock"  # mock | ciss_db2
-    db2_conn_string: str = ""  # trecho ODBC sem DRIVER= (DATABASE=...;HOSTNAME=...)
+    db2_conn_string: str = ""  # DATABASE=...;HOSTNAME=...;PORT=...;UID=...;PWD=...;SCHEMA=...
     db2_schema: str = "DBA"
+    db2_fallback_host: str = ""
+    db2_fallback_port: int = 50044
+    ibm_db_home: str = ""
     db2_odbc_driver: str = "IBM DB2 ODBC DRIVER"
     db2_query_timeout_seconds: float = 30.0
     retail_warn_after_seconds: int = 300

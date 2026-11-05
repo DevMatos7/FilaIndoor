@@ -152,3 +152,32 @@ def test_availability_stock(seeded):
     svc.sync_store(store_id, entities=["PRODUCT", "AVAILABILITY"], full=True)
     rows = db.scalars(select(RetailStoreProduct).where(RetailStoreProduct.store_id == store_id)).all()
     assert any(r.current_stock_qty and r.current_stock_qty > 0 for r in rows)
+
+
+def test_promo_window_active_helper():
+    from datetime import date, timedelta
+
+    from app.modules.retail.providers.ciss_db2 import _promo_window_active
+
+    today = date.today()
+    assert _promo_window_active(today - timedelta(days=1), today + timedelta(days=1)) is True
+    assert _promo_window_active(today - timedelta(days=10), today - timedelta(days=1)) is False
+    assert _promo_window_active(today + timedelta(days=1), today + timedelta(days=10)) is False
+    assert _promo_window_active(None, None) is False
+
+
+def test_retail_product_detail_includes_store_prices(seeded, client, auth_header):
+    store_id = seeded["store"].id
+    db = seeded["db"]
+    svc = RetailSyncService(db, provider=MockRetailDataProvider())
+    svc.upsert_store_source(store_id, company_code="1")
+    svc.sync_store(store_id, entities=["PRODUCT", "PRICE", "PROMOTION", "AVAILABILITY"], full=True)
+    prod = db.scalars(select(RetailProduct).where(RetailProduct.source_product_id == "1001:0")).first()
+    assert prod
+    r = client.get(f"/api/v1/retail-products/{prod.id}?store_id={store_id}", headers=auth_header)
+    assert r.status_code == 200
+    body = r.json()
+    assert body["unit"] == "KG"
+    assert any(p["price_kind"] == "REGULAR" for p in body["prices"])
+    assert body["promotion"] is not None
+    assert body["availability"]["available"] is True

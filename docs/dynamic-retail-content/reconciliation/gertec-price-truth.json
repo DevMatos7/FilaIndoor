@@ -1,0 +1,408 @@
+{
+  "compared": 50,
+  "match": 50,
+  "mismatch": 0,
+  "price_source_status": "CONFIRMED",
+  "details": [
+    {
+      "spid": "128811:128811",
+      "codbar": "7896635190901",
+      "politica": 1.25,
+      "gertec": 1.25,
+      "result": "MATCH",
+      "descricao": "SALG BEBELA PRESUNTO"
+    },
+    {
+      "spid": "142411:142411",
+      "codbar": "1424126",
+      "politica": 0.02,
+      "gertec": 0.02,
+      "result": "MATCH",
+      "descricao": "BICICLETA INFANTIL A"
+    },
+    {
+      "spid": "126922:126922",
+      "codbar": "7896054903342",
+      "politica": 0.08,
+      "gertec": 0.08,
+      "result": "MATCH",
+      "descricao": "KETCHUP DAJUDA SACHE"
+    },
+    {
+      "spid": "112958:112958",
+      "codbar": "7896054903359",
+      "politica": 0.08,
+      "gertec": 0.08,
+      "result": "MATCH",
+      "descricao": "MAIONESE DAJUDA SACH"
+    },
+    {
+      "spid": "163074:163074",
+      "codbar": "7896054907227",
+      "politica": 0.08,
+      "gertec": 0.08,
+      "result": "MATCH",
+      "descricao": "MOLHO VERDE DAJUDA C"
+    },
+    {
+      "spid": "129201:129201",
+      "codbar": "7896054905384",
+      "politica": 0.08,
+      "gertec": 0.08,
+      "result": "MATCH",
+      "descricao": "MOSTARDA DAJUDA SACH"
+    },
+    {
+      "spid": "107773:133634",
+      "codbar": "7891150012370",
+      "politica": 0.29,
+      "gertec": 0.29,
+      "result": "MATCH",
+      "descricao": "CALDO KNORR CARNE CX"
+    },
+    {
+      "spid": "135185:136027",
+      "codbar": "7897511728430",
+      "politica": 0.29,
+      "gertec": 0.29,
+      "result": "MATCH",
+      "descricao": "UC EMB GALVANOTEK GA"
+    },
+    {
+      "spid": "183702:183702",
+      "codbar": "1837032",
+      "politica": 0.46,
+      "gertec": 0.46,
+      "result": "MATCH",
+      "descricao": "GFA VIDRO 300 ML AMB"
+    },
+    {
+      "spid": "134633:134633",
+      "codbar": "7896080900018",
+      "politica": 0.49,
+      "gertec": 0.49,
+      "result": "MATCH",
+      "descricao": "PALITO DENTAL PARANA"
+    },
+    {
+      "spid": "175792:175792",
+      "codbar": "1879490",
+      "politica": 0.49,
+      "gertec": 0.49,
+      "result": "MATCH",
+      "descricao": "UC FORMA BOLO INGLES"
+    },
+    {
+      "spid": "120775:120775",
+      "codbar": "7896080900001",
+      "politica": 0.5,
+      "gertec": 0.5,
+      "result": "MATCH",
+      "descricao": "PALITO DENTAL PARANA"
+    },
+    {
+      "spid": "273961:273961",
+      "codbar": "7896090105007",
+      "politica": 0.59,
+      "gertec": 0.59,
+      "result": "MATCH",
+      "descricao": "ESPONJA ASSOLAN PERT"
+    },
+    {
+      "spid": "177788:177788",
+      "codbar": "7898538002077",
+      "politica": 0.69,
+      "gertec": 0.69,
+      "result": "MATCH",
+      "descricao": "CANETA MOLIN ESFEROG"
+    },
+    {
+      "spid": "150909:150909",
+      "codbar": "7894904578146",
+      "politica": 0.69,
+      "gertec": 0.69,
+      "result": "MATCH",
+      "descricao": "HAMBURG REZENDE CARN"
+    },
+    {
+      "spid": "346799:346799",
+      "codbar": "7898439765460",
+      "politica": 0.69,
+      "gertec": 0.69,
+      "result": "MATCH",
+      "descricao": "LUVA REDUCAO FACILIT"
+    },
+    {
+      "spid": "14274:14274",
+      "codbar": "7896051020127",
+      "politica": 0.69,
+      "gertec": 0.69,
+      "result": "MATCH",
+      "descricao": "PALITO DENTAL GINA C"
+    },
+    {
+      "spid": "145065:145065",
+      "codbar": "78931251",
+      "politica": 0.75,
+      "gertec": 0.75,
+      "result": "MATCH",
+      "descricao": "BOMBOM BON O BON BEI"
+    },
+    {
+      "spid": "145066:145066",
+      "codbar": "78931244",
+      "politica": 0.75,
+      "gertec": 0.75,
+      "result": "MATCH",
+      "descricao": "BOMBOM BON O BON BRI"
+    },
+    {
+      "spid": "110111:110111",
+      "codbar": "7898191110034",
+      "politica": 0.79,
+      "gertec": 0.79,
+      "result": "MATCH",
+      "descricao": "AGUA MIN PURISSIMA S"
+    },
+    {
+      "spid": "160528:160528",
+      "codbar": "7896051126010",
+      "politica": 0.79,
+      "gertec": 0.79,
+      "result": "MATCH",
+      "descricao": "LEITE FERM ITAMBE IT"
+    },
+    {
+      "spid": "159526:159526",
+      "codbar": "7898374660165",
+      "politica": 0.79,
+      "gertec": 0.79,
+      "result": "MATCH",
+      "descricao": "RATICIDA KELLMAT GRA"
+    },
+    {
+      "spid": "338184:338184",
+      "codbar": "7898439761448",
+      "politica": 0.88,
+      "gertec": 0.88,
+      "result": "MATCH",
+      "descricao": "LIXA P/UNHAS 3PCS"
+    },
+    {
+      "spid": "101697:101697",
+      "codbar": "7898439765279",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "ADAPTADOR FACILIT SO"
+    },
+    {
+      "spid": "181942:181942",
+      "codbar": "7896718701321",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "AGUA MIN ANTARES NAT"
+    },
+    {
+      "spid": "182969:182969",
+      "codbar": "7891962051383",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "BOLINHO BAUDUCCO DUO"
+    },
+    {
+      "spid": "184438:184438",
+      "codbar": "7891515989408",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "HAMBURG PERDIGAO 56G"
+    },
+    {
+      "spid": "146489:146489",
+      "codbar": "7894904500383",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "HAMBURG SEARA TEXAS"
+    },
+    {
+      "spid": "121813:121818",
+      "codbar": "7896071019446",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "MACAR IN SANDELLA CA"
+    },
+    {
+      "spid": "121813:121814",
+      "codbar": "7896071019484",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "MACAR IN SANDELLA CA"
+    },
+    {
+      "spid": "121813:122354",
+      "codbar": "7898933733781",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "MACAR IN SANDELLA CA"
+    },
+    {
+      "spid": "121813:121819",
+      "codbar": "7896071019439",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "MACAR IN SANDELLA GA"
+    },
+    {
+      "spid": "121813:125565",
+      "codbar": "7898933733934",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "MACAR IN SANDELLA GA"
+    },
+    {
+      "spid": "110782:110782",
+      "codbar": "7891022849240",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "PALHA ACO BOMBRIL BR"
+    },
+    {
+      "spid": "145347:145347",
+      "codbar": "2454368",
+      "politica": 0.89,
+      "gertec": 0.89,
+      "result": "MATCH",
+      "descricao": "PEDRA SANIT AZULIM J"
+    },
+    {
+      "spid": "167063:167063",
+      "codbar": "7897520812847",
+      "politica": 0.98,
+      "gertec": 0.98,
+      "result": "MATCH",
+      "descricao": "AGUA MIN LEBRINHA NA"
+    },
+    {
+      "spid": "101002:101002",
+      "codbar": "7896183900939",
+      "politica": 0.98,
+      "gertec": 0.98,
+      "result": "MATCH",
+      "descricao": "CANELA ZAELI PO 7G"
+    },
+    {
+      "spid": "101849:101849",
+      "codbar": "7898439761943",
+      "politica": 0.98,
+      "gertec": 0.98,
+      "result": "MATCH",
+      "descricao": "JOELHO FACILIT SOLDA"
+    },
+    {
+      "spid": "338257:338257",
+      "codbar": "7898439761967",
+      "politica": 0.98,
+      "gertec": 0.98,
+      "result": "MATCH",
+      "descricao": "LUVA SODAVEL 20MM"
+    },
+    {
+      "spid": "338311:338311",
+      "codbar": "7898439764180",
+      "politica": 0.98,
+      "gertec": 0.98,
+      "result": "MATCH",
+      "descricao": "PLUG FACILIT ROSCAVE"
+    },
+    {
+      "spid": "181943:181943",
+      "codbar": "7896718701338",
+      "politica": 0.99,
+      "gertec": 0.99,
+      "result": "MATCH",
+      "descricao": "AGUA MIN ANTARES NAT"
+    },
+    {
+      "spid": "123515:123515",
+      "codbar": "7898215151807",
+      "politica": 0.99,
+      "gertec": 0.99,
+      "result": "MATCH",
+      "descricao": "BEB LACT PIRAKIDS CH"
+    },
+    {
+      "spid": "189542:189542",
+      "codbar": "78939318",
+      "politica": 0.99,
+      "gertec": 0.99,
+      "result": "MATCH",
+      "descricao": "BOMBOM LACTA OURO BR"
+    },
+    {
+      "spid": "189261:189261",
+      "codbar": "78939301",
+      "politica": 0.99,
+      "gertec": 0.99,
+      "result": "MATCH",
+      "descricao": "BOMBOM LACTA SONHO V"
+    },
+    {
+      "spid": "190153:190153",
+      "codbar": "78936911",
+      "politica": 0.99,
+      "gertec": 0.99,
+      "result": "MATCH",
+      "descricao": "CHOC GAROTO BATON CR"
+    },
+    {
+      "spid": "156948:156948",
+      "codbar": "7896184800184",
+      "politica": 0.99,
+      "gertec": 0.99,
+      "result": "MATCH",
+      "descricao": "CUSCUZ NUTRIVITA PCT"
+    },
+    {
+      "spid": "114958:114958",
+      "codbar": "7898134660251",
+      "politica": 0.99,
+      "gertec": 0.99,
+      "result": "MATCH",
+      "descricao": "FUBA MASSON MIMOSO T"
+    },
+    {
+      "spid": "183054:183054",
+      "codbar": "7891048050606",
+      "politica": 0.99,
+      "gertec": 0.99,
+      "result": "MATCH",
+      "descricao": "GELATINA DR OETKER A"
+    },
+    {
+      "spid": "183342:183342",
+      "codbar": "7891048050651",
+      "politica": 0.99,
+      "gertec": 0.99,
+      "result": "MATCH",
+      "descricao": "GELATINA DR OETKER M"
+    },
+    {
+      "spid": "183053:183053",
+      "codbar": "7891048050668",
+      "politica": 0.99,
+      "gertec": 0.99,
+      "result": "MATCH",
+      "descricao": "GELATINA DR OETKER M"
+    }
+  ]
+}
