@@ -27,6 +27,7 @@ from app.modules.edge import models as edge_models  # noqa: F401
 from app.modules.integration import models as integration_models  # noqa: F401
 from app.modules.toledo import models as toledo_models  # noqa: F401
 from app.modules.real_plus import models as real_plus_models  # noqa: F401
+from app.modules.retail import models as retail_models  # noqa: F401
 from app.modules.queue.services.queue_service import QueueService
 
 get_settings.cache_clear()

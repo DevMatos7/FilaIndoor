@@ -19,6 +19,7 @@ import QueueSettings from "./pages/QueueSettings";
 import Queues from "./pages/Queues";
 import RealPlus from "./pages/RealPlus";
 import RealPlusAdmin from "./pages/RealPlusAdmin";
+import RetailContent from "./pages/RetailContent";
 import Toledo from "./pages/Toledo";
 import Totem from "./pages/Totem";
 import TotemDiagnostics from "./pages/TotemDiagnostics";
@@ -58,6 +59,7 @@ export default function App() {
         <Route path="queues/:queueId/settings" element={<QueueSettings />} />
         <Route path="history" element={<History />} />
         <Route path="media" element={<Media />} />
+        <Route path="retail-content" element={<RetailContent />} />
         <Route path="playlists" element={<Playlists />} />
         <Route path="channels" element={<Channels />} />
         <Route path="devices" element={<Devices />} />

@@ -33,6 +33,8 @@ from app.modules.toledo.routes import router as toledo_router
 from app.modules.toledo import models as toledo_models  # noqa: F401
 from app.modules.real_plus.routes import router as real_plus_router
 from app.modules.real_plus import models as real_plus_models  # noqa: F401
+from app.modules.retail.routes import router as retail_router
+from app.modules.retail import models as retail_models  # noqa: F401
 
 settings = get_settings()
 
@@ -91,6 +93,7 @@ app.include_router(devices_admin_router, prefix=api)
 app.include_router(device_mgmt_router, prefix=api)
 app.include_router(edge_router, prefix=api)
 app.include_router(integration_router, prefix=api)
+app.include_router(retail_router, prefix=api)
 app.include_router(toledo_router, prefix=api)
 app.include_router(real_plus_router, prefix=api)
 app.include_router(analytics_router, prefix=api)

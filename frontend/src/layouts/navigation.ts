@@ -13,6 +13,7 @@ import {
   Scale,
   Smartphone,
   Settings2,
+  Tags,
 } from "lucide-react";
 
 export type NavItem = {
@@ -55,6 +56,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Indoor",
     items: [
       { id: "media", label: "Conteúdos", to: "/media", icon: Image, match: "exact" },
+      { id: "retail", label: "Produtos & preços", to: "/retail-content", icon: Tags, match: "prefix" },
       { id: "playlists", label: "Playlists", to: "/playlists", icon: Clapperboard, match: "exact" },
       { id: "channels", label: "Programação", to: "/channels", icon: CalendarRange, match: "exact" },
     ],

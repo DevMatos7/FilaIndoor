@@ -39,6 +39,17 @@ class Settings(BaseSettings):
     erp_stock_sync_minutes: int = 20
     erp_only_in_stock_min_qty: float = 0.01
 
+    # DRC-1 Retail Data Foundation — CISS DB2 read-only
+    retail_provider: str = "mock"  # mock | ciss_db2
+    db2_conn_string: str = ""  # trecho ODBC sem DRIVER= (DATABASE=...;HOSTNAME=...)
+    db2_schema: str = "DBA"
+    db2_odbc_driver: str = "IBM DB2 ODBC DRIVER"
+    db2_query_timeout_seconds: float = 30.0
+    retail_warn_after_seconds: int = 300
+    retail_hard_stop_after_seconds: int = 900
+    retail_sync_product_limit: int = 2000
+    retail_sync_price_limit: int = 5000
+
     # Toledo (S13 discovery + S14 adapter)
     toledo_enabled: bool = False
     toledo_mode: str = "NATIVE"  # NATIVE | TOLEDO_DISPLAY | TOLEDO_SYNC | TOLEDO_FULL
