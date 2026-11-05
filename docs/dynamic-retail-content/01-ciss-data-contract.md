@@ -2,7 +2,9 @@
 
 **Data:** 2026-11-05  
 **Ambiente:** `DATABASE=SUPEREAL` · schema `DBA` · host DataCISS  
-**Método:** ODBC IBM DB2 DRIVER · queries somente leitura · sem dump de credenciais
+**Método:** ODBC IBM DB2 DRIVER · queries somente leitura · sem dump de credenciais  
+
+**Referência operacional confirmada (negócio):** tabela de preço = `POLITICA_PRECO_PRODUTO`; view de cadastro = `PRODUTOS_VIEW` (sync canônico permanece em `PRODUTO`/`PRODUTO_GRADE` + política).
 
 ## Integração pré-existente no repo
 

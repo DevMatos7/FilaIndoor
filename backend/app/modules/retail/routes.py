@@ -129,9 +129,15 @@ def list_retail_products(
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(RETAIL_DATA_VIEWER, RETAIL_CONTENT_VIEWER, RETAIL_CONTENT_ADMIN)),
 ):
+    from app.modules.retail.models import RetailPrice, RetailPromotion, RetailStoreProduct
+
     stmt = select(RetailProduct).order_by(RetailProduct.description).limit(limit)
     if section:
         stmt = stmt.where(RetailProduct.section_code == section)
+    if store_id:
+        stmt = stmt.join(RetailStoreProduct, RetailStoreProduct.product_id == RetailProduct.id).where(
+            RetailStoreProduct.store_id == store_id
+        )
     rows = list(db.scalars(stmt).all())
     if q:
         needle = q.strip().lower()
@@ -141,8 +147,42 @@ def list_retail_products(
             if needle in (r.description or "").lower()
             or needle in (r.source_product_id or "").lower()
             or needle in (r.gtin or "").lower()
+            or needle in (r.commercial_description or "").lower()
         ]
-    return [_product_payload(r) for r in rows]
+    out = []
+    for r in rows:
+        payload = _product_payload(r)
+        if store_id:
+            regular = db.scalar(
+                select(RetailPrice).where(
+                    RetailPrice.store_id == store_id,
+                    RetailPrice.product_id == r.id,
+                    RetailPrice.price_kind == "REGULAR",
+                    RetailPrice.active.is_(True),
+                )
+            )
+            promo = db.scalar(
+                select(RetailPromotion).where(
+                    RetailPromotion.store_id == store_id,
+                    RetailPromotion.product_id == r.id,
+                    RetailPromotion.active.is_(True),
+                )
+            )
+            qty = list(
+                db.scalars(
+                    select(RetailPrice).where(
+                        RetailPrice.store_id == store_id,
+                        RetailPrice.product_id == r.id,
+                        RetailPrice.price_kind == "QUANTITY",
+                        RetailPrice.active.is_(True),
+                    )
+                ).all()
+            )
+            payload["regular_price"] = regular.amount if regular else None
+            payload["promotion_price"] = promo.promo_amount if promo else None
+            payload["quantity_tiers"] = [{"min_qty": q.min_qty, "amount": q.amount} for q in qty]
+        out.append(payload)
+    return out
 
 
 @router.get("/retail-products/{product_id}")

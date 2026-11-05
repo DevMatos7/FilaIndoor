@@ -24,8 +24,8 @@
 | CODE VALIDATION | **PASS** (retail foundation `8 passed`; integração geral `93 passed`) |
 | REGRESSION EXTERNA | `test_programming_studio_ux9` **FAILED** pré-existente / flaky — **fora do escopo DRC** |
 
-**MODULE 1:** READY FOR FINAL HOMOLOGATION  
-**MODULE 2:** NOT STARTED / NOT AUTHORIZED by this document alone — aguarda homologação humana explícita.
+**MODULE 1:** FINAL HOMOLOGATION **PASS** (autorizado 2026-11-05)  
+**MODULE 2:** AUTHORIZED (Price Table Engine)
 
 ### 1R.1 — Store timezone correction
 
