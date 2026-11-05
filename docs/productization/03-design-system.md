@@ -157,6 +157,7 @@ Todos exibem **texto + ícone + cor**.
 4. EmptyState novo não usa copy de seed/`/media`.
 5. Source Serif mantida para customer-facing até UX-4/6.
 6. **PriorityBadge** (UX-9): ícone + texto + cor para `NORMAL` / `HIGH` / `EMERGENCY` (Schedule). Não reutilizar para ScreenOverride.
+7. **DeviceStatus** (UX-1/UX-10): fonte única de badge de saúde ONLINE/DEGRADED/OFFLINE/DISABLED no Fleet — não criar badge paralelo.
 
 ---
 

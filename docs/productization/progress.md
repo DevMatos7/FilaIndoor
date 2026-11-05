@@ -13,9 +13,9 @@
 | UX-6C Screen Override | `CODE HOMOLOGATED` | `08c-screen-override.md` · VISUAL PENDING |
 | UX-7 Media Library 2.0 | `CODE HOMOLOGATED` | `09-media-library.md` · VISUAL PENDING |
 | UX-8 Playlist Studio | `CODE HOMOLOGATED` | `10-playlist-studio.md` · VISUAL PENDING |
-| UX-9 Programming Studio | `READY FOR HOMOLOGATION` | `11-programming-studio.md` · VISUAL PENDING |
-| UX-10 Screen & Device Fleet | `PLANNED` | **não iniciar sem homologação** |
-| UX-11 Analytics 2.0 | `PLANNED` | — |
+| UX-9 Programming Studio | `CODE HOMOLOGATED` | `11-programming-studio.md` · VISUAL PENDING |
+| UX-10 Screen & Device Fleet | `READY FOR HOMOLOGATION` | `12-screen-device-fleet.md` · VISUAL PENDING |
+| UX-11 Analytics 2.0 | `PLANNED` | **não iniciar sem homologação** |
 | UX-12 Playwright + Visual QA | `PLANNED` | — |
 
 ## DISPLAY 2.0 Gate
@@ -43,23 +43,34 @@
 - Delete channel 409 se display/grupo; schedules soft-delete.
 - StoreContext + `?channel=` deep-link.
 
+## Decisões UX-10
+
+- 0 migrations; `GET /devices/fleet?store_id=` (FleetItem unifica Device+Display).
+- Status = `DeviceService._compute_status` (90s/300s) — igual Command Center.
+- `active` ≠ online; Programado agora ≠ Proof of Play.
+- Channel assign só em Display; cross-store 422; tokens mascarados no fleet.
+- Store timezone permanece débito arquitetural.
+
 ## Débitos
 
-- Display 2.0 visual gate.
-- UX-7: pagination/virtualization.
-- UX-8: virtualization timeline; layout preview; versioning.
-- UX-9: drag/resize schedule; month view; publish; screen assignment → UX-10.
+- Display 2.0 visual gate (COMMERCIAL/VISUAL PENDING).
+- Store timezone.
+- Proof of Play / playback_events.
+- Device Commands / remote refresh-reboot-screenshot.
+- ScreenGroup override target; fleet pagination.
+- UX-7/8/9 débitos visuais e de edição avançada.
 
-## Critérios UX-9
+## Critérios UX-10
 
 ```text
-Programming Studio ✓
+Fleet /devices ✓
 StoreContext ✓
-timeline Hoje/Semana ✓
-Agora/Próximo = active_at ✓
-conflitos AMBIGUOUS/RESOLVED ✓
-default playlist + layout ✓
-cross-store rejeitado ✓
+status = CC ✓
+channel assign ✓
+cross-store 422 ✓
+programmed ≠ confirmed ✓
+token masked ✓
+player config após channel ✓
 build + testes ✓
 VISUAL PENDING
 ```

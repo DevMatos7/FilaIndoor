@@ -63,7 +63,7 @@ export const NAV_GROUPS: NavGroup[] = [
     id: "devices",
     label: "Dispositivos",
     items: [
-      { id: "fleet", label: "Fleet", to: "/devices", icon: MonitorSmartphone, match: "exact" },
+      { id: "fleet", label: "Telas & dispositivos", to: "/devices", icon: MonitorSmartphone, match: "exact" },
       { id: "edge", label: "Edge", to: "/edge", icon: Network, match: "exact" },
     ],
   },
