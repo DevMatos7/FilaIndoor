@@ -12,8 +12,6 @@ from collections import defaultdict
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
-from zoneinfo import ZoneInfo
-
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parent
 sys.path.insert(0, str(ROOT))
@@ -38,17 +36,17 @@ from app.modules.retail.models import (
 from app.modules.retail.providers.ciss_db2 import (
     CissDb2RetailProvider,
     _flag_inactive,
-    _promo_window_active,
     _to_dt,
     product_key,
 )
 from app.modules.retail.reconcile_service import RetailReconciliationService
 from app.modules.retail.sync_service import RetailSyncService
+from app.modules.retail.timezone_util import promo_window_active, store_calendar_today
 
 OUT_DIR = REPO / "docs" / "dynamic-retail-content" / "reconciliation"
 COMPANY = "1"
 STORE_NAME = "Loja Campo Novo"
-TZ = ZoneInfo("America/Sao_Paulo")
+DEFAULT_TZ = "America/Cuiaba"
 
 
 def money(v: Any) -> float | None:
@@ -80,8 +78,8 @@ def connect_raw():
     )
 
 
-def today_store() -> date:
-    return datetime.now(TZ).date()
+def today_store(tz_name: str = DEFAULT_TZ) -> date:
+    return store_calendar_today(tz_name)
 
 
 def sku_from_row(r) -> dict:
@@ -416,7 +414,7 @@ def upsert_sample(db, store_id: str, sample: list[dict], cur) -> None:
         starts = _to_dt(date.fromisoformat(s["promo_start"])) if s.get("promo_start") else None
         ends = _to_dt(date.fromisoformat(s["promo_end"])) if s.get("promo_end") else None
         if s.get("ciss_promo") and s["ciss_promo"] > 0:
-            active = _promo_window_active(starts, ends)
+            active = promo_window_active(starts, ends, DEFAULT_TZ)
             sync._upsert_price(
                 store_id,
                 rp.id,
@@ -598,7 +596,7 @@ def write_sample_md(path: Path, *, store, empresa, src, sample, availability, to
         "# Module 1R — Real sample",
         "",
         f"**Date (UTC):** {datetime.utcnow().date().isoformat()}",
-        f"**Store day:** {today.isoformat()} (`America/Sao_Paulo`)",
+        f"**Store day:** {today.isoformat()} (`{store.timezone}`)",
         f"**Store app:** {store.name} (`{store.id}`) timezone=`{store.timezone}`",
         f"**IDEMPRESA:** {empresa['idempresa']} — {empresa['nomefantasia']} / {empresa['razaosocial']}",
         f"**Mapping:** company_code=`{src.company_code}` location_code=`{src.location_code}` active={src.active}",

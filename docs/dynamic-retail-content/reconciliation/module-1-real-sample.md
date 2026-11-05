@@ -4,8 +4,8 @@
 > Relatório: [`../03-real-ciss-reconciliation.md`](../03-real-ciss-reconciliation.md).
 
 **Date (UTC):** 2026-11-05
-**Store day:** 2026-11-05 (`America/Sao_Paulo`)
-**Store app:** Loja Campo Novo (`c73b48c6-9646-4dee-854a-b65eb212b8ad`) timezone=`America/Sao_Paulo`
+**Store day:** 2026-11-05 (`America/Cuiaba`)
+**Store app:** Loja Campo Novo (`c73b48c6-9646-4dee-854a-b65eb212b8ad`) timezone=`America/Cuiaba`
 **IDEMPRESA:** 1 — Supermercado Real / Casagrande & Cia Ltda - EPP
 **Mapping:** company_code=`1` location_code=`None` active=True
 **Correspondência:** loja piloto app «Loja Campo Novo» ↔ CISS empresa 1 «Supermercado Real» (matriz Supermercado Real / Casagrande).

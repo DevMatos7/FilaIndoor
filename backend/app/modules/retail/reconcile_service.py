@@ -7,11 +7,13 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError, ValidationError
+from app.modules.org.models.entities import Store
 from app.modules.retail.freshness import utcnow
 from app.modules.retail.models import RetailPrice, RetailProduct, RetailPromotion, RetailStoreProduct
 from app.modules.retail.providers import get_retail_provider
 from app.modules.retail.providers.base import RetailDataProvider
 from app.modules.retail.sync_service import RetailSyncService
+from app.modules.retail.timezone_util import validate_iana_timezone
 
 
 def _cmp(a: Any, b: Any) -> str:
@@ -55,6 +57,10 @@ class RetailReconciliationService:
         if len(product_ids) > 100:
             raise ValidationError("máximo 100 produtos por reconciliação")
         source = self.sync.get_store_source(store_id)
+        store = self.db.get(Store, store_id)
+        if not store:
+            raise NotFoundError("Loja não encontrada")
+        store_tz = validate_iana_timezone(store.timezone)
 
         # Resolve local products first so we can fetch CISS by exact keys (not only top-N).
         local_products: list[RetailProduct] = []
@@ -71,15 +77,21 @@ class RetailReconciliationService:
 
         if hasattr(self.provider, "fetch_prices_for_products") and source_ids:
             source_prices = self.provider.fetch_prices_for_products(  # type: ignore[attr-defined]
-                company_code=source.company_code, source_product_ids=source_ids
+                company_code=source.company_code,
+                source_product_ids=source_ids,
+                store_timezone=store_tz,
             )
         else:
-            source_prices = self.provider.fetch_prices(company_code=source.company_code, limit=10000)
+            source_prices = self.provider.fetch_prices(
+                company_code=source.company_code, limit=10000, store_timezone=store_tz
+            )
 
         source_promos = [
             p
             for p in (
-                self.provider.fetch_promotions(company_code=source.company_code, limit=10000)
+                self.provider.fetch_promotions(
+                    company_code=source.company_code, limit=10000, store_timezone=store_tz
+                )
                 if not hasattr(self.provider, "fetch_prices_for_products")
                 else []
             )

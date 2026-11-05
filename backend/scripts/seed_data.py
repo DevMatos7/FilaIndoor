@@ -36,9 +36,18 @@ def main() -> None:
 
         store = db.scalar(select(Store).where(Store.name == "Loja Campo Novo", Store.company_id == company.id))
         if not store:
-            store = Store(company_id=company.id, name="Loja Campo Novo", external_code="CAMPO_NOVO")
+            # Campo Novo do Parecis/MT → IANA America/Cuiaba (UTC-4), não SP.
+            store = Store(
+                company_id=company.id,
+                name="Loja Campo Novo",
+                external_code="CAMPO_NOVO",
+                timezone="America/Cuiaba",
+            )
             db.add(store)
             db.flush()
+        elif store.timezone != "America/Cuiaba":
+            store.timezone = "America/Cuiaba"
+            db.add(store)
 
         dept = db.scalar(select(Department).where(Department.store_id == store.id, Department.code == "ACOU"))
         if not dept:

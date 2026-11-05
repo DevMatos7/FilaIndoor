@@ -27,12 +27,22 @@ class RetailDataProvider(ABC):
 
     @abstractmethod
     def fetch_prices(
-        self, *, company_code: str, since: datetime | None = None, limit: int = 500
+        self,
+        *,
+        company_code: str,
+        since: datetime | None = None,
+        limit: int = 500,
+        store_timezone: str | None = None,
     ) -> list[CanonicalPrice]: ...
 
     @abstractmethod
     def fetch_promotions(
-        self, *, company_code: str, since: datetime | None = None, limit: int = 500
+        self,
+        *,
+        company_code: str,
+        since: datetime | None = None,
+        limit: int = 500,
+        store_timezone: str | None = None,
     ) -> list[CanonicalPromotion]: ...
 
     @abstractmethod

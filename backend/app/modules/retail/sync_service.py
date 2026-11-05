@@ -104,12 +104,13 @@ class RetailSyncService:
                 raise ValidationError(f"entity inválida: {e}")
         results = []
         for entity in wanted:
-            results.append(self._sync_entity(store_id, source, entity, full=full))
+            results.append(self._sync_entity(store, source, entity, full=full))
         return results
 
     def _sync_entity(
-        self, store_id: str, source: RetailStoreSource, entity: str, *, full: bool
+        self, store: Store, source: RetailStoreSource, entity: str, *, full: bool
     ) -> dict[str, Any]:
+        store_id = store.id
         wm = self._get_watermark(entity, store_id)
         since = None if full else self._parse_wm(wm.watermark_value if wm else None)
         run = RetailSyncRun(
@@ -158,6 +159,7 @@ class RetailSyncService:
                     company_code=source.company_code,
                     since=since,
                     limit=self.settings.retail_sync_price_limit,
+                    store_timezone=store.timezone,
                 )
                 read = len(prices)
                 # replace strategy per product kinds for idempotency in mock/db2 batch
@@ -177,6 +179,7 @@ class RetailSyncService:
                     company_code=source.company_code,
                     since=since,
                     limit=self.settings.retail_sync_price_limit,
+                    store_timezone=store.timezone,
                 )
                 read = len(promos)
                 touched: set[str] = set()

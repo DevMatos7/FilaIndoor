@@ -27,6 +27,15 @@
 **MODULE 1:** READY FOR FINAL HOMOLOGATION  
 **MODULE 2:** NOT STARTED / NOT AUTHORIZED by this document alone — aguarda homologação humana explícita.
 
+### 1R.1 — Store timezone correction
+
+| Antes | Depois |
+|-------|--------|
+| `America/Sao_Paulo` (errado para MT) | **`America/Cuiaba`** |
+
+Origem do valor incorreto: default ORM/migration `America/Sao_Paulo` + seed da loja piloto sem override explícito.  
+Defaults globais (`Store.timezone` default, Alembic `server_default`, schema org) **mantidos** como default Brasil genérico — documentados, sem hardcode por cidade. Vigência de promo CISS usa **sempre** `store.timezone`.
+
 ---
 
 ## 1. Loja piloto / mapping
@@ -35,7 +44,7 @@
 |-------|-------|
 | Store app | Loja Campo Novo |
 | store_id | `c73b48c6-9646-4dee-854a-b65eb212b8ad` |
-| timezone | `America/Sao_Paulo` |
+| timezone | `America/Cuiaba` (UTC-4 · Campo Novo do Parecis/MT) |
 | IDEMPRESA | `1` |
 | Nome fantasia CISS | Supermercado Real |
 | Razão social | Casagrande & Cia Ltda - EPP |
@@ -86,7 +95,7 @@ Artefato: `reconciliation/gertec-price-truth.json`
 
 Campos confirmados: `VALPROMVAREJO`, `DTINIPROMOCAOVAR`, `DTFIMPROMOCAOVAR`, `QTDMINPROMVAREJO`.
 
-Regra de vigência (timezone da loja / `America/Sao_Paulo` para DATE CISS):
+Regra de vigência (timezone da **Store** — piloto `America/Cuiaba` — para DATE CISS):
 
 - before start → inactive  
 - during → active  
@@ -175,6 +184,11 @@ API: `GET /retail-products/{id}?store_id=` devolve prices / promotion / availabi
 | PDV frontbox UI screenshot | **NOT CONFIRMED** (Gertec view usada como consulta operacional) |
 
 ---
+
+## Travas para o Module 2 (quando autorizado)
+
+- `hide_if_unavailable` = **DISABLED** até `location_code` / composição comercial de estoque confirmada  
+- UI de promoção pode ser implementada/testada com fixtures; **homologação comercial de promoção ativa** condicionada a caso real vigente no CISS  
 
 ## STOP
 

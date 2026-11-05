@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import re
-from datetime import date, datetime, time
+from datetime import datetime, time
 from typing import Any
-from zoneinfo import ZoneInfo
 
 from app.core.config import get_settings
 from app.core.exceptions import ValidationError
@@ -14,36 +13,7 @@ from app.modules.retail.dto import (
     CanonicalStoreProduct,
 )
 from app.modules.retail.providers.base import RetailDataProvider
-
-# CISS DATE fields are calendar-day; pilot stores use America/Sao_Paulo.
-_PROMO_TZ = ZoneInfo("America/Sao_Paulo")
-
-
-def _as_date(value: Any) -> date | None:
-    if value is None:
-        return None
-    if isinstance(value, datetime):
-        return value.date()
-    if isinstance(value, date):
-        return value
-    try:
-        return date.fromisoformat(str(value)[:10])
-    except ValueError:
-        return None
-
-
-def _promo_window_active(starts: Any, ends: Any) -> bool:
-    """Active when today (store TZ) is within [start, end]. Missing both ends → inactive."""
-    today = datetime.now(_PROMO_TZ).date()
-    s = _as_date(starts)
-    e = _as_date(ends)
-    if s is None and e is None:
-        return False
-    if s is not None and today < s:
-        return False
-    if e is not None and today > e:
-        return False
-    return True
+from app.modules.retail.timezone_util import promo_window_active, validate_iana_timezone
 
 
 def _flag_true(value: Any) -> bool:
@@ -212,9 +182,14 @@ class CissDb2RetailProvider(RetailDataProvider):
             cn.close()
 
     def fetch_prices_for_products(
-        self, *, company_code: str, source_product_ids: list[str]
+        self,
+        *,
+        company_code: str,
+        source_product_ids: list[str],
+        store_timezone: str | None = None,
     ) -> list[CanonicalPrice]:
         """Preços/promo/qty apenas para SKUs informados (gate de reconciliação)."""
+        tz = validate_iana_timezone(store_timezone) if store_timezone else None
         out: list[CanonicalPrice] = []
         if not source_product_ids:
             return out
@@ -257,6 +232,8 @@ class CissDb2RetailProvider(RetailDataProvider):
                         )
                     )
                 if promo is not None and promo > 0:
+                    if not tz:
+                        raise ValidationError("store_timezone obrigatório para avaliar vigência de promoção CISS")
                     out.append(
                         CanonicalPrice(
                             spid,
@@ -265,7 +242,7 @@ class CissDb2RetailProvider(RetailDataProvider):
                             min_qty=min_qty,
                             starts_at=starts,
                             expires_at=ends,
-                            active=_promo_window_active(starts, ends),
+                            active=promo_window_active(starts, ends, tz),
                             source_ref=f"politica:{company_code}:{spid}:PROMOTION",
                             source_updated_at=src_at,
                         )
@@ -336,9 +313,15 @@ class CissDb2RetailProvider(RetailDataProvider):
             cn.close()
 
     def fetch_prices(
-        self, *, company_code: str, since: datetime | None = None, limit: int = 500
+        self,
+        *,
+        company_code: str,
+        since: datetime | None = None,
+        limit: int = 500,
+        store_timezone: str | None = None,
     ) -> list[CanonicalPrice]:
         limit = max(1, min(limit, 10000))
+        tz = validate_iana_timezone(store_timezone) if store_timezone else None
         # CAST AS DOUBLE: driver ODBC IBM devolve DECIMAL(15,6) sem escala
         # (ex.: 2.19 → Decimal('2190000')); CHAR/DOUBLE preservam o valor real.
         sql = f"""
@@ -383,6 +366,10 @@ class CissDb2RetailProvider(RetailDataProvider):
                         )
                     )
                 if promo is not None and promo > 0:
+                    if not tz:
+                        raise ValidationError(
+                            "store_timezone obrigatório para avaliar vigência de promoção CISS"
+                        )
                     out.append(
                         CanonicalPrice(
                             spid,
@@ -391,7 +378,7 @@ class CissDb2RetailProvider(RetailDataProvider):
                             min_qty=min_qty,
                             starts_at=starts,
                             expires_at=ends,
-                            active=_promo_window_active(starts, ends),
+                            active=promo_window_active(starts, ends, tz),
                             source_ref=f"politica:{company_code}:{spid}:PROMOTION",
                             condition_text=(f"A partir de {min_qty:g}" if min_qty and min_qty > 1 else None),
                             source_updated_at=src_at,
@@ -434,9 +421,16 @@ class CissDb2RetailProvider(RetailDataProvider):
             cn.close()
 
     def fetch_promotions(
-        self, *, company_code: str, since: datetime | None = None, limit: int = 500
+        self,
+        *,
+        company_code: str,
+        since: datetime | None = None,
+        limit: int = 500,
+        store_timezone: str | None = None,
     ) -> list[CanonicalPromotion]:
-        prices = self.fetch_prices(company_code=company_code, since=since, limit=limit)
+        prices = self.fetch_prices(
+            company_code=company_code, since=since, limit=limit, store_timezone=store_timezone
+        )
         out: list[CanonicalPromotion] = []
         for p in prices:
             if p.price_kind != "PROMOTION":

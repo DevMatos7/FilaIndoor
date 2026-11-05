@@ -7,7 +7,7 @@
   "store": {
     "id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
     "name": "Loja Campo Novo",
-    "timezone": "America/Sao_Paulo"
+    "timezone": "America/Cuiaba"
   },
   "mapping": {
     "company_code": "1",
@@ -201,7 +201,7 @@
   "health": {
     "store_id": "c73b48c6-9646-4dee-854a-b65eb212b8ad",
     "store_name": "Loja Campo Novo",
-    "timezone": "America/Sao_Paulo",
+    "timezone": "America/Cuiaba",
     "timezone_valid": true,
     "timezone_error": null,
     "source": "CISS",
@@ -3893,5 +3893,10 @@
     "compared": 50,
     "match": 50,
     "mismatch": 0
+  },
+  "timezone_correction": {
+    "from": "America/Sao_Paulo",
+    "to": "America/Cuiaba",
+    "smoke": "PASS"
   }
 }

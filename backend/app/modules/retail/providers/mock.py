@@ -89,7 +89,12 @@ class MockRetailDataProvider(RetailDataProvider):
         return rows[:limit]
 
     def fetch_prices(
-        self, *, company_code: str, since: datetime | None = None, limit: int = 500
+        self,
+        *,
+        company_code: str,
+        since: datetime | None = None,
+        limit: int = 500,
+        store_timezone: str | None = None,
     ) -> list[CanonicalPrice]:
         now = _utcnow()
         rows = [
@@ -141,7 +146,12 @@ class MockRetailDataProvider(RetailDataProvider):
         return rows[:limit]
 
     def fetch_promotions(
-        self, *, company_code: str, since: datetime | None = None, limit: int = 500
+        self,
+        *,
+        company_code: str,
+        since: datetime | None = None,
+        limit: int = 500,
+        store_timezone: str | None = None,
     ) -> list[CanonicalPromotion]:
         now = _utcnow()
         rows = [

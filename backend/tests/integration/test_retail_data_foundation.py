@@ -157,13 +157,36 @@ def test_availability_stock(seeded):
 def test_promo_window_active_helper():
     from datetime import date, timedelta
 
-    from app.modules.retail.providers.ciss_db2 import _promo_window_active
+    from app.modules.retail.timezone_util import promo_window_active
 
-    today = date.today()
-    assert _promo_window_active(today - timedelta(days=1), today + timedelta(days=1)) is True
-    assert _promo_window_active(today - timedelta(days=10), today - timedelta(days=1)) is False
-    assert _promo_window_active(today + timedelta(days=1), today + timedelta(days=10)) is False
-    assert _promo_window_active(None, None) is False
+    tz = "America/Cuiaba"
+    today = date(2026, 11, 5)
+    start = date(2026, 11, 5)
+    end = date(2026, 11, 10)
+    assert promo_window_active(start, end, tz, as_of=today - timedelta(days=1)) is False  # before
+    assert promo_window_active(start, end, tz, as_of=start) is True  # start boundary
+    assert promo_window_active(start, end, tz, as_of=date(2026, 11, 7)) is True  # during
+    assert promo_window_active(start, end, tz, as_of=end) is True  # end inclusive
+    assert promo_window_active(start, end, tz, as_of=end + timedelta(days=1)) is False  # after
+    assert promo_window_active(None, None, tz, as_of=today) is False
+
+
+def test_promo_window_uses_store_timezone_not_browser():
+    """DATE CISS interpretada no calendário da loja (Cuiabá), não SP/browser."""
+    from datetime import date, datetime
+    from zoneinfo import ZoneInfo
+
+    from app.modules.retail.timezone_util import promo_window_active, store_calendar_today, validate_iana_timezone
+
+    assert validate_iana_timezone("America/Cuiaba") == "America/Cuiaba"
+    # Instant where calendars diverge (Cuiabá UTC-4 vs São Paulo UTC-3, sem DST).
+    # 2026-11-06 03:30 UTC = 2026-11-05 23:30 Cuiabá / 2026-11-06 00:30 São Paulo
+    instant = datetime(2026, 11, 6, 3, 30, tzinfo=ZoneInfo("UTC"))
+    assert store_calendar_today("America/Cuiaba", as_of=instant) == date(2026, 11, 5)
+    assert store_calendar_today("America/Sao_Paulo", as_of=instant) == date(2026, 11, 6)
+    # Promo ending 2026-11-05: still active in Cuiabá at that instant, already ended in SP.
+    assert promo_window_active(date(2026, 11, 1), date(2026, 11, 5), "America/Cuiaba", as_of=instant) is True
+    assert promo_window_active(date(2026, 11, 1), date(2026, 11, 5), "America/Sao_Paulo", as_of=instant) is False
 
 
 def test_retail_product_detail_includes_store_prices(seeded, client, auth_header):
