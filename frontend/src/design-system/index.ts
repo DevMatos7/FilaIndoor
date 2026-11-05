@@ -64,3 +64,6 @@ export { SlaIndicator } from "./patterns/SlaIndicator";
 
 export { MediaCard, MediaCardSkeleton } from "./patterns/MediaCard";
 export type { MediaCardProps, MediaCardType } from "./patterns/MediaCard";
+
+export { PriorityBadge, priorityLabel } from "./patterns/PriorityBadge";
+export type { SchedulePriority } from "./patterns/PriorityBadge";

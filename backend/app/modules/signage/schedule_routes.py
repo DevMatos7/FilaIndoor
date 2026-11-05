@@ -27,6 +27,7 @@ class ChannelUpdate(BaseModel):
     layout_template_id: str | None = None
     default_playlist_id: str | None = None
     active: bool | None = None
+    store_id: str | None = None
 
 
 class GroupCreate(BaseModel):
@@ -80,10 +81,11 @@ def create_channel(
 @router.get("/channels/{channel_id}")
 def get_channel(
     channel_id: str,
+    store_id: str | None = Query(default=None),
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_VIEWER, SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return ScheduleService(db).get_channel(channel_id)
+    return ScheduleService(db).get_channel(channel_id, store_id=store_id)
 
 
 @router.patch("/channels/{channel_id}")
@@ -93,7 +95,19 @@ def patch_channel(
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return ScheduleService(db).update_channel(channel_id, **body.model_dump(exclude_unset=True))
+    data = body.model_dump(exclude_unset=True)
+    store_id = data.pop("store_id", None)
+    return ScheduleService(db).update_channel(channel_id, store_id=store_id, **data)
+
+
+@router.delete("/channels/{channel_id}")
+def delete_channel(
+    channel_id: str,
+    store_id: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
+):
+    return ScheduleService(db).delete_channel(channel_id, store_id=store_id)
 
 
 @router.post("/screen-groups", status_code=201)
@@ -146,11 +160,36 @@ def channel_now(
     return ScheduleService(db).active_at(channel_id, at)
 
 
-@router.get("/channels/{channel_id}/conflicts")
-def channel_conflicts(
+@router.get("/channels/{channel_id}/next")
+def channel_next(
     channel_id: str,
     at: datetime | None = Query(default=None),
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(SIGNAGE_VIEWER, SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
-    return ScheduleService(db).list_conflicts(channel_id, at)
+    return ScheduleService(db).next_at(channel_id, at)
+
+
+@router.get("/channels/{channel_id}/conflicts")
+def channel_conflicts(
+    channel_id: str,
+    at: datetime | None = Query(default=None),
+    structural: bool = Query(default=False),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions(SIGNAGE_VIEWER, SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
+):
+    svc = ScheduleService(db)
+    if structural:
+        return {"channel_id": channel_id, "conflicts": svc.analyze_conflicts(channel_id)}
+    return svc.list_conflicts(channel_id, at)
+
+
+@router.get("/channels/{channel_id}/programming-overview")
+def programming_overview(
+    channel_id: str,
+    store_id: str | None = Query(default=None),
+    at: datetime | None = Query(default=None),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions(SIGNAGE_VIEWER, SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
+):
+    return ScheduleService(db).programming_overview(channel_id, store_id=store_id, when=at)
