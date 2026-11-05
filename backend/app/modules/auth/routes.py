@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -21,7 +21,8 @@ class TokenResponse(BaseModel):
 
 class MeResponse(BaseModel):
     id: str
-    email: EmailStr
+    # str (não EmailStr): seed/QA usam domínios .local reservados
+    email: str
     full_name: str
     role: str
     permissions: list[str]

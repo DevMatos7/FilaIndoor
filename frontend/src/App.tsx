@@ -25,7 +25,11 @@ import TotemDiagnostics from "./pages/TotemDiagnostics";
 
 function Private({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("token");
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) {
+    const next = `${window.location.pathname}${window.location.search}`;
+    const qs = next && next !== "/login" ? `?next=${encodeURIComponent(next)}` : "";
+    return <Navigate to={`/login${qs}`} replace />;
+  }
   return <>{children}</>;
 }
 
