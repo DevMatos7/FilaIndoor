@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+
+from app.core.exceptions import NotFoundError
 
 from app.core.permissions import (
     RETAIL_CONTENT_ADMIN,
@@ -99,6 +101,50 @@ def retail_scheduler_status(
     from app.modules.retail.scheduler import scheduler_status
 
     return scheduler_status()
+
+
+@router.get("/retail-offers")
+def list_retail_offers(
+    store_id: str = Query(...),
+    active_only: bool = True,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions(RETAIL_DATA_VIEWER, RETAIL_CONTENT_VIEWER, RETAIL_CONTENT_ADMIN)),
+):
+    from app.modules.retail.models import RetailOfferCampaign, RetailOfferItem
+    from app.modules.retail.timezone_util import promo_window_active, validate_iana_timezone
+    from app.modules.org.models.entities import Store
+
+    store = db.get(Store, store_id)
+    if not store:
+        raise NotFoundError("Loja não encontrada")
+    tz = validate_iana_timezone(store.timezone)
+    stmt = select(RetailOfferCampaign).where(RetailOfferCampaign.store_id == store_id)
+    if active_only:
+        stmt = stmt.where(RetailOfferCampaign.active.is_(True))
+    rows = list(db.scalars(stmt.order_by(RetailOfferCampaign.starts_at.desc())).all())
+    out = []
+    for r in rows:
+        n_items = db.scalar(
+            select(func.count()).select_from(RetailOfferItem).where(
+                RetailOfferItem.campaign_id == r.id, RetailOfferItem.active.is_(True)
+            )
+        ) or 0
+        window_ok = promo_window_active(r.starts_at, r.expires_at, tz)
+        if active_only and not window_ok:
+            continue
+        out.append(
+            {
+                "id": r.id,
+                "source_offer_id": r.source_offer_id,
+                "name": r.name,
+                "starts_at": r.starts_at.isoformat() + "Z" if r.starts_at else None,
+                "expires_at": r.expires_at.isoformat() + "Z" if r.expires_at else None,
+                "active": r.active,
+                "window_active": window_ok,
+                "item_count": int(n_items),
+            }
+        )
+    return out
 
 
 @router.get("/retail-data/sync-runs")

@@ -1,0 +1,1712 @@
+{
+  "module": "5R",
+  "audited_at": "2026-11-06T13:33:17.923423+00:00",
+  "read_only": true,
+  "blob_fetch_note": "pyodbc ODBC type -98 unsupported; used LENGTH + HEX(SUBSTR) for magic",
+  "tables": {
+    "PRODUTO_ESPECIFICACAO_TECNICA": {
+      "exists": true,
+      "columns": [
+        {
+          "name": "IDCODBARPROD",
+          "type": "DECIMAL",
+          "length": 14,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "OBSESPECIFIC",
+          "type": "CLOB",
+          "length": 1048576,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "FOTOPRINCIPAL",
+          "type": "BLOB",
+          "length": 1048576,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "FOTOESPECIFIC",
+          "type": "BLOB",
+          "length": 1048576,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "FOTOVISAO1",
+          "type": "BLOB",
+          "length": 1048576,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "FOTOVISAO2",
+          "type": "BLOB",
+          "length": 1048576,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "PATHVIDEOPRODUTO",
+          "type": "VARCHAR",
+          "length": 100,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "PATHVIDEOFORNCEDOR",
+          "type": "VARCHAR",
+          "length": 100,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "DTALTERACAO",
+          "type": "TIMESTAMP",
+          "length": 10,
+          "scale": 6,
+          "nullable": "Y"
+        }
+      ]
+    },
+    "PROMOCAO_GESTAO": {
+      "exists": true,
+      "columns": [
+        {
+          "name": "IDPROMOCAO",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "IDPLANILHA",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "DESCRPROMOCAO",
+          "type": "VARCHAR",
+          "length": 60,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "DTINIPROMOCAO",
+          "type": "TIMESTAMP",
+          "length": 10,
+          "scale": 6,
+          "nullable": "N"
+        },
+        {
+          "name": "DTFIMPROMOCAO",
+          "type": "TIMESTAMP",
+          "length": 10,
+          "scale": 6,
+          "nullable": "N"
+        },
+        {
+          "name": "TIPOPRECO",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "TIPOPROMOCAO",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "FLAGINATIVO",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "DTALTERACAO",
+          "type": "TIMESTAMP",
+          "length": 10,
+          "scale": 6,
+          "nullable": "N"
+        },
+        {
+          "name": "IDUSUARIO",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "VALORMINIMO",
+          "type": "DECIMAL",
+          "length": 15,
+          "scale": 2,
+          "nullable": "Y"
+        },
+        {
+          "name": "FLAGCONSIDERAITEMVLRMIN",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "IDTPPROMOCAO",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "FLAGITENSFORAPROMO",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "TIPOCALCULOVENDA",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "FLAGPROMOCLIENTECAD",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "FLAGENVIAPROPZ",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "OBSPROMOCAO",
+          "type": "VARCHAR",
+          "length": 600,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "FLAGVINCULAEMPPROPZ",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "TIPOOBSERVACAOPROPZ",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "FLAGMOSTRACISSLIVESCAN",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "TIPOAPLICACAOPROMOCAO",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "FLAGENVIAPROMOCAOCRM",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "IDUSUARIOALTERACAO",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "DATAHORACADASTRO",
+          "type": "TIMESTAMP",
+          "length": 10,
+          "scale": 6,
+          "nullable": "Y"
+        },
+        {
+          "name": "FLAGPROMOCLIENTECADCLUBE",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "FORMACONTROLEMOVIMENTO",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "FLAGUTILIZAPRECOTABELA",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        }
+      ]
+    },
+    "PROMOCAO_GESTAO_PRODUTO": {
+      "exists": true,
+      "columns": [
+        {
+          "name": "IDPROMOCAO",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "IDPRODUTO",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "IDSUBPRODUTO",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "VALPRECO",
+          "type": "DECIMAL",
+          "length": 18,
+          "scale": 6,
+          "nullable": "N"
+        },
+        {
+          "name": "DTALTERACAO",
+          "type": "TIMESTAMP",
+          "length": 10,
+          "scale": 6,
+          "nullable": "N"
+        },
+        {
+          "name": "FLAGEVIDENCIA",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "VALDESCONTO",
+          "type": "DECIMAL",
+          "length": 14,
+          "scale": 2,
+          "nullable": "Y"
+        },
+        {
+          "name": "PERDESCONTO",
+          "type": "DECIMAL",
+          "length": 5,
+          "scale": 2,
+          "nullable": "Y"
+        },
+        {
+          "name": "QTDMINIMA",
+          "type": "DECIMAL",
+          "length": 9,
+          "scale": 3,
+          "nullable": "Y"
+        },
+        {
+          "name": "QTDMAXIMA",
+          "type": "DECIMAL",
+          "length": 9,
+          "scale": 3,
+          "nullable": "Y"
+        },
+        {
+          "name": "FLAGINATIVO",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "NUMSEQUENCIA",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "FLAGPRECOMANDATORIO",
+          "type": "CHARACTER",
+          "length": 1,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "QTDVENDALIMITE",
+          "type": "DECIMAL",
+          "length": 9,
+          "scale": 3,
+          "nullable": "Y"
+        }
+      ]
+    },
+    "PRODUTO_CADEIA_PRECO": {
+      "exists": true,
+      "columns": [
+        {
+          "name": "IDCADEIAPRECO",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "IDPRODUTO",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "IDSUBPRODUTO",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "DESCRCADEIAPRECO",
+          "type": "VARCHAR",
+          "length": 80,
+          "scale": 0,
+          "nullable": "N"
+        },
+        {
+          "name": "DTALTERACAO",
+          "type": "TIMESTAMP",
+          "length": 10,
+          "scale": 6,
+          "nullable": "Y"
+        },
+        {
+          "name": "DESCRETIQUETAGONDOLA",
+          "type": "VARCHAR",
+          "length": 60,
+          "scale": 0,
+          "nullable": "Y"
+        },
+        {
+          "name": "QTDETIQUETA",
+          "type": "INTEGER",
+          "length": 4,
+          "scale": 0,
+          "nullable": "Y"
+        }
+      ]
+    }
+  },
+  "fotoprincipal": {
+    "total_rows": 54953,
+    "null_count": 7033,
+    "non_null_count": 47920,
+    "count_len_4912": 38018,
+    "count_len_other": 9902,
+    "len_min": 645,
+    "len_max": 130754,
+    "length_histogram_top": [
+      {
+        "length": 4912,
+        "count": 38018
+      },
+      {
+        "length": 645,
+        "count": 2546
+      },
+      {
+        "length": 12483,
+        "count": 8
+      },
+      {
+        "length": 14863,
+        "count": 7
+      },
+      {
+        "length": 14583,
+        "count": 6
+      },
+      {
+        "length": 18587,
+        "count": 6
+      },
+      {
+        "length": 8419,
+        "count": 5
+      },
+      {
+        "length": 13334,
+        "count": 5
+      },
+      {
+        "length": 11285,
+        "count": 5
+      },
+      {
+        "length": 5412,
+        "count": 4
+      },
+      {
+        "length": 8005,
+        "count": 4
+      },
+      {
+        "length": 7648,
+        "count": 4
+      },
+      {
+        "length": 7562,
+        "count": 4
+      },
+      {
+        "length": 6739,
+        "count": 4
+      },
+      {
+        "length": 6611,
+        "count": 4
+      },
+      {
+        "length": 6591,
+        "count": 4
+      },
+      {
+        "length": 6465,
+        "count": 4
+      },
+      {
+        "length": 5963,
+        "count": 4
+      },
+      {
+        "length": 5906,
+        "count": 4
+      },
+      {
+        "length": 5599,
+        "count": 4
+      }
+    ],
+    "samples": [
+      {
+        "idcodbarprod": "2127729",
+        "bucket": "LEN_4912",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 4912,
+        "head_sha_hint": "be52f9fa6f49"
+      },
+      {
+        "idcodbarprod": "40419",
+        "bucket": "LEN_4912",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 4912,
+        "head_sha_hint": "be52f9fa6f49"
+      },
+      {
+        "idcodbarprod": "31",
+        "bucket": "LEN_4912",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 4912,
+        "head_sha_hint": "be52f9fa6f49"
+      },
+      {
+        "idcodbarprod": "31844",
+        "bucket": "LEN_4912",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 4912,
+        "head_sha_hint": "be52f9fa6f49"
+      },
+      {
+        "idcodbarprod": "55",
+        "bucket": "LEN_4912",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 4912,
+        "head_sha_hint": "be52f9fa6f49"
+      },
+      {
+        "idcodbarprod": "79",
+        "bucket": "LEN_4912",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 4912,
+        "head_sha_hint": "be52f9fa6f49"
+      },
+      {
+        "idcodbarprod": "31356",
+        "bucket": "LEN_4912",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 4912,
+        "head_sha_hint": "be52f9fa6f49"
+      },
+      {
+        "idcodbarprod": "33046",
+        "bucket": "LEN_4912",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 4912,
+        "head_sha_hint": "be52f9fa6f49"
+      },
+      {
+        "idcodbarprod": "7622210833389",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe100bc457869660000",
+        "declared_length": 130754,
+        "head_sha_hint": "3e667dabf24d"
+      },
+      {
+        "idcodbarprod": "7896216100046",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 129714,
+        "head_sha_hint": "fd1c5e560150"
+      },
+      {
+        "idcodbarprod": "7891032011156",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 129630,
+        "head_sha_hint": "b8da49544ddb"
+      },
+      {
+        "idcodbarprod": "7896045113613",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 129335,
+        "head_sha_hint": "b8da49544ddb"
+      },
+      {
+        "idcodbarprod": "7891089095550",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 128938,
+        "head_sha_hint": "f5f06bb104e3"
+      },
+      {
+        "idcodbarprod": "7896025802308",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 128909,
+        "head_sha_hint": "f5f06bb104e3"
+      },
+      {
+        "idcodbarprod": "7896025800779",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 127876,
+        "head_sha_hint": "f5f06bb104e3"
+      },
+      {
+        "idcodbarprod": "20305",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 127643,
+        "head_sha_hint": "7e82f5368809"
+      },
+      {
+        "idcodbarprod": "62862",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 127152,
+        "head_sha_hint": "c347d72057c3"
+      },
+      {
+        "idcodbarprod": "64590",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 126694,
+        "head_sha_hint": "4389bdf47318"
+      },
+      {
+        "idcodbarprod": "736532841261",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 126558,
+        "head_sha_hint": "2234b5edba79"
+      },
+      {
+        "idcodbarprod": "21036",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 126386,
+        "head_sha_hint": "1b21321cd94f"
+      },
+      {
+        "idcodbarprod": "7891000120187",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 123755,
+        "head_sha_hint": "f5f06bb104e3"
+      },
+      {
+        "idcodbarprod": "7908228805885",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 122319,
+        "head_sha_hint": "cff3bf619848"
+      },
+      {
+        "idcodbarprod": "7896256601541",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 121133,
+        "head_sha_hint": "fd1c5e560150"
+      },
+      {
+        "idcodbarprod": "7898673510307",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 119610,
+        "head_sha_hint": "c6a40b0438f6"
+      },
+      {
+        "idcodbarprod": "7896045505357",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 119132,
+        "head_sha_hint": "e25e815d3f1e"
+      },
+      {
+        "idcodbarprod": "7891962056500",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 118816,
+        "head_sha_hint": "7e82f5368809"
+      },
+      {
+        "idcodbarprod": "7891991307338",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe10108457869660000",
+        "declared_length": 118709,
+        "head_sha_hint": "52e426d4afbb"
+      },
+      {
+        "idcodbarprod": "7898905153586",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 118359,
+        "head_sha_hint": "f5f06bb104e3"
+      },
+      {
+        "idcodbarprod": "7898905153579",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 118359,
+        "head_sha_hint": "f5f06bb104e3"
+      },
+      {
+        "idcodbarprod": "7896943203478",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffdb0043000604050605",
+        "declared_length": 116843,
+        "head_sha_hint": "2e19a1d0bad0"
+      },
+      {
+        "idcodbarprod": "7891164110635",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 116104,
+        "head_sha_hint": "f5f06bb104e3"
+      },
+      {
+        "idcodbarprod": "7891515433628",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 115762,
+        "head_sha_hint": "1b21321cd94f"
+      },
+      {
+        "idcodbarprod": "1777734",
+        "bucket": "LEN_OTHER",
+        "format": "JPEG",
+        "mime": "image/jpeg",
+        "width": null,
+        "height": null,
+        "head_hex": "ffd8ffe000104a4649460001",
+        "declared_length": 114414,
+        "head_sha_hint": "dc4b1db56122"
+      }
+    ],
+    "format_distribution_sample": {
+      "JPEG": 33
+    },
+    "cast_head_trials": [
+      {
+        "idcodbarprod": "19545",
+        "length": 10378,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      },
+      {
+        "idcodbarprod": "7891515014520",
+        "length": 14377,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      },
+      {
+        "idcodbarprod": "7896022204877",
+        "length": 25140,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      },
+      {
+        "idcodbarprod": "307",
+        "length": 24349,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      },
+      {
+        "idcodbarprod": "611",
+        "length": 11743,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      },
+      {
+        "idcodbarprod": "7580",
+        "length": 9595,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      },
+      {
+        "idcodbarprod": "21159",
+        "length": 9571,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      },
+      {
+        "idcodbarprod": "1861",
+        "length": 16848,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      },
+      {
+        "idcodbarprod": "1960",
+        "length": 9068,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      },
+      {
+        "idcodbarprod": "7898111820647",
+        "length": 10113,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      },
+      {
+        "idcodbarprod": "47913",
+        "length": 15007,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      },
+      {
+        "idcodbarprod": "2868",
+        "length": 11640,
+        "format_head": "JPEG",
+        "head_hex": "ffd8ffe000104a46"
+      }
+    ],
+    "dimension_trials": [
+      {
+        "idcodbarprod": "7896020632092",
+        "length": 5001,
+        "format": "JPEG",
+        "width": 200,
+        "height": 200,
+        "decode_success": 200
+      },
+      {
+        "idcodbarprod": "63289",
+        "length": 5007,
+        "format": "JPEG",
+        "width": 275,
+        "height": 183,
+        "decode_success": 183
+      },
+      {
+        "idcodbarprod": "7892300000698",
+        "length": 5009,
+        "format": "JPEG",
+        "width": 132,
+        "height": 132,
+        "decode_success": 132
+      },
+      {
+        "idcodbarprod": "7896403208692",
+        "length": 5011,
+        "format": "JPEG",
+        "width": 154,
+        "height": 159,
+        "decode_success": 159
+      },
+      {
+        "idcodbarprod": "7896862000165",
+        "length": 5012,
+        "format": "JPEG",
+        "width": 225,
+        "height": 224,
+        "decode_success": 224
+      }
+    ],
+    "decode_ok_heads": 12,
+    "decode_fail_heads": 0,
+    "rule_4912": {
+      "hypothesis": "PLACEHOLDER_OR_FIXED_ASSET",
+      "sample_formats": [
+        "JPEG",
+        "JPEG",
+        "JPEG",
+        "JPEG",
+        "JPEG",
+        "JPEG",
+        "JPEG",
+        "JPEG"
+      ],
+      "all_same_head": true,
+      "heads": [
+        "ffd8ffe000104a4649460001"
+      ]
+    },
+    "active_skus_with_non_4912_image": 4591
+  },
+  "obsespecific": {
+    "sample_n": 40,
+    "BETTER": 27,
+    "EQUAL": 13,
+    "WORSE": 0,
+    "EMPTY": 0,
+    "samples": [
+      {
+        "sku": "25:25",
+        "description": "LARANJA BAHIA",
+        "commercial_description": "LARANJA BAHIA  KG",
+        "obsespecific": "LARANJA BAHIA KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "30:30",
+        "description": "LARANJA LIMA",
+        "commercial_description": "LARANJA LIMA KG",
+        "obsespecific": "LARANJA LIMA KG",
+        "class": "EQUAL"
+      },
+      {
+        "sku": "35:35",
+        "description": "LARANJA PERA CUTRALE",
+        "commercial_description": "LARANJA PERA CUTRALE KG",
+        "obsespecific": "LARANJA PERA CUTRALE KG",
+        "class": "EQUAL"
+      },
+      {
+        "sku": "60:60",
+        "description": "LIMA PERSIA",
+        "commercial_description": "LIMA PERSIA KG",
+        "obsespecific": "LIMA  DA PERSIA KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "67:67",
+        "description": "LIMAO TAITI",
+        "commercial_description": "LIMAO TAITI KG",
+        "obsespecific": "LIMÃO TAITI KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "103:103",
+        "description": "ABOBORA MORANGA",
+        "commercial_description": "ABOBORA MORANGA KG",
+        "obsespecific": "ABÓBORA MORANGA KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "123:123",
+        "description": "MACA NACIONAL",
+        "commercial_description": "MACA NACIONAL KG",
+        "obsespecific": "MAÇÃ NACIONAL KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "135:135",
+        "description": "PRES SADIA COZ S/CAPA GORDURA",
+        "commercial_description": "PRES SADIA COZ S/C GOR KG",
+        "obsespecific": "PRESUNTO SADIA COZIDO KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "143:143",
+        "description": "MAMAO FORMOSA",
+        "commercial_description": "MAMAO FORMOSA KG",
+        "obsespecific": "MAMÃO FORMOSA KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "150:130469",
+        "description": "MORT SADIA DEF",
+        "commercial_description": "MORT SADIA DEF RETALHO KG",
+        "obsespecific": "MORTADELA SADIA DEFUMADA RETALHO KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "150:150",
+        "description": "MORT SADIA DEF",
+        "commercial_description": "MORT SADIA DEF KG",
+        "obsespecific": "MORTADELA SADIA DEFUMADA KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "150:181409",
+        "description": "MORT SADIA DEF",
+        "commercial_description": "MORT SADIA DEF INT KG",
+        "obsespecific": "MORTADELA SADIA DEFUMADA FATIADA KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "161:161",
+        "description": "ABOBORA SECA KG",
+        "commercial_description": "ABOBORA SECA KG",
+        "obsespecific": "ABOBORA SECA KG",
+        "class": "EQUAL"
+      },
+      {
+        "sku": "173:173",
+        "description": "CS PE EXCELENCIA SALG",
+        "commercial_description": "CS PE EXCELENCIA SALG KG",
+        "obsespecific": "Não contém glúten.\r\nCNPJ: 17.356.474/0001-73.",
+        "class": "BETTER"
+      },
+      {
+        "sku": "183:183",
+        "description": "MELANCIA KG",
+        "commercial_description": "MELANCIA",
+        "obsespecific": "MELANCIA KG",
+        "class": "EQUAL"
+      },
+      {
+        "sku": "222:222",
+        "description": "ABOBRINHA VERDE",
+        "commercial_description": "ABOBRINHA VERDE KG",
+        "obsespecific": "ABOBRINHA VERDE KG",
+        "class": "EQUAL"
+      },
+      {
+        "sku": "223:223",
+        "description": "MARACUJA AZEDO",
+        "commercial_description": "MARACUJA AZEDO KG",
+        "obsespecific": "MARACUJÁ AZEDO KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "275:275",
+        "description": "MELAO REDINHA KG",
+        "commercial_description": "MELAO REDINHA KG",
+        "obsespecific": "MELÃO REI REDINHA KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "298:298",
+        "description": "MELAO ORANGE",
+        "commercial_description": "MELAO ORANGE  KG",
+        "obsespecific": "*% Valores diarios com base em uma dieta de 2000 kcal ou 8400 kj. Seus valores diarios pod",
+        "class": "BETTER"
+      },
+      {
+        "sku": "308:308",
+        "description": "CB BUCHO KG",
+        "commercial_description": "CB BUCHO KG",
+        "obsespecific": "CB BUCHO KG",
+        "class": "EQUAL"
+      },
+      {
+        "sku": "359:359",
+        "description": "ABOBORA CABOTIA",
+        "commercial_description": "ABOBORA CABOTIA  KG",
+        "obsespecific": "ABOBORA CABOTIA KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "359:173635",
+        "description": "ABOBORA CABOTIA",
+        "commercial_description": "ABOBORA CABOTIA  EMB KG",
+        "obsespecific": "Não contém glútem  cnpj:05.953.340/0001-50",
+        "class": "BETTER"
+      },
+      {
+        "sku": "360:360",
+        "description": "NECTARINA IMPORTADA",
+        "commercial_description": "NECTARINA IMPORTADA KG",
+        "obsespecific": "NECTARINA IMPORTADA KG",
+        "class": "EQUAL"
+      },
+      {
+        "sku": "367:367",
+        "description": "NECTARINA NACIONAL",
+        "commercial_description": "NECTARINA NACIONAL KG",
+        "obsespecific": "NECTARINA NACIONAL KG",
+        "class": "EQUAL"
+      },
+      {
+        "sku": "416:416",
+        "description": "ACELGA KG",
+        "commercial_description": "ACELGA KG",
+        "obsespecific": "ACELGA KG",
+        "class": "EQUAL"
+      },
+      {
+        "sku": "417:417",
+        "description": "PEPINO AODAI",
+        "commercial_description": "PEPINO AODAI KG",
+        "obsespecific": "PEPINO AODAI KG",
+        "class": "EQUAL"
+      },
+      {
+        "sku": "469:469",
+        "description": "MACA ARGENTINA",
+        "commercial_description": "MACA ARGENTINA KG",
+        "obsespecific": "MAÇÃ ARGENTINA KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "470:470",
+        "description": "PESSEGO NACIONAL",
+        "commercial_description": "PESSEGO NACIONAL KG",
+        "obsespecific": "PÊSSEGO NACIONAL KG",
+        "class": "BETTER"
+      },
+      {
+        "sku": "490:490",
+        "description": "PIMENTA CAMBUCI",
+        "commercial_description": "PIMENTA CAMBUCI KG",
+        "obsespecific": "NAO CONTEM GLUTEN.\r\nCNPJ:05953340000150",
+        "class": "BETTER"
+      },
+      {
+        "sku": "490:180634",
+        "description": "PIMENTA CAMBUCI",
+        "commercial_description": "PIMENTA CAMBUCI EMB KG",
+        "obsespecific": "NAO CONTEM GLUTEN.\r\nCNPJ:05953340000150",
+        "class": "BETTER"
+      }
+    ]
+  },
+  "promocao_gestao": {
+    "total": 17561,
+    "flaginativo_F": 17354,
+    "columns": [
+      "IDPROMOCAO",
+      "IDPLANILHA",
+      "DESCRPROMOCAO",
+      "DTINIPROMOCAO",
+      "DTFIMPROMOCAO",
+      "TIPOPRECO",
+      "TIPOPROMOCAO",
+      "FLAGINATIVO",
+      "DTALTERACAO",
+      "IDUSUARIO",
+      "VALORMINIMO",
+      "FLAGCONSIDERAITEMVLRMIN",
+      "IDTPPROMOCAO",
+      "FLAGITENSFORAPROMO",
+      "TIPOCALCULOVENDA",
+      "FLAGPROMOCLIENTECAD",
+      "FLAGENVIAPROPZ",
+      "OBSPROMOCAO",
+      "FLAGVINCULAEMPPROPZ",
+      "TIPOOBSERVACAOPROPZ",
+      "FLAGMOSTRACISSLIVESCAN",
+      "TIPOAPLICACAOPROMOCAO",
+      "FLAGENVIAPROMOCAOCRM",
+      "IDUSUARIOALTERACAO",
+      "DATAHORACADASTRO",
+      "FLAGPROMOCLIENTECADCLUBE",
+      "FORMACONTROLEMOVIMENTO",
+      "FLAGUTILIZAPRECOTABELA"
+    ],
+    "samples": [
+      {
+        "IDPROMOCAO": "19164",
+        "DESCRPROMOCAO": "OFERTA PADARIA JP",
+        "DTINIPROMOCAO": "2026-11-06T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-08T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-06T09:26:06.560012",
+        "IDTPPROMOCAO": null,
+        "DATAHORACADASTRO": "2026-11-06T09:23:57.378000"
+      },
+      {
+        "IDPROMOCAO": "19163",
+        "DESCRPROMOCAO": "OFERTA VINHOS",
+        "DTINIPROMOCAO": "2026-11-06T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-15T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-06T09:07:36.306673",
+        "IDTPPROMOCAO": "1",
+        "DATAHORACADASTRO": "2026-11-06T09:07:34.317000"
+      },
+      {
+        "IDPROMOCAO": "19162",
+        "DESCRPROMOCAO": "OFERTA VINHOS ATACADO",
+        "DTINIPROMOCAO": "2026-11-06T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-15T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-06T07:02:27.337569",
+        "IDTPPROMOCAO": "1",
+        "DATAHORACADASTRO": "2026-11-06T07:02:25.391000"
+      },
+      {
+        "IDPROMOCAO": "19161",
+        "DESCRPROMOCAO": "OFERTA INTERNA",
+        "DTINIPROMOCAO": "2026-11-06T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-06T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-06T06:08:44.192466",
+        "IDTPPROMOCAO": "1",
+        "DATAHORACADASTRO": "2026-11-06T06:08:43.689000"
+      },
+      {
+        "IDPROMOCAO": "19160",
+        "DESCRPROMOCAO": "OFERTA AÇOUGUE JP",
+        "DTINIPROMOCAO": "2026-11-06T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-08T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-05T15:15:10.399205",
+        "IDTPPROMOCAO": "1",
+        "DATAHORACADASTRO": "2026-11-05T15:14:14.554000"
+      },
+      {
+        "IDPROMOCAO": "19159",
+        "DESCRPROMOCAO": "OFERTA INTERNA ",
+        "DTINIPROMOCAO": "2026-11-06T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-08T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-06T08:38:04.760527",
+        "IDTPPROMOCAO": null,
+        "DATAHORACADASTRO": "2026-11-05T14:19:30.558000"
+      },
+      {
+        "IDPROMOCAO": "19158",
+        "DESCRPROMOCAO": "OFERTA INTERNA JP",
+        "DTINIPROMOCAO": "2026-11-05T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-30T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-05T13:51:05.616723",
+        "IDTPPROMOCAO": "41",
+        "DATAHORACADASTRO": "2026-11-05T13:50:46.165000"
+      },
+      {
+        "IDPROMOCAO": "19157",
+        "DESCRPROMOCAO": "OFERTA SEXTA FEIRA",
+        "DTINIPROMOCAO": "2026-11-06T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-08T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-06T08:40:07.984745",
+        "IDTPPROMOCAO": "1",
+        "DATAHORACADASTRO": "2026-11-05T14:42:22.418000"
+      },
+      {
+        "IDPROMOCAO": "19155",
+        "DESCRPROMOCAO": "OFERTA INTERNA DATA",
+        "DTINIPROMOCAO": "2026-11-05T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-20T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-05T10:30:27.106817",
+        "IDTPPROMOCAO": "41",
+        "DATAHORACADASTRO": "2026-11-05T10:30:26.233000"
+      },
+      {
+        "IDPROMOCAO": "19154",
+        "DESCRPROMOCAO": "OFERTA FRIOS JP",
+        "DTINIPROMOCAO": "2026-11-05T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-10T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-05T09:57:14.638422",
+        "IDTPPROMOCAO": "1",
+        "DATAHORACADASTRO": "2026-11-05T09:57:14.197000"
+      },
+      {
+        "IDPROMOCAO": "19153",
+        "DESCRPROMOCAO": "oferta data atacado",
+        "DTINIPROMOCAO": "2026-11-05T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-21T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-05T10:49:41.789534",
+        "IDTPPROMOCAO": "41",
+        "DATAHORACADASTRO": "2026-11-05T09:46:26.498000"
+      },
+      {
+        "IDPROMOCAO": "19152",
+        "DESCRPROMOCAO": "OFERTA ATACADO FINAL DE SEMANA 06/11",
+        "DTINIPROMOCAO": "2026-11-06T00:00:00",
+        "DTFIMPROMOCAO": "2026-11-08T23:59:00",
+        "FLAGINATIVO": "F",
+        "DTALTERACAO": "2026-11-06T06:13:20.386334",
+        "IDTPPROMOCAO": "1",
+        "DATAHORACADASTRO": "2026-11-04T15:33:02.821000"
+      }
+    ],
+    "active_query_tried": [
+      [
+        "DTINIPROMOCAO",
+        "DTFIMPROMOCAO"
+      ]
+    ],
+    "active_now_samples": [
+      {
+        "IDPROMOCAO": "18134",
+        "start": "2026-06-30T00:00:00",
+        "end": "2026-12-31T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "17672",
+        "start": "2026-05-09T00:00:00",
+        "end": "2026-12-31T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "17632",
+        "start": "2026-05-07T00:00:00",
+        "end": "2026-12-27T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "18981",
+        "start": "2026-10-08T00:00:00",
+        "end": "2026-12-13T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "19158",
+        "start": "2026-11-05T00:00:00",
+        "end": "2026-11-30T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "18987",
+        "start": "2026-10-08T00:00:00",
+        "end": "2026-11-30T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "19094",
+        "start": "2026-10-26T00:00:00",
+        "end": "2026-11-27T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "19153",
+        "start": "2026-11-05T00:00:00",
+        "end": "2026-11-21T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "19155",
+        "start": "2026-11-05T00:00:00",
+        "end": "2026-11-20T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "18999",
+        "start": "2026-10-09T00:00:00",
+        "end": "2026-11-19T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "19113",
+        "start": "2026-10-29T00:00:00",
+        "end": "2026-11-18T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "19089",
+        "start": "2026-10-24T00:00:00",
+        "end": "2026-11-18T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "19120",
+        "start": "2026-10-30T00:00:00",
+        "end": "2026-11-17T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "19151",
+        "start": "2026-11-04T00:00:00",
+        "end": "2026-11-16T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      },
+      {
+        "IDPROMOCAO": "19162",
+        "start": "2026-11-06T00:00:00",
+        "end": "2026-11-15T23:59:00",
+        "window": "DTINIPROMOCAO/DTFIMPROMOCAO"
+      }
+    ]
+  },
+  "promocao_gestao_produto": {
+    "total": 677047,
+    "columns": [
+      "IDPROMOCAO",
+      "IDPRODUTO",
+      "IDSUBPRODUTO",
+      "VALPRECO",
+      "DTALTERACAO",
+      "FLAGEVIDENCIA",
+      "VALDESCONTO",
+      "PERDESCONTO",
+      "QTDMINIMA",
+      "QTDMAXIMA",
+      "FLAGINATIVO",
+      "NUMSEQUENCIA",
+      "FLAGPRECOMANDATORIO",
+      "QTDVENDALIMITE"
+    ],
+    "flagprecomandatorio_dist": {
+      "F": 675205,
+      "T": 1842
+    },
+    "sample_promo_id": "18134",
+    "offer_samples": [
+      {
+        "promo": "18134",
+        "sku": "146504:146504",
+        "valpreco": 2.99,
+        "flagprecomandatorio": "F",
+        "valgramaentrada": 50.0,
+        "effective_offer_price": 2.99,
+        "calculation_type": "DIRECT",
+        "regular_price": 1.35,
+        "chain_mode": "NON_CHAIN",
+        "idcadeiapreco": null
+      },
+      {
+        "promo": "18134",
+        "sku": "164032:164032",
+        "valpreco": 6.99,
+        "flagprecomandatorio": "F",
+        "valgramaentrada": 25.0,
+        "effective_offer_price": 6.99,
+        "calculation_type": "DIRECT",
+        "regular_price": 3.19,
+        "chain_mode": "NON_CHAIN",
+        "idcadeiapreco": null
+      },
+      {
+        "promo": "18134",
+        "sku": "211503:211503",
+        "valpreco": 71.99,
+        "flagprecomandatorio": "F",
+        "valgramaentrada": 1.0,
+        "effective_offer_price": 71.99,
+        "calculation_type": "DIRECT",
+        "regular_price": 0.0,
+        "chain_mode": "NON_CHAIN",
+        "idcadeiapreco": null
+      },
+      {
+        "promo": "18134",
+        "sku": "242576:242576",
+        "valpreco": 4.99,
+        "flagprecomandatorio": "F",
+        "valgramaentrada": 1.0,
+        "effective_offer_price": 4.99,
+        "calculation_type": "DIRECT",
+        "regular_price": 0.0,
+        "chain_mode": "NON_CHAIN",
+        "idcadeiapreco": null
+      },
+      {
+        "promo": "18134",
+        "sku": "242710:242710",
+        "valpreco": 139.99,
+        "flagprecomandatorio": "F",
+        "valgramaentrada": 1.0,
+        "effective_offer_price": 139.99,
+        "calculation_type": "DIRECT",
+        "regular_price": 0.0,
+        "chain_mode": "NON_CHAIN",
+        "idcadeiapreco": null
+      },
+      {
+        "promo": "18134",
+        "sku": "244970:244970",
+        "valpreco": 42.99,
+        "flagprecomandatorio": "F",
+        "valgramaentrada": 1.0,
+        "effective_offer_price": 42.99,
+        "calculation_type": "DIRECT",
+        "regular_price": 0.0,
+        "chain_mode": "CHAIN",
+        "idcadeiapreco": "776"
+      },
+      {
+        "promo": "18134",
+        "sku": "318663:318663",
+        "valpreco": 58.99,
+        "flagprecomandatorio": "F",
+        "valgramaentrada": 1.0,
+        "effective_offer_price": 58.99,
+        "calculation_type": "DIRECT",
+        "regular_price": 20.98,
+        "chain_mode": "NON_CHAIN",
+        "idcadeiapreco": null
+      }
+    ]
+  },
+  "produto_cadeia_preco": {
+    "total_chains": 2969,
+    "active_grades_with_chain": 4583,
+    "columns": [
+      "IDCADEIAPRECO",
+      "IDPRODUTO",
+      "IDSUBPRODUTO",
+      "DESCRCADEIAPRECO",
+      "DTALTERACAO",
+      "DESCRETIQUETAGONDOLA",
+      "QTDETIQUETA"
+    ],
+    "top_chains": [
+      {
+        "id": "110",
+        "description": "SEMENTES FELTRIN ",
+        "active_skus": 57
+      },
+      {
+        "id": "1836",
+        "description": "ESMALTE IMPALA CORES 7,5ML",
+        "active_skus": 41
+      },
+      {
+        "id": "776",
+        "description": "CREME PENTEAR SALON LINE FRAGÂNCIAS PT 1KG",
+        "active_skus": 25
+      },
+      {
+        "id": "2580",
+        "description": "BALAO SAO ROQUE LETRAS",
+        "active_skus": 24
+      },
+      {
+        "id": "253",
+        "description": "CREME TRATAMENTO SKALA 1KG",
+        "active_skus": 20
+      },
+      {
+        "id": "2173",
+        "description": "VELAS BRINK FEST BIG CORES",
+        "active_skus": 20
+      },
+      {
+        "id": "2150",
+        "description": "VELAS GLAMOUR NUMEROS",
+        "active_skus": 20
+      },
+      {
+        "id": "302",
+        "description": "ESMALTE RISQUE 8ML",
+        "active_skus": 20
+      },
+      {
+        "id": "423",
+        "description": "TINTA COR E TON TONS",
+        "active_skus": 18
+      },
+      {
+        "id": "311",
+        "description": "DESODORANTE REXONA AEROSOL FRAGRÂNCIAS 150ML",
+        "active_skus": 17
+      },
+      {
+        "id": "721",
+        "description": "DESODORANTE NIVEA AEROSOL FRAGÂNCIAS 150ML",
+        "active_skus": 17
+      },
+      {
+        "id": "2827",
+        "description": "MACARRAO GALO VERMELHO 500G",
+        "active_skus": 16
+      },
+      {
+        "id": "1873",
+        "description": "LIMPADOR COALA PERFUMADO CONCENTRADO FRAGRÂNCIAS 120ML",
+        "active_skus": 15
+      },
+      {
+        "id": "2795",
+        "description": "BOLOS SIMPLES REAL KG",
+        "active_skus": 15
+      },
+      {
+        "id": "234",
+        "description": "MACARRÃO INSTANTÂNEO NISSIN LAMEN SABORES 85GR",
+        "active_skus": 14
+      }
+    ]
+  },
+  "final_gates": {
+    "CISS_IMAGE_PATH_SOURCE": "NOT_USABLE",
+    "CISS_IMAGE_BLOB_SOURCE": "USABLE",
+    "OBSESPECIFIC_FOR_DISPLAY": "NOT_ADOPTED",
+    "PROMOCAO_GESTAO": "CONFIRMED",
+    "CISS_OFFER_SOURCE": "CONFIRMED",
+    "PRICE_CHAIN": "CONFIRMED",
+    "REAL_ACTIVE_PROMOTION": "PASS",
+    "placeholder_sha256": "0c2cba5fa5aa8a4552672c5aee88bd011e706ebd671596e7e5d268988923ce5e"
+  }
+}

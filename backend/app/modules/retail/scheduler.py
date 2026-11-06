@@ -30,6 +30,9 @@ def _entity_seconds(entity: str) -> int:
         "PRICE": s.retail_sync_price_seconds,
         "PROMOTION": s.retail_sync_promotion_seconds,
         "AVAILABILITY": s.retail_sync_availability_seconds,
+        "OFFER": s.retail_sync_offer_seconds,
+        "PRODUCT_IMAGE": s.retail_sync_product_image_seconds,
+        "PRICE_CHAIN": s.retail_sync_price_chain_seconds,
     }.get(entity, 300)
 
 

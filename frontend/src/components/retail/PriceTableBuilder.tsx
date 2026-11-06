@@ -75,6 +75,9 @@ export function PriceTableBuilder({
   const [limitItems, setLimitItems] = useState(16);
   const [sortMode, setSortMode] = useState("NAME_ASC");
   const [promotionOnly, setPromotionOnly] = useState(false);
+  const [selectionSource, setSelectionSource] = useState<"RULES" | "CISS_OFFER">("RULES");
+  const [offerCampaignId, setOfferCampaignId] = useState("");
+  const [offers, setOffers] = useState<{ id: string; name: string; item_count?: number }[]>([]);
   const [itemsPerPage, setItemsPerPage] = useState(8);
   const [pageDuration, setPageDuration] = useState(8);
   const [durationMode, setDurationMode] = useState<"FULL_CYCLE" | "FIXED">("FULL_CYCLE");
@@ -128,6 +131,19 @@ export function PriceTableBuilder({
           setLimitItems(d.rule.limit_items || 16);
           setSortMode(d.rule.sort_mode || "NAME_ASC");
           setPromotionOnly(Boolean(d.rule.promotion_only));
+          const src = String(d.rule.config?.selection_source || "RULES").toUpperCase();
+          setSelectionSource(src === "CISS_OFFER" ? "CISS_OFFER" : "RULES");
+          setOfferCampaignId(d.rule.config?.offer_campaign_id || "");
+        }
+      }
+      if (contentType === "PROMOTION_BOARD") {
+        try {
+          const { data: offerList } = await api.get("/retail-offers", {
+            params: { store_id: storeId, active_only: true },
+          });
+          setOffers(offerList || []);
+        } catch {
+          setOffers([]);
         }
       }
     })();
@@ -203,11 +219,15 @@ export function PriceTableBuilder({
         mode === "MANUAL"
           ? null
           : {
-              section_code: sectionCode || null,
-              promotion_only: promotionOnly,
+              section_code: selectionSource === "CISS_OFFER" ? null : sectionCode || null,
+              promotion_only: selectionSource === "CISS_OFFER" ? true : promotionOnly,
               available_only: false,
               limit_items: limitItems,
               sort_mode: sortMode,
+              config: {
+                selection_source: selectionSource,
+                offer_campaign_id: selectionSource === "CISS_OFFER" ? offerCampaignId || null : null,
+              },
             },
       products,
     };
@@ -324,12 +344,57 @@ export function PriceTableBuilder({
 
             {(mode === "AUTOMATIC" || mode === "HYBRID") && (
               <div className="grid gap-3 sm:grid-cols-2">
-                <Input
-                  label="Seção (código)"
-                  value={sectionCode}
-                  onChange={(e) => setSectionCode(e.target.value)}
-                  placeholder="ex.: 1"
-                />
+                {contentType === "PROMOTION_BOARD" && (
+                  <>
+                    <fieldset className="sm:col-span-2 space-y-2">
+                      <legend className="text-sm font-medium text-brand-900">Origem</legend>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          name="selectionSource"
+                          checked={selectionSource === "RULES"}
+                          onChange={() => setSelectionSource("RULES")}
+                        />
+                        Seleção por regras
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          name="selectionSource"
+                          checked={selectionSource === "CISS_OFFER"}
+                          onChange={() => {
+                            setSelectionSource("CISS_OFFER");
+                            setMode("AUTOMATIC");
+                          }}
+                        />
+                        Oferta do CISS (Promoção Gestão)
+                      </label>
+                    </fieldset>
+                    {selectionSource === "CISS_OFFER" && (
+                      <Select
+                        label="Oferta CISS"
+                        value={offerCampaignId}
+                        onChange={(e) => setOfferCampaignId(e.target.value)}
+                        className="sm:col-span-2"
+                      >
+                        <option value="">Selecione…</option>
+                        {offers.map((o) => (
+                          <option key={o.id} value={o.id}>
+                            {o.name} ({o.item_count ?? 0} itens)
+                          </option>
+                        ))}
+                      </Select>
+                    )}
+                  </>
+                )}
+                {selectionSource !== "CISS_OFFER" && (
+                  <Input
+                    label="Seção (código)"
+                    value={sectionCode}
+                    onChange={(e) => setSectionCode(e.target.value)}
+                    placeholder="ex.: 1"
+                  />
+                )}
                 <Input
                   label="Limite de itens"
                   type="number"
@@ -342,10 +407,16 @@ export function PriceTableBuilder({
                   <option value="PRICE_DESC">Preço ↓</option>
                   <option value="PROMOTION_FIRST">Promoções primeiro</option>
                 </Select>
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={promotionOnly} onChange={(e) => setPromotionOnly(e.target.checked)} />
-                  Somente promoção
-                </label>
+                {selectionSource !== "CISS_OFFER" && (
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={promotionOnly}
+                      onChange={(e) => setPromotionOnly(e.target.checked)}
+                    />
+                    Somente promoção
+                  </label>
+                )}
                 <label className="flex items-center gap-2 text-sm text-ink/50">
                   <input type="checkbox" disabled checked={false} readOnly />
                   Somente disponíveis

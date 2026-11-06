@@ -146,33 +146,26 @@ class ProductMediaService:
             pass
 
     def resolve_primary_image(self, product_id: str, store_id: str) -> dict[str, Any] | None:
-        """store PRIMARY → global PRIMARY → None."""
-        store_link = self.db.scalar(
-            select(ProductMediaLink)
-            .where(
-                ProductMediaLink.product_id == product_id,
-                ProductMediaLink.store_id == store_id,
-                ProductMediaLink.purpose == "PRIMARY",
-                ProductMediaLink.is_primary.is_(True),
-                ProductMediaLink.active.is_(True),
-            )
-            .order_by(ProductMediaLink.updated_at.desc())
-            .limit(1)
-        )
-        link = store_link
-        if not link:
-            link = self.db.scalar(
-                select(ProductMediaLink)
-                .where(
+        """Precedence: MANUAL store > CISS store > MANUAL global > CISS global."""
+        candidates = list(
+            self.db.scalars(
+                select(ProductMediaLink).where(
                     ProductMediaLink.product_id == product_id,
-                    ProductMediaLink.store_id.is_(None),
                     ProductMediaLink.purpose == "PRIMARY",
                     ProductMediaLink.is_primary.is_(True),
                     ProductMediaLink.active.is_(True),
+                    (ProductMediaLink.store_id == store_id) | (ProductMediaLink.store_id.is_(None)),
                 )
-                .order_by(ProductMediaLink.updated_at.desc())
-                .limit(1)
-            )
+            ).all()
+        )
+
+        def rank(link: ProductMediaLink) -> tuple[int, int]:
+            store_rank = 0 if link.store_id == store_id else 1
+            src = (link.source or "MANUAL").upper()
+            source_rank = 0 if src == "MANUAL" else (1 if src == "CISS" else 2)
+            return (store_rank, source_rank)
+
+        link = sorted(candidates, key=rank)[0] if candidates else None
         if not link:
             return None
         asset = self.db.get(MediaAsset, link.media_asset_id)
@@ -201,13 +194,16 @@ class ProductMediaService:
                 )
             ).all()
         )
-        # prefer store-specific
+        # prefer store-specific MANUAL over CISS, then global
+        def _rank(link: ProductMediaLink) -> tuple[int, int]:
+            store_rank = 0 if link.store_id == store_id else 1
+            src = (link.source or "MANUAL").upper()
+            source_rank = 0 if src == "MANUAL" else (1 if src == "CISS" else 2)
+            return (store_rank, source_rank)
+
         chosen: dict[str, ProductMediaLink] = {}
-        for link in links:
-            cur = chosen.get(link.product_id)
-            if cur is None:
-                chosen[link.product_id] = link
-            elif cur.store_id is None and link.store_id == store_id:
+        for link in sorted(links, key=_rank):
+            if link.product_id not in chosen:
                 chosen[link.product_id] = link
 
         asset_ids = [l.media_asset_id for l in chosen.values()]

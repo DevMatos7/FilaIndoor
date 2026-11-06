@@ -45,7 +45,12 @@
 | price_source_updated_at | `POLITICA_PRECO_PRODUTO` | `DTALTERACAO` / `DTALTERACAOVAR` | | Watermark de preço | Y |
 | quantity_price | `PRODUTO_DESCONTO_QTDE` | `VALPRECOVAREJO` + `QTDPRODUTO` → **`CAST(... AS DOUBLE)`** | `IDEMPRESA` · ignora `TIPOSTATUS` I/N | Preço por quantidade (ODBC também corrompe escala de QTD) | N amount |
 | stock_qty | `PRODUTO_GRADE_SALDO_EST_VW` | `QTDATUALESTOQUE` | `IDEMPRESA`+produto+sub (+local) | Saldo | N |
-| image_path | `PRODUTO_GRADE_IMAGENS` | `PATHIMAGEM` | `FLAGIMAGEMPADRAO` | Path no ERP — **não** baixamos binário no Módulo 1 | Y |
+| image_path | `PRODUTO_GRADE_IMAGENS` | `PATHIMAGEM` | `FLAGIMAGEMPADRAO` | Path UNC — **NOT_USABLE** | Y |
+| image_blob | `PRODUTO_ESPECIFICACAO_TECNICA` | `FOTOPRINCIPAL` | via `IDCODBARPROD` | BLOB JPEG — **USABLE** (Module 5R); excluir LENGTH=4912 placeholder | Y |
+| offer_campaign | `PROMOCAO_GESTAO` | `IDPROMOCAO` / `DESCRPROMOCAO` / `DTINIPROMOCAO` / `DTFIMPROMOCAO` | + `PROMOCAO_GESTAO_EMPRESA.IDEMPRESA` | Campanha gerenciada ≠ política promo | N |
+| offer_item_price | `PROMOCAO_GESTAO_PRODUTO` | `VALPRECO` + `FLAGPRECOMANDATORIO` | × `VALGRAMAENTRADA` se mandatório | Preço efetivo da oferta | N |
+| price_chain | `PRODUTO_CADEIA_PRECO` | `IDCADEIAPRECO` / `DESCRCADEIAPRECO` | `PRODUTO_GRADE.IDCADEIAPRECO` | Grupo comercial (não é SKU) | Y |
+| tech_description | `PRODUTO_ESPECIFICACAO_TECNICA` | `OBSESPECIFIC` | CLOB | Parcialmente comercial — **NOT_ADOPTED** default | Y |
 
 ---
 

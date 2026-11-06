@@ -8,8 +8,9 @@
 | 2 Price Table Engine | `HOMOLOGATED` · visual PASS |
 | 3 Dynamic Playlist & Player | `HOMOLOGATED` |
 | 4 Product Visual Engine | `HOMOLOGATED` |
-| 5 Automation & Resilience | `READY FOR HOMOLOGATION` |
-| 6 Visual QA / Pilot Gate | `NOT STARTED` |
+| 5 Automation & Resilience | `FINAL HOMOLOGATION: PASS` |
+| 5R CISS Offers & Product Images | `READY FOR HOMOLOGATION` |
+| 6 Visual QA / Pilot Gate | `HOLD` (aguarda homologação 5R) |
 
 ## Travas preservadas
 
@@ -17,7 +18,10 @@
 - **STOCK COMMERCIAL SOURCE: NOT CONFIRMED**
 - `PROMOTION ENGINE: PASS` · `REAL ACTIVE PROMOTION: PENDING`
 - `MULTI-TIER ENGINE: PASS` · `REAL MULTI-TIER: PENDING`
-- `CISS IMAGE SOURCE: NOT_USABLE` (associação manual via Media Library)
+- `CISS IMAGE PATH SOURCE: NOT_USABLE`
+- `CISS IMAGE BLOB SOURCE: USABLE` (FOTOPRINCIPAL; placeholder LENGTH=4912 excluído)
+- `CISS OFFER SOURCE: CONFIRMED` · `PRICE CHAIN: CONFIRMED`
+- `REAL ACTIVE PROMOTION: PASS` (Promoção Gestão vigente)
 - **PRODUCTION MOCK GUARD: PASS** (`APP_ENV=production` + `RETAIL_PROVIDER=mock` → fail-fast)
 
 ## Module 5 notas

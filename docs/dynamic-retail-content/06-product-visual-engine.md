@@ -123,6 +123,8 @@ stock filtering · Proof of Play · Retail Media · campaign advertiser · AI im
 
 Automação / invalidação WS / `valid_until` → [07-automation-resilience.md](./07-automation-resilience.md).
 
+Imagem CISS BLOB (`FOTOPRINCIPAL`) + Oferta Gestão → [08-ciss-offers-images.md](./08-ciss-offers-images.md).
+
 ## Travas preservadas
 
 - `STOCK FILTER: DISABLED BY DESIGN`  

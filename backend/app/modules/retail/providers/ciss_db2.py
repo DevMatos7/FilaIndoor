@@ -481,6 +481,220 @@ class CissDb2RetailProvider(RetailDataProvider):
         finally:
             cn.close()
 
+    # Placeholder JPEG embedded in CISS for products without a real photo (LENGTH=4912, identical SHA).
+    PLACEHOLDER_IMAGE_SHA256 = "0c2cba5fa5aa8a4552672c5aee88bd011e706ebd671596e7e5d268988923ce5e"
+    PLACEHOLDER_IMAGE_LENGTH = 4912
+
+    def fetch_product_image_blob(
+        self, *, source_product_id: str | None = None, gtin: str | None = None
+    ) -> dict[str, Any] | None:
+        """
+        Read FOTOPRINCIPAL via HEX(SUBSTR) chunks (pyodbc does not support ODBC BLOB -98).
+        Returns None for missing/placeholder images. Never exposes SQL to callers beyond dict meta.
+        """
+        import hashlib
+
+        cn = self._connect()
+        try:
+            cur = cn.cursor()
+            idcod = None
+            spid = source_product_id
+            if source_product_id:
+                try:
+                    idprod, idsub = [int(x) for x in source_product_id.split(":", 1)]
+                except ValueError:
+                    return None
+                cur.execute(
+                    f"""
+                    SELECT CAST(IDCODBARPROD AS VARCHAR(32)), LENGTH(PET.FOTOPRINCIPAL)
+                    FROM {self.schema}.PRODUTO_GRADE G
+                    JOIN {self.schema}.PRODUTO_ESPECIFICACAO_TECNICA PET
+                      ON PET.IDCODBARPROD = G.IDCODBARPROD
+                    WHERE G.IDPRODUTO=? AND G.IDSUBPRODUTO=?
+                      AND PET.FOTOPRINCIPAL IS NOT NULL
+                    FETCH FIRST 1 ROW ONLY
+                    """,
+                    idprod,
+                    idsub,
+                )
+            elif gtin:
+                cur.execute(
+                    f"""
+                    SELECT CAST(IDCODBARPROD AS VARCHAR(32)), LENGTH(FOTOPRINCIPAL)
+                    FROM {self.schema}.PRODUTO_ESPECIFICACAO_TECNICA
+                    WHERE CAST(IDCODBARPROD AS VARCHAR(32)) = ?
+                      AND FOTOPRINCIPAL IS NOT NULL
+                    FETCH FIRST 1 ROW ONLY
+                    """,
+                    str(gtin),
+                )
+            else:
+                return None
+            row = cur.fetchone()
+            if not row:
+                return None
+            idcod, length = str(row[0]), int(row[1] or 0)
+            if length <= 0 or length == self.PLACEHOLDER_IMAGE_LENGTH:
+                return None
+
+            chunk = 2000
+            parts: list[str] = []
+            for start in range(1, length + 1, chunk):
+                cur.execute(
+                    f"""
+                    SELECT CAST(HEX(SUBSTR(FOTOPRINCIPAL, ?, ?)) AS VARCHAR(4000))
+                    FROM {self.schema}.PRODUTO_ESPECIFICACAO_TECNICA
+                    WHERE CAST(IDCODBARPROD AS VARCHAR(32)) = ?
+                    """,
+                    start,
+                    min(chunk, length - start + 1),
+                    idcod,
+                )
+                hx = cur.fetchone()
+                if not hx or not hx[0]:
+                    break
+                parts.append(str(hx[0]).strip())
+            raw = bytes.fromhex("".join(parts))
+            if not raw:
+                return None
+            digest = hashlib.sha256(raw).hexdigest()
+            if digest == self.PLACEHOLDER_IMAGE_SHA256:
+                return None
+            fmt = "UNKNOWN"
+            mime = "application/octet-stream"
+            if raw[:3] == b"\xff\xd8\xff":
+                fmt, mime = "JPEG", "image/jpeg"
+            elif raw[:8] == b"\x89PNG\r\n\x1a\n":
+                fmt, mime = "PNG", "image/png"
+            else:
+                return None
+            return {
+                "idcodbarprod": idcod,
+                "source_product_id": spid,
+                "bytes": raw,
+                "sha256": digest,
+                "length": len(raw),
+                "format": fmt,
+                "mime_type": mime,
+            }
+        finally:
+            cn.close()
+
+    def fetch_offer_campaigns(
+        self, *, company_code: str, active_only: bool = True, limit: int = 50
+    ) -> list[dict[str, Any]]:
+        """PROMOCAO_GESTAO scoped by PROMOCAO_GESTAO_EMPRESA."""
+        limit = max(1, min(limit, 200))
+        sql = f"""
+            SELECT PG.IDPROMOCAO, PG.DESCRPROMOCAO, PG.DTINIPROMOCAO, PG.DTFIMPROMOCAO,
+                   PG.FLAGINATIVO, PG.DTALTERACAO
+            FROM {self.schema}.PROMOCAO_GESTAO PG
+            JOIN {self.schema}.PROMOCAO_GESTAO_EMPRESA PE
+              ON PE.IDPROMOCAO = PG.IDPROMOCAO
+             AND PE.IDEMPRESA = ?
+             AND PE.FLAGINATIVO = 'F'
+            WHERE PG.FLAGINATIVO = 'F'
+        """
+        if active_only:
+            sql += " AND PG.DTINIPROMOCAO <= CURRENT TIMESTAMP AND PG.DTFIMPROMOCAO >= CURRENT TIMESTAMP"
+        sql += " ORDER BY PG.DTINIPROMOCAO DESC FETCH FIRST ? ROWS ONLY"
+        cn = self._connect()
+        try:
+            cur = cn.cursor()
+            cur.execute(sql, int(company_code), limit)
+            out = []
+            for r in cur.fetchall():
+                out.append(
+                    {
+                        "source_offer_id": str(r[0]),
+                        "name": str(r[1] or f"Oferta {r[0]}").strip(),
+                        "starts_at": _to_dt(r[2]),
+                        "expires_at": _to_dt(r[3]),
+                        "active": not _flag_inactive(r[4]),
+                        "source_updated_at": _to_dt(r[5]),
+                    }
+                )
+            return out
+        finally:
+            cn.close()
+
+    def fetch_offer_items(
+        self, *, company_code: str, source_offer_id: str, limit: int = 500
+    ) -> list[dict[str, Any]]:
+        from app.modules.retail.offer_price import OfferPriceResolver
+
+        limit = max(1, min(limit, 2000))
+        sql = f"""
+            SELECT PGP.IDPRODUTO, PGP.IDSUBPRODUTO,
+                   CAST(PGP.VALPRECO AS DOUBLE),
+                   PGP.FLAGPRECOMANDATORIO,
+                   CAST(PPV.VALGRAMAENTRADA AS DOUBLE),
+                   CAST(PPP.VALPRECOVAREJO AS DOUBLE),
+                   PV.IDCADEIAPRECO,
+                   PGP.FLAGINATIVO
+            FROM {self.schema}.PROMOCAO_GESTAO_PRODUTO PGP
+            JOIN {self.schema}.PRODUTOS_VIEW PPV
+              ON PPV.IDPRODUTO = PGP.IDPRODUTO AND PPV.IDSUBPRODUTO = PGP.IDSUBPRODUTO
+            JOIN {self.schema}.PRODUTO_GRADE PV
+              ON PV.IDPRODUTO = PGP.IDPRODUTO AND PV.IDSUBPRODUTO = PGP.IDSUBPRODUTO
+            LEFT JOIN {self.schema}.POLITICA_PRECO_PRODUTO PPP
+              ON PPP.IDPRODUTO = PGP.IDPRODUTO AND PPP.IDSUBPRODUTO = PGP.IDSUBPRODUTO
+             AND PPP.IDEMPRESA = ?
+            WHERE PGP.IDPROMOCAO = ?
+              AND PGP.FLAGINATIVO = 'F'
+            FETCH FIRST ? ROWS ONLY
+        """
+        cn = self._connect()
+        try:
+            cur = cn.cursor()
+            cur.execute(sql, int(company_code), int(source_offer_id), limit)
+            out = []
+            for r in cur.fetchall():
+                priced = OfferPriceResolver.resolve(
+                    val_preco=r[2], flag_preco_mandatorio=r[3], val_grama_entrada=r[4]
+                )
+                out.append(
+                    {
+                        "source_product_id": product_key(r[0], r[1]),
+                        "raw_offer_price": float(priced.raw_offer_price) if priced.raw_offer_price is not None else None,
+                        "offer_price": float(priced.effective_offer_price)
+                        if priced.effective_offer_price is not None
+                        else None,
+                        "calculation_type": priced.calculation_type,
+                        "regular_price": _num(r[5]),
+                        "source_chain_id": str(r[6]) if r[6] is not None else None,
+                        "active": not _flag_inactive(r[7]),
+                    }
+                )
+            return out
+        finally:
+            cn.close()
+
+    def fetch_price_chains(self, *, limit: int = 500) -> list[dict[str, Any]]:
+        limit = max(1, min(limit, 5000))
+        sql = f"""
+            SELECT IDCADEIAPRECO, DESCRCADEIAPRECO, DESCRETIQUETAGONDOLA, DTALTERACAO,
+                   IDPRODUTO, IDSUBPRODUTO
+            FROM {self.schema}.PRODUTO_CADEIA_PRECO
+            FETCH FIRST ? ROWS ONLY
+        """
+        cn = self._connect()
+        try:
+            cur = cn.cursor()
+            cur.execute(sql, limit)
+            return [
+                {
+                    "source_chain_id": str(r[0]),
+                    "description": str(r[1] or f"Cadeia {r[0]}").strip(),
+                    "gondola_label": (str(r[2]).strip() if r[2] else None),
+                    "source_updated_at": _to_dt(r[3]),
+                    "source_product_id": product_key(r[4], r[5]) if r[4] is not None else None,
+                }
+                for r in cur.fetchall()
+            ]
+        finally:
+            cn.close()
+
     def fetch_availability_for_products(
         self, *, company_code: str, source_product_ids: list[str]
     ) -> list[CanonicalStoreProduct]:

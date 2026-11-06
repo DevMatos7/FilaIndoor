@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
@@ -171,3 +171,78 @@ class RetailSyncRun(Base):
     watermark_before: Mapped[str | None] = mapped_column(String(120), nullable=True)
     watermark_after: Mapped[str | None] = mapped_column(String(120), nullable=True)
     error_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class RetailPriceChain(Base):
+    """CISS PRODUTO_CADEIA_PRECO — grupo comercial (não é SKU)."""
+
+    __tablename__ = "retail_price_chains"
+    __table_args__ = (UniqueConstraint("source_system", "source_chain_id", name="uq_retail_price_chain"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    source_system: Mapped[str] = mapped_column(String(40), nullable=False, default="CISS")
+    source_chain_id: Mapped[str] = mapped_column(String(40), nullable=False)
+    description: Mapped[str] = mapped_column(String(120), nullable=False)
+    gondola_label: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    source_updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    synced_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow)
+
+
+class RetailProductPriceChain(Base):
+    __tablename__ = "retail_product_price_chains"
+    __table_args__ = (
+        UniqueConstraint("product_id", "price_chain_id", name="uq_retail_product_price_chain"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    product_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("retail_products.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    price_chain_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("retail_price_chains.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    synced_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow)
+
+
+class RetailOfferCampaign(Base):
+    """CISS PROMOCAO_GESTAO — campanha/oferta gerenciada (≠ RetailPromotion de política)."""
+
+    __tablename__ = "retail_offer_campaigns"
+    __table_args__ = (
+        UniqueConstraint("store_id", "source_system", "source_offer_id", name="uq_retail_offer_campaign"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    store_id: Mapped[str] = mapped_column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False, index=True)
+    source_system: Mapped[str] = mapped_column(String(40), nullable=False, default="CISS")
+    source_offer_id: Mapped[str] = mapped_column(String(40), nullable=False)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    starts_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    source_updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    synced_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow)
+
+
+class RetailOfferItem(Base):
+    __tablename__ = "retail_offer_items"
+    __table_args__ = (
+        UniqueConstraint("campaign_id", "product_id", name="uq_retail_offer_item"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    campaign_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("retail_offer_campaigns.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    product_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("retail_products.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    price_chain_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("retail_price_chains.id", ondelete="SET NULL"), nullable=True
+    )
+    regular_price: Mapped[float | None] = mapped_column(Numeric(18, 4), nullable=True)
+    offer_price: Mapped[float | None] = mapped_column(Numeric(18, 4), nullable=True)
+    raw_offer_price: Mapped[float | None] = mapped_column(Numeric(18, 4), nullable=True)
+    calculation_type: Mapped[str] = mapped_column(String(30), nullable=False, default="DIRECT")
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    synced_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow)

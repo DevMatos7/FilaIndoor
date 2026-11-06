@@ -135,4 +135,9 @@ class RetailHealthService:
             "scheduler": scheduler_status(),
             "stock_filter": "DISABLED_BY_DESIGN",
             "stock_commercial_source": "NOT_CONFIRMED",
+            "ciss_image_path_source": "NOT_USABLE",
+            "ciss_image_blob_source": "USABLE",
+            "ciss_offer_source": "CONFIRMED",
+            "price_chain": "CONFIRMED",
+            "obsespecific_for_display": "NOT_ADOPTED",
         }

@@ -27,13 +27,16 @@ from app.modules.retail.sync_lock import retail_sync_lock
 from app.modules.retail.timezone_util import validate_iana_timezone
 
 
-ENTITIES = ("PRODUCT", "PRICE", "PROMOTION", "AVAILABILITY")
+ENTITIES = ("PRODUCT", "PRICE", "PROMOTION", "AVAILABILITY", "OFFER", "PRODUCT_IMAGE", "PRICE_CHAIN")
 
 ENTITY_CHANGE = {
     "PRODUCT": "PRODUCT_CHANGED",
     "PRICE": "PRICE_CHANGED",
     "PROMOTION": "PROMOTION_CHANGED",
     "AVAILABILITY": "AVAILABILITY_CHANGED",
+    "OFFER": "PROMOTION_CHANGED",
+    "PRODUCT_IMAGE": "IMAGE_CHANGED",
+    "PRICE_CHAIN": "PRODUCT_CHANGED",
 }
 
 
@@ -267,6 +270,37 @@ class RetailSyncService:
                     updated += u
                     if touched_flag:
                         changed.add(prod.id)
+            elif entity == "OFFER":
+                from app.modules.retail.offer_sync_service import RetailOfferSyncService
+
+                result = RetailOfferSyncService(self.db, provider=self.provider).sync_offers(
+                    store_id, company_code=source.company_code
+                )
+                read = int(result.get("campaigns") or 0)
+                inserted = int(result.get("inserted") or 0)
+                updated = int(result.get("updated") or 0)
+                skipped = int(result.get("skipped") or 0)
+                changed.update(result.get("changed_product_ids") or [])
+            elif entity == "PRODUCT_IMAGE":
+                from app.modules.retail.ciss_image_importer import CissProductImageImporter
+
+                result = CissProductImageImporter(self.db, provider=self.provider).import_store_products(
+                    store_id, limit=min(200, int(self.settings.retail_sync_product_limit or 200))
+                )
+                read = int(result.get("read") or 0)
+                inserted = int(result.get("inserted") or 0)
+                updated = int(result.get("updated") or 0)
+                skipped = int(result.get("skipped") or 0)
+                failed = int(result.get("failed") or 0)
+                changed.update(result.get("changed_product_ids") or [])
+            elif entity == "PRICE_CHAIN":
+                from app.modules.retail.offer_sync_service import RetailOfferSyncService
+
+                result = RetailOfferSyncService(self.db, provider=self.provider).sync_price_chains()
+                read = int(result.get("read") or 0)
+                inserted = int(result.get("inserted") or 0)
+                updated = int(result.get("updated") or 0)
+                changed.update(result.get("changed_product_ids") or [])
 
             wm_after = max_src.isoformat() if max_src else (wm.watermark_value if wm else None)
             self._set_watermark(entity, store_id, wm_after, ok=True)

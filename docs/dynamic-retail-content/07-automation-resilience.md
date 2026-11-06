@@ -102,3 +102,8 @@ Logs: `retail.sync.scheduled|started|completed|failed`, `dynamic.invalidated`, p
 ## Critérios
 
 Ver relatório Module 5 no chat / `progress.md`.
+
+## Module 5R (fontes CISS)
+
+Scheduler reutilizado para `OFFER` / `PRODUCT_IMAGE` / `PRICE_CHAIN`.  
+Detalhes e gates: [08-ciss-offers-images.md](./08-ciss-offers-images.md).

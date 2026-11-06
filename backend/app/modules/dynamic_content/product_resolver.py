@@ -80,27 +80,33 @@ class DynamicProductResolver:
         return self._materialize(store, ordered, mode="HYBRID", limit=limit, pinned_ids=set(pinned_ids))
 
     def _automatic_ids(self, store: Store, rule: DynamicContentRule | None) -> list[str]:
-        # Products linked to store via retail_store_products
-        stmt = (
-            select(RetailProduct)
-            .join(RetailStoreProduct, RetailStoreProduct.product_id == RetailProduct.id)
-            .where(
-                RetailStoreProduct.store_id == store.id,
-                RetailProduct.active.is_(True),
-            )
-        )
-        if rule:
-            if rule.section_code:
-                stmt = stmt.where(RetailProduct.section_code == rule.section_code)
-            if rule.group_code:
-                stmt = stmt.where(RetailProduct.group_code == rule.group_code)
-            if rule.subgroup_code:
-                stmt = stmt.where(RetailProduct.subgroup_code == rule.subgroup_code)
+        cfg = (rule.config if rule else None) or {}
+        selection_source = str(cfg.get("selection_source") or "RULES").upper()
 
-        products = list(self.db.scalars(stmt).all())
+        if selection_source == "CISS_OFFER":
+            products = self._ciss_offer_products(store, cfg)
+        else:
+            # Products linked to store via retail_store_products
+            stmt = (
+                select(RetailProduct)
+                .join(RetailStoreProduct, RetailStoreProduct.product_id == RetailProduct.id)
+                .where(
+                    RetailStoreProduct.store_id == store.id,
+                    RetailProduct.active.is_(True),
+                )
+            )
+            if rule:
+                if rule.section_code:
+                    stmt = stmt.where(RetailProduct.section_code == rule.section_code)
+                if rule.group_code:
+                    stmt = stmt.where(RetailProduct.group_code == rule.group_code)
+                if rule.subgroup_code:
+                    stmt = stmt.where(RetailProduct.subgroup_code == rule.subgroup_code)
+            products = list(self.db.scalars(stmt).all())
+
         tz = validate_iana_timezone(store.timezone)
 
-        if rule and rule.promotion_only:
+        if rule and rule.promotion_only and selection_source != "CISS_OFFER":
             filtered = []
             for p in products:
                 promo = self.db.scalar(
@@ -137,6 +143,42 @@ class DynamicProductResolver:
             priced.sort(key=name_key)
 
         return [p.id for p, _ in priced]
+
+    def _ciss_offer_products(self, store: Store, cfg: dict[str, Any]) -> list[RetailProduct]:
+        from app.modules.retail.models import RetailOfferCampaign, RetailOfferItem
+
+        campaign_id = cfg.get("offer_campaign_id") or cfg.get("ciss_offer_campaign_id")
+        source_offer_id = cfg.get("source_offer_id")
+        campaign = None
+        if campaign_id:
+            campaign = self.db.get(RetailOfferCampaign, str(campaign_id))
+        elif source_offer_id:
+            campaign = self.db.scalar(
+                select(RetailOfferCampaign).where(
+                    RetailOfferCampaign.store_id == store.id,
+                    RetailOfferCampaign.source_offer_id == str(source_offer_id),
+                    RetailOfferCampaign.active.is_(True),
+                )
+            )
+        if not campaign or campaign.store_id != store.id or not campaign.active:
+            return []
+        tz = validate_iana_timezone(store.timezone)
+        if not promo_window_active(campaign.starts_at, campaign.expires_at, tz):
+            return []
+        items = list(
+            self.db.scalars(
+                select(RetailOfferItem).where(
+                    RetailOfferItem.campaign_id == campaign.id,
+                    RetailOfferItem.active.is_(True),
+                )
+            ).all()
+        )
+        products: list[RetailProduct] = []
+        for it in items:
+            prod = self.db.get(RetailProduct, it.product_id)
+            if prod and prod.active:
+                products.append(prod)
+        return products
 
     def _materialize(
         self,

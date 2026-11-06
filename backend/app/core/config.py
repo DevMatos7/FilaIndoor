@@ -62,6 +62,9 @@ class Settings(BaseSettings):
     retail_sync_price_seconds: int = 60
     retail_sync_promotion_seconds: int = 60
     retail_sync_availability_seconds: int = 180
+    retail_sync_offer_seconds: int = 120
+    retail_sync_product_image_seconds: int = 900
+    retail_sync_price_chain_seconds: int = 900
     retail_allow_mock_in_production: bool = False
 
     @property
