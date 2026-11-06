@@ -1,37 +1,41 @@
 # Module 6 — Pilot Defect Register
 
+**Homologação:** P0=0 · P1=0 · P2=5 · P3=2  
+P2/P3 **não** reabrem desenvolvimento de produto antes do piloto.
+
 ## P0
 
-*Nenhum aberto após correções do gate.*
+*Nenhum aberto.*
 
 | ID | Título | Status | Correção |
 |----|--------|--------|----------|
-| DRC6-P0-01 | Descrição TV = `source_product_id` (4777 SKUs via `_ensure_minimal_product`) | **FIXED** | Placeholder sem ID; `price_resolver` bloqueia ID/GTIN; repair CISS em 4777 SKUs |
+| DRC6-P0-01 | Descrição TV = `source_product_id` | **FIXED** | Bloqueio estrutural + repair 4777 SKUs |
+| DRC6-P0-02 | `data_version` `dirty:` empilhado → VARCHAR(80) + sync crash | **FIXED** (hotfix pós-`8b830b2`) | Poison fixo `dirty` + `rollback` no scheduler |
 
 ## P1
 
 *Nenhum aberto.*
 
-## P2
+## P2 — classificação pós-homologação
 
-| ID | Título | Status | Nota |
-|----|--------|--------|------|
-| DRC6-P2-01 | API Docker `RETAIL_PROVIDER=mock` enquanto host gate usa `ciss_db2` | OPEN | Admin mostra Fonte:MOCK; piloto deve rodar API com `ciss_db2` |
-| DRC6-P2-02 | Media import host ≠ volume Docker | OPEN | Requer `docker cp`/volume compartilhado após import CISS no host |
-| DRC6-P2-03 | Cobertura imagem CISS inicial baixa (~0,07% no gate; cresce por ciclo) | OPEN | Incremental OK; import completo leva vários ciclos de 200 SKUs |
-| DRC6-P2-04 | Captura Hero vs Grid race na playlist da TV | OPEN | Payload hero OK; timing de captura às vezes pega item seguinte |
-| DRC6-P2-05 | Imagens CISS ~200×200 em Hero/4K | OPEN | Aceitável; não alta resolução |
+| ID | Título | Tratamento | Nota |
+|----|--------|------------|------|
+| DRC6-P2-01 | API em `RETAIL_PROVIDER=mock` | **Condição obrigatória de instalação (RC-2)** | Não é débito “para depois”; piloto exige `ciss_db2` |
+| DRC6-P2-02 | Media host ≠ volume do player | **Condição obrigatória de instalação (RC-3)** | Import CISS e player devem ver o mesmo storage |
+| DRC6-P2-03 | Cobertura imagem CISS gradual | **Aceito no piloto** | Fallback existe; 2º sync sem BLOB massivo |
+| DRC6-P2-04 | Race screenshot Hero/Grid | **QA/polish** | Payload/fluxo reais OK; não falha de player |
+| DRC6-P2-05 | JPEG CISS ~200×200 | **Aceito · observar em Hero/4K** | Sem IA/upscale antes de evidência operacional |
 
 ## P3
 
-| ID | Título | Status |
-|----|--------|--------|
-| DRC6-P3-01 | Copy admin / polish baseline | OPEN |
-| DRC6-P3-02 | Scripts `_m6_debug_*` de diagnóstico | OPEN | Não fazem parte do runtime |
+| ID | Título | Tratamento |
+|----|--------|------------|
+| DRC6-P3-01 | Copy admin / polish | Adiar |
+| DRC6-P3-02 | Scripts `_m6_debug_*` | Fora do runtime |
 
-## Aceites explícitos para CONDITIONAL GO
+## Aceites explícitos (CONDITIONAL GO)
 
-- STOCK FILTER DISABLED BY DESIGN
-- PHYSICAL HARDWARE VALIDATION: PENDING
-- RELEASE DELIVERY: local `main` ahead of `origin/main` (sem push automático)
-- Cobertura de imagem CISS parcial com fallback visual
+- STOCK FILTER: **DISABLED BY DESIGN** — TV não garante disponibilidade de estoque
+- PHYSICAL HARDWARE: PENDING → Gate RC-4
+- RELEASE DELIVERY: NO-GO até RC-1 (`origin/main` = HEAD homologado)
+- Cobertura de imagem parcial com fallback visual

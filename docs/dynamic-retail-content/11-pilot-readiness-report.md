@@ -2,9 +2,11 @@
 
 **Projeto:** DevMatos7/FilaIndoor  
 **Fase:** Dynamic Retail Content / CISS Price & Product Engine  
-**Gate HEAD (pré-commit Module 6):** `25a402a` (+ working tree Module 6)  
-**Decisão produto:** **CONDITIONAL GO**  
-**Release delivery:** **NO-GO** (branch local ahead de `origin/main`; push não autorizado neste gate)
+**Evidence HEAD (homologado):** `8b830b2` — `test(dynamic-retail): module 6 pilot readiness gate`  
+**MODULE 6 / QA:** **PASS** · **HOMOLOGATED**  
+**PRODUTO Dynamic Retail:** **CONDITIONAL GO**  
+**INSTALAÇÃO DO PILOTO:** **AINDA CONDICIONADA** (Day-0 RC-1…RC-4)  
+**RELEASE DELIVERY:** **NO-GO** até `origin/main` publicar o HEAD homologado
 
 ---
 
@@ -88,13 +90,24 @@ sync failures · freshness · price mismatches · player failures · WS reconnec
 | 4 Product Visual Engine | FINAL HOMOLOGATED |
 | 5 Automation & Resilience | FINAL HOMOLOGATED |
 | 5R CISS Offers & Images | FINAL HOMOLOGATED |
-| 6 Final Pilot Gate | **CONDITIONAL GO** |
+| 6 Final Pilot Gate | **HOMOLOGATED** (produto CONDITIONAL GO) |
 
 ---
 
+## Próximo passo (não-feature)
+
+Ver `12-pilot-release-candidate.md`:
+
+1. RC-1 Source control (publicar `8b830b2` / tag)  
+2. RC-2 Pilot runtime (`production` + `ciss_db2` + ODBC)  
+3. RC-3 Media storage persistente compartilhado  
+4. RC-4 Hardware smoke  
+
+**STOP** de desenvolvimento funcional até conclusão do RC / observação na loja.
+
 ## Riscos / dívida
 
-- Deploy piloto deve usar **API com ODBC + RETAIL_PROVIDER=ciss_db2** (não o compose mock).  
-- Volume de media host↔container precisa alinhamento.  
-- Cobertura de imagem completa é gradual (cap 200/ciclo).  
-- Push para `origin/main` pendente de autorização explícita.
+- **P2-01 / P2-02** = condições obrigatórias de instalação (RC-2 / RC-3), não backlog de produto.  
+- Cobertura de imagem gradual (P2-03) e JPEG 200×200 (P2-05) aceitos no piloto.  
+- STOCK FILTER permanece DISABLED BY DESIGN — comunicar à operação.  
+- Push/`RELEASE DELIVERY: GO` só com autorização explícita no RC-1.

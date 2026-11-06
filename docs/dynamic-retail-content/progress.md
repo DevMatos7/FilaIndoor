@@ -1,5 +1,19 @@
 # Dynamic Retail Content — Progresso
 
+## Homologação oficial do produto
+
+```
+DYNAMIC RETAIL CONTENT — FINAL PRODUCT HOMOLOGATION
+MODULE 6 — FINAL PILOT GATE · HOMOLOGATED
+
+Evidence HEAD: 8b830b2
+test(dynamic-retail): module 6 pilot readiness gate
+
+DYNAMIC RETAIL CONTENT: CONDITIONAL GO
+PILOT: CONDITIONAL GO
+RELEASE DELIVERY: NO-GO
+```
+
 | Módulo | Status |
 |--------|--------|
 | 1 Retail Data Foundation | `FINAL HOMOLOGATED` |
@@ -10,29 +24,36 @@
 | 4 Product Visual Engine | `FINAL HOMOLOGATED` |
 | 5 Automation & Resilience | `FINAL HOMOLOGATED` |
 | 5R CISS Offers & Product Images | `FINAL HOMOLOGATED` |
-| 6 Visual QA / Pilot Gate | `CONDITIONAL GO` · `FINAL HOMOLOGATED` (com condições) |
+| 6 Final Pilot Gate | `HOMOLOGATED` · produto **CONDITIONAL GO** |
+
+## Três decisões (significados distintos)
+
+| Decisão | Status | Significado |
+|---------|--------|-------------|
+| MODULE 6 / QA | **PASS** | Gate de qualidade fechado |
+| PRODUTO Dynamic Retail | **CONDITIONAL GO** | Tecnologia comercialmente segura com condições aceitas |
+| INSTALAÇÃO DO PILOTO | **AINDA CONDICIONADA** | Depende do Release Candidate / Day-0 |
+| RELEASE DELIVERY | **NO-GO** | `origin/main` ainda não contém o HEAD homologado publicado |
 
 ## Travas preservadas
 
-- `hide_if_unavailable` / `available_only` = **DISABLED BY DESIGN**
+- `hide_if_unavailable` / `available_only` = **DISABLED BY DESIGN** (comunicar à operação)
 - **STOCK COMMERCIAL SOURCE: NOT CONFIRMED**
-- `PROMOTION ENGINE: PASS` · `REAL ACTIVE PROMOTION: PASS`
-- `MULTI-TIER ENGINE: PASS` · `REAL MULTI-TIER: PASS` (ex. “A PARTIR DE 50” em SKU real)
-- `CISS IMAGE PATH SOURCE: NOT_USABLE`
-- `CISS IMAGE BLOB SOURCE: USABLE` (FOTOPRINCIPAL; placeholder LENGTH=4912 excluído)
-- `CISS OFFER SOURCE: CONFIRMED` · `PRICE CHAIN: CONFIRMED`
+- `REAL PRICE / OFFER / IMAGE / ACTIVE PROMOTION: PASS`
+- `CISS IMAGE BLOB SOURCE: USABLE` · path UNC **NOT_USABLE**
 - **PRODUCTION MOCK GUARD: PASS**
-- **PRODUCT_IMAGE incremental:** fingerprint meta-only no 2º sync (`blob_reads=0`)
+- **PRODUCT_IMAGE incremental:** 2º sync sem retransmissão massiva de BLOB
 
-## Module 6 artefatos
+## Artefatos Module 6
 
-- Matrix: `09-final-qa-matrix.md`
-- Defects: `10-pilot-defects.md`
-- Readiness: `11-pilot-readiness-report.md`
-- Gate JSON: `reconciliation/module-6-pilot-gate.json`
-- Screenshots: `screenshots/module-6/{admin,display}/`
-- Playwright: `frontend/e2e/specs/09-drc6-pilot-gate.spec.ts`
+- `09-final-qa-matrix.md` · `10-pilot-defects.md` · `11-pilot-readiness-report.md`
+- `12-pilot-release-candidate.md` (Day-0 — próximo trabalho permitido)
+- `reconciliation/module-6-pilot-gate.json`
+- `screenshots/module-6/`
+- Playwright `09-drc6-pilot-gate.spec.ts`
 
-## STOP
+## STOP — desenvolvimento funcional
 
-Não iniciar Proof of Play / Retail Media / Device Commands / Stock Intelligence / AI.
+Não iniciar: Proof of Play · Retail Media · Device Commands · Stock Intelligence · AI · novas features Dynamic Retail.
+
+Próximo trabalho permitido: **somente** Pilot Release Candidate / Day-0 (RC-1…RC-4), depois instalação assistida e observação operacional.
