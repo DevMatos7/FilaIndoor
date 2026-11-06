@@ -58,16 +58,21 @@ def _run_scheduled(entity: str) -> None:
         )
         logger.info("retail.sync.scheduled entity=%s stores=%s", entity, len(sources))
         for src in sources:
+            store_id = src.store_id
             try:
-                logger.info("retail.sync.started store=%s entity=%s trigger=SCHEDULED", src.store_id, entity)
+                logger.info("retail.sync.started store=%s entity=%s trigger=SCHEDULED", store_id, entity)
                 RetailSyncService(db).sync_store(
-                    src.store_id, entities=[entity], full=False, trigger="SCHEDULED"
+                    store_id, entities=[entity], full=False, trigger="SCHEDULED"
                 )
-                _last_tick[f"{src.store_id}:{entity}"] = datetime.now(timezone.utc).isoformat()
-                logger.info("retail.sync.completed store=%s entity=%s", src.store_id, entity)
+                _last_tick[f"{store_id}:{entity}"] = datetime.now(timezone.utc).isoformat()
+                logger.info("retail.sync.completed store=%s entity=%s", store_id, entity)
             except Exception as exc:  # noqa: BLE001
+                try:
+                    db.rollback()
+                except Exception:  # noqa: BLE001
+                    logger.exception("retail.sync.rollback_failed store=%s entity=%s", store_id, entity)
                 logger.exception(
-                    "retail.sync.failed store=%s entity=%s err=%s", src.store_id, entity, exc
+                    "retail.sync.failed store=%s entity=%s err=%s", store_id, entity, exc
                 )
     finally:
         db.close()

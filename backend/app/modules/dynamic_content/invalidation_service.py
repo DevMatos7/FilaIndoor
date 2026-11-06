@@ -105,8 +105,9 @@ class DynamicInvalidationService:
             ).all()
         )
         for snap in rows:
-            # Poison data_version so it no longer matches current store version
-            snap.data_version = f"dirty:{snap.data_version}"
+            # Poison data_version so it no longer matches current store version.
+            # Must stay within VARCHAR(80) — never stack "dirty:" prefixes across sync cycles.
+            snap.data_version = "dirty"
             snap.publishable = False
 
     def _bump_store_version(self, store_id: str) -> None:

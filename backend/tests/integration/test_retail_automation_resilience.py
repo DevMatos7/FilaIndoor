@@ -406,7 +406,7 @@ def test_22_23_freshness_hard_stop_and_dirty(seeded, client, auth_header):
         select(DynamicRenderSnapshot).where(DynamicRenderSnapshot.dynamic_content_id == content["id"])
     )
     assert snap is not None
-    assert str(snap.data_version).startswith("dirty:")
+    assert str(snap.data_version).startswith("dirty")
     assert snap.publishable is False
 
     h = client.get(f"/api/v1/retail-data/health?store_id={store_id}", headers=auth_header)
@@ -524,7 +524,18 @@ def test_price_change_pipeline_invalidates(seeded):
     snap = db.scalar(
         select(DynamicRenderSnapshot).where(DynamicRenderSnapshot.dynamic_content_id == content["id"])
     )
-    assert str(snap.data_version).startswith("dirty:")
+    assert str(snap.data_version).startswith("dirty")
+    # Repeated invalidation must not grow beyond VARCHAR(80)
+    with patch("app.modules.dynamic_content.invalidation_service.hub.publish"):
+        for _ in range(20):
+            DynamicInvalidationService(db).invalidate_products(
+                store_id,
+                changed_product_ids=[picanha.id],
+                change_types=["PRICE_CHANGED"],
+            )
+    db.refresh(snap)
+    assert snap.data_version == "dirty"
+    assert len(snap.data_version) <= 80
 
 
 def test_watermark_not_advanced_on_failure(seeded):
