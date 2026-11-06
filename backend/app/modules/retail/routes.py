@@ -17,10 +17,25 @@ from app.modules.auth.deps import require_permissions
 from app.modules.org.models.entities import User
 from app.modules.retail.health_service import RetailHealthService
 from app.modules.retail.models import RetailProduct, RetailSyncRun
+from app.modules.retail.product_media_service import ProductMediaService
 from app.modules.retail.reconcile_service import RetailReconciliationService
 from app.modules.retail.sync_service import RetailSyncService
 
 router = APIRouter(tags=["retail-data"])
+
+
+class ProductMediaAttach(BaseModel):
+    media_asset_id: str
+    store_id: str
+    purpose: str = "PRIMARY"
+    is_primary: bool = True
+
+
+class ProductMediaPatch(BaseModel):
+    is_primary: bool | None = None
+    purpose: str | None = None
+    active: bool | None = None
+    store_id: str | None = None
 
 
 class StoreSourceBody(BaseModel):
@@ -125,20 +140,21 @@ def list_retail_products(
     store_id: str | None = None,
     q: str | None = None,
     section: str | None = None,
+    has_image: str | None = Query(None, description="all|with|without"),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(RETAIL_DATA_VIEWER, RETAIL_CONTENT_VIEWER, RETAIL_CONTENT_ADMIN)),
 ):
     from app.modules.retail.models import RetailPrice, RetailPromotion, RetailStoreProduct
 
-    stmt = select(RetailProduct).order_by(RetailProduct.description).limit(limit)
+    stmt = select(RetailProduct).order_by(RetailProduct.description).limit(limit * 3 if has_image else limit)
     if section:
         stmt = stmt.where(RetailProduct.section_code == section)
     if store_id:
         stmt = stmt.join(RetailStoreProduct, RetailStoreProduct.product_id == RetailProduct.id).where(
             RetailStoreProduct.store_id == store_id
         )
-    rows = list(db.scalars(stmt).all())
+    rows = list(db.scalars(stmt).unique().all())
     if q:
         needle = q.strip().lower()
         rows = [
@@ -149,9 +165,22 @@ def list_retail_products(
             or needle in (r.gtin or "").lower()
             or needle in (r.commercial_description or "").lower()
         ]
+    images: dict = {}
+    if store_id and rows:
+        images = ProductMediaService(db).batch_primary_images([r.id for r in rows], store_id)
+
+    filt = (has_image or "all").lower()
     out = []
     for r in rows:
         payload = _product_payload(r)
+        primary = images.get(r.id) if store_id else None
+        payload["primary_image"] = primary
+        payload["has_image"] = bool(primary)
+        payload["image_status"] = "COM IMAGEM" if primary else "SEM IMAGEM"
+        if filt == "with" and not primary:
+            continue
+        if filt == "without" and primary:
+            continue
         if store_id:
             regular = db.scalar(
                 select(RetailPrice).where(
@@ -182,6 +211,8 @@ def list_retail_products(
             payload["promotion_price"] = promo.promo_amount if promo else None
             payload["quantity_tiers"] = [{"min_qty": q.min_qty, "amount": q.amount} for q in qty]
         out.append(payload)
+        if len(out) >= limit:
+            break
     return out
 
 
@@ -256,4 +287,59 @@ def get_retail_product(
             if sp
             else None
         )
+        payload["primary_image"] = ProductMediaService(db).resolve_primary_image(product_id, store_id)
+        payload["has_image"] = bool(payload["primary_image"])
+        payload["image_status"] = "COM IMAGEM" if payload["has_image"] else "SEM IMAGEM"
+        payload["media"] = ProductMediaService(db).list_for_product(product_id, store_id=store_id)
     return payload
+
+
+@router.get("/retail-products/{product_id}/media")
+def list_product_media(
+    product_id: str,
+    store_id: str | None = Query(None),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions(RETAIL_CONTENT_VIEWER, RETAIL_CONTENT_ADMIN, RETAIL_DATA_VIEWER)),
+):
+    return ProductMediaService(db).list_for_product(product_id, store_id=store_id)
+
+
+@router.post("/retail-products/{product_id}/media", status_code=201)
+def attach_product_media(
+    product_id: str,
+    body: ProductMediaAttach,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permissions(RETAIL_CONTENT_EDITOR, RETAIL_CONTENT_ADMIN)),
+):
+    return ProductMediaService(db).attach(
+        product_id,
+        media_asset_id=body.media_asset_id,
+        store_id=body.store_id,
+        purpose=body.purpose,
+        is_primary=body.is_primary,
+        user_id=user.id,
+    )
+
+
+@router.patch("/retail-products/{product_id}/media/{link_id}")
+def patch_product_media(
+    product_id: str,
+    link_id: str,
+    body: ProductMediaPatch,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions(RETAIL_CONTENT_EDITOR, RETAIL_CONTENT_ADMIN)),
+):
+    data = body.model_dump(exclude_unset=True)
+    store_id = data.pop("store_id", None)
+    return ProductMediaService(db).patch_link(product_id, link_id, store_id=store_id, **data)
+
+
+@router.delete("/retail-products/{product_id}/media/{link_id}")
+def delete_product_media(
+    product_id: str,
+    link_id: str,
+    store_id: str | None = Query(None),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions(RETAIL_CONTENT_EDITOR, RETAIL_CONTENT_ADMIN)),
+):
+    return ProductMediaService(db).detach(product_id, link_id, store_id=store_id)

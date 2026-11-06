@@ -54,14 +54,23 @@ def test_system_templates_seed_idempotent(seeded):
             )
         ).all()
     )
-    assert len(rows) == 4
+    assert len(rows) == 11  # 4 PRICE_TABLE + 7 visual (grid/hero/board)
     slugs = {r.slug for r in rows}
-    assert slugs == {
+    assert {
         "price_table_clean",
         "price_table_compact",
         "price_table_two_columns",
         "price_table_promo",
-    }
+    }.issubset(slugs)
+    assert {
+        "product_grid_2x2",
+        "product_grid_3x2",
+        "product_grid_4x2",
+        "product_hero_clean",
+        "product_hero_promo",
+        "promotion_board_2x2",
+        "promotion_board_3x2",
+    }.issubset(slugs)
 
 
 def test_manual_automatic_hybrid_and_isolation(seeded, client, auth_header):

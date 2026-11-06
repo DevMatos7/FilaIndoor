@@ -7,6 +7,7 @@ import { formatClockDuration } from "../../lib/signageFormat";
 export type DynamicContentOption = {
   id: string;
   name: string;
+  content_type?: string | null;
   template_name?: string | null;
   template_slug?: string | null;
   item_count?: number | null;
@@ -15,6 +16,19 @@ export type DynamicContentOption = {
   status?: string | null;
   freshness?: string | null;
 };
+
+function typeLabel(t?: string | null) {
+  switch ((t || "").toUpperCase()) {
+    case "PRODUCT_GRID":
+      return "GRADE";
+    case "PRODUCT_HERO":
+      return "DESTAQUE";
+    case "PROMOTION_BOARD":
+      return "PAINEL";
+    default:
+      return "PRICE TABLE";
+  }
+}
 
 type Props = {
   open: boolean;
@@ -97,7 +111,9 @@ export function DynamicPicker({ open, onClose, storeId, onConfirm, busy }: Props
         </>
       }
     >
-      <p className="mb-3 text-sm text-ink/65">Tabelas PRICE_TABLE prontas para a playlist desta loja.</p>
+      <p className="mb-3 text-sm text-ink/65">
+        Tabelas, grades, destaques e painéis prontos para a playlist desta loja.
+      </p>
       {error && <Alert variant="danger">{error}</Alert>}
       {loading && <Skeleton.Card />}
       {!loading && selectableRows.length === 0 && (
@@ -123,7 +139,7 @@ export function DynamicPicker({ open, onClose, storeId, onConfirm, busy }: Props
                 <span className="min-w-0 flex-1">
                   <span className="block font-semibold text-brand-900">{row.name}</span>
                   <span className="mt-0.5 block text-xs text-ink/55">
-                    PRICE TABLE · {row.template_name || row.template_slug || "template"}
+                    {typeLabel(row.content_type)} · {row.template_name || row.template_slug || "template"}
                     {row.item_count != null ? ` · ${row.item_count} produtos` : ""}
                     {row.page_count != null ? ` · ${row.page_count} pág.` : ""}
                     {row.total_duration_seconds != null

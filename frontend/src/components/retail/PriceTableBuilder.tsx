@@ -15,11 +15,16 @@ type Template = {
   id: string;
   name: string;
   slug: string;
+  content_type?: string;
   config: {
     default_items_per_page?: number;
     min_items_per_page?: number;
     max_items_per_page?: number;
     ui_name?: string;
+    columns?: number;
+    rows?: number;
+    image_fit?: string;
+    default_promotion_only?: boolean;
   };
 };
 
@@ -39,11 +44,22 @@ type Props = {
   contentId?: string | null;
   onClose: () => void;
   onSaved: () => void;
+  /** Filter templates by content_type (default PRICE_TABLE). */
+  contentType?: string;
+  titleLabel?: string;
 };
 
 const STEPS = ["Informações", "Produtos", "Aparência", "Exibição", "Preview"] as const;
 
-export function PriceTableBuilder({ open, storeId, contentId, onClose, onSaved }: Props) {
+export function PriceTableBuilder({
+  open,
+  storeId,
+  contentId,
+  onClose,
+  onSaved,
+  contentType = "PRICE_TABLE",
+  titleLabel = "tabela",
+}: Props) {
   const [step, setStep] = useState(0);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [name, setName] = useState("");
@@ -72,17 +88,27 @@ export function PriceTableBuilder({ open, storeId, contentId, onClose, onSaved }
   const [loadingPreview, setLoadingPreview] = useState(false);
 
   const template = templates.find((t) => t.id === templateId);
+  const isVisual =
+    contentType === "PRODUCT_GRID" ||
+    contentType === "PRODUCT_HERO" ||
+    contentType === "PROMOTION_BOARD";
+  const lockedPageSize = Boolean(
+    isVisual && template?.config?.columns && template?.config?.rows,
+  ) || contentType === "PRODUCT_HERO";
 
   useEffect(() => {
     if (!open || !storeId) return;
     void (async () => {
       const { data } = await api.get<Template[]>("/dynamic-content/templates", {
-        params: { store_id: storeId, content_type: "PRICE_TABLE" },
+        params: { store_id: storeId, content_type: contentType },
       });
       setTemplates(data);
-      if (!templateId && data[0]) {
+      if (!contentId && data[0]) {
         setTemplateId(data[0].id);
         setItemsPerPage(data[0].config.default_items_per_page || 8);
+        if (contentType === "PROMOTION_BOARD" || data[0].config.default_promotion_only) {
+          setPromotionOnly(true);
+        }
       }
       if (contentId) {
         const detail = await api.get(`/dynamic-content/${contentId}`, { params: { store_id: storeId } });
@@ -105,7 +131,7 @@ export function PriceTableBuilder({ open, storeId, contentId, onClose, onSaved }
         }
       }
     })();
-  }, [open, storeId, contentId]);
+  }, [open, storeId, contentId, contentType]);
 
   useEffect(() => {
     if (!open || !storeId || step !== 1) return;
@@ -168,6 +194,10 @@ export function PriceTableBuilder({ open, storeId, contentId, onClose, onSaved }
         show_unit: showUnit,
         show_regular_price: true,
         show_promo_badge: true,
+        show_image: isVisual ? true : undefined,
+        image_fit: template?.config?.image_fit || (isVisual ? "contain" : undefined),
+        columns: template?.config?.columns,
+        rows: template?.config?.rows,
       },
       rule:
         mode === "MANUAL"
@@ -222,7 +252,11 @@ export function PriceTableBuilder({ open, storeId, contentId, onClose, onSaved }
   }
 
   return (
-    <Drawer open={open} onClose={onClose} title={contentId ? "Editar tabela" : "Nova tabela"}>
+    <Drawer
+      open={open}
+      onClose={onClose}
+      title={contentId ? `Editar ${titleLabel}` : `Nova ${titleLabel}`}
+    >
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2" role="tablist" aria-label="Etapas">
           {STEPS.map((label, i) => (
@@ -414,7 +448,11 @@ export function PriceTableBuilder({ open, storeId, contentId, onClose, onSaved }
                 aria-pressed={templateId === t.id}
                 onClick={() => {
                   setTemplateId(t.id);
-                  setItemsPerPage(t.config.default_items_per_page || 8);
+                  const geo =
+                    t.config.columns && t.config.rows
+                      ? t.config.columns * t.config.rows
+                      : t.config.default_items_per_page || 8;
+                  setItemsPerPage(contentType === "PRODUCT_HERO" ? 1 : geo);
                 }}
                 className={`rounded-ds border p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600 ${
                   templateId === t.id ? "border-brand-700 bg-brand-50 ring-2 ring-brand-600" : "border-brand-100"
@@ -448,10 +486,15 @@ export function PriceTableBuilder({ open, storeId, contentId, onClose, onSaved }
               type="number"
               value={String(itemsPerPage)}
               onChange={(e) => setItemsPerPage(Number(e.target.value) || 1)}
+              disabled={lockedPageSize}
               hint={
-                template
-                  ? `${template.config.min_items_per_page}–${template.config.max_items_per_page}`
-                  : undefined
+                lockedPageSize
+                  ? contentType === "PRODUCT_HERO"
+                    ? "Hero: 1 produto por página"
+                    : `Grade: ${template?.config?.columns}×${template?.config?.rows}`
+                  : template
+                    ? `${template.config.min_items_per_page}–${template.config.max_items_per_page}`
+                    : undefined
               }
             />
             <Input
@@ -525,7 +568,7 @@ export function PriceTableBuilder({ open, storeId, contentId, onClose, onSaved }
               </Button>
             ) : (
               <Button onClick={() => void save()} disabled={saving || !name.trim() || !templateId}>
-                {saving ? "Salvando…" : "Salvar tabela"}
+                {saving ? "Salvando…" : `Salvar ${titleLabel}`}
               </Button>
             )}
           </div>

@@ -21,18 +21,32 @@ export type MediaPickerProps = {
   storeId: string;
   onConfirm: (assets: MediaItem[]) => void | Promise<void>;
   busy?: boolean;
+  /** Initial / locked media type filter (e.g. IMAGE for product packshots). */
+  defaultFilter?: FilterType;
+  lockFilter?: boolean;
+  /** When true, selecting a new asset replaces previous selection. */
+  singleSelect?: boolean;
 };
 
 /**
- * Media Library picker for Playlist Studio.
- * Multi-select: order = order of selection.
+ * Media Library picker for Playlist Studio / Product Media.
+ * Multi-select: order = order of selection (unless singleSelect).
  */
-export function MediaPicker({ open, onClose, storeId, onConfirm, busy }: MediaPickerProps) {
+export function MediaPicker({
+  open,
+  onClose,
+  storeId,
+  onConfirm,
+  busy,
+  defaultFilter = "ALL",
+  lockFilter = false,
+  singleSelect = false,
+}: MediaPickerProps) {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<FilterType>("ALL");
+  const [filter, setFilter] = useState<FilterType>(defaultFilter);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -42,7 +56,7 @@ export function MediaPicker({ open, onClose, storeId, onConfirm, busy }: MediaPi
     setError(null);
     setSelectedIds([]);
     setQuery("");
-    setFilter("ALL");
+    setFilter(defaultFilter);
     void (async () => {
       try {
         const { data } = await api.get<MediaItem[]>("/media", {
@@ -59,7 +73,7 @@ export function MediaPicker({ open, onClose, storeId, onConfirm, busy }: MediaPi
       }
     })();
     return () => ac.abort();
-  }, [open, storeId]);
+  }, [open, storeId, defaultFilter]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -75,7 +89,10 @@ export function MediaPicker({ open, onClose, storeId, onConfirm, busy }: MediaPi
   }, [items, query, filter]);
 
   function toggle(id: string) {
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    setSelectedIds((prev) => {
+      if (singleSelect) return prev.includes(id) ? [] : [id];
+      return prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+    });
   }
 
   async function confirm() {
@@ -107,9 +124,11 @@ export function MediaPicker({ open, onClose, storeId, onConfirm, busy }: MediaPi
               loading={busy}
               onClick={() => void confirm()}
             >
-              {selectedIds.length > 1
-                ? `Adicionar ${selectedIds.length} conteúdos`
-                : "Adicionar conteúdo"}
+              {singleSelect
+                ? "Associar imagem"
+                : selectedIds.length > 1
+                  ? `Adicionar ${selectedIds.length} conteúdos`
+                  : "Adicionar conteúdo"}
             </Button>
           </div>
         </div>
@@ -131,6 +150,7 @@ export function MediaPicker({ open, onClose, storeId, onConfirm, busy }: MediaPi
             value={filter}
             onChange={(e) => setFilter(e.target.value as FilterType)}
             className="sm:w-40"
+            disabled={lockFilter}
           >
             <option value="ALL">Todos</option>
             <option value="IMAGE">Imagens</option>

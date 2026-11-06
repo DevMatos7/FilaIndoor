@@ -62,7 +62,18 @@ class SnapshotService:
         resolved = self.resolver.resolve(content, store)
         cfg = dict(content.config or {})
         tpl_cfg = dict(template.config or {})
-        items_per_page = int(cfg.get("items_per_page") or tpl_cfg.get("default_items_per_page") or 8)
+        content_type = (content.content_type or template.content_type or "PRICE_TABLE").upper()
+
+        # geometry for visual templates
+        cols = int(cfg.get("columns") or tpl_cfg.get("columns") or 0)
+        rows_n = int(cfg.get("rows") or tpl_cfg.get("rows") or 0)
+        if content_type in {"PRODUCT_GRID", "PROMOTION_BOARD"} and cols and rows_n:
+            items_per_page = cols * rows_n
+        elif content_type == "PRODUCT_HERO":
+            items_per_page = 1
+        else:
+            items_per_page = int(cfg.get("items_per_page") or tpl_cfg.get("default_items_per_page") or 8)
+
         min_ipp = int(tpl_cfg.get("min_items_per_page") or 1)
         max_ipp = int(tpl_cfg.get("max_items_per_page") or 40)
         if items_per_page < min_ipp or items_per_page > max_ipp:
@@ -89,19 +100,28 @@ class SnapshotService:
             if total_duration < 3:
                 raise ValidationError("total_duration_seconds inválido")
 
+        # Batch product images for visual types (and optional PRICE_TABLE)
+        from app.modules.retail.product_media_service import ProductMediaService
+
+        image_map = ProductMediaService(self.db).batch_primary_images(
+            [i.product_id for i in display_items], store.id
+        )
+
         pages = []
         for page_no in range(page_count):
             start = page_no * items_per_page
             chunk = display_items[start : start + items_per_page]
-            pages.append(
-                {
-                    "number": page_no + 1,
-                    "items": [it.as_dict(show_unit=show_unit) for it in chunk],
-                }
-            )
+            page_items = []
+            for it in chunk:
+                d = it.as_dict(show_unit=show_unit)
+                img = image_map.get(it.product_id)
+                d["image"] = img  # None → renderer fallback
+                page_items.append(d)
+            pages.append({"number": page_no + 1, "items": page_items})
 
         hash_basis = {
             "content_id": content.id,
+            "content_type": content_type,
             "name": content.name,
             "selection_mode": content.selection_mode,
             "template_slug": template.slug,
@@ -115,6 +135,7 @@ class SnapshotService:
                     "tiers": [(str(t.min_qty), str(t.amount)) for t in i.quantity_tiers],
                     "unit": i.unit,
                     "description": i.description,
+                    "image_asset_id": (image_map.get(i.product_id) or {}).get("asset_id"),
                 }
                 for i in display_items
             ],
@@ -126,12 +147,14 @@ class SnapshotService:
         if freshness == "DEGRADED":
             warnings.append("Dados de preço em estado DEGRADED — preview permitido com atenção.")
         if blocking_missing and content.selection_mode.upper() in {"MANUAL", "HYBRID"}:
-            warnings.append("Existem produtos sem preço válido; tabela não está PRONTA.")
+            warnings.append("Existem produtos sem preço válido; conteúdo não está PRONTO.")
+        if item_count == 0 and content_type == "PROMOTION_BOARD":
+            warnings.append("Nenhuma promoção vigente encontrada.")
 
         status = self._table_status(content, freshness, blocking_missing, item_count)
 
         payload = {
-            "content_type": "PRICE_TABLE",
+            "content_type": content_type,
             "title": cfg.get("title") or content.name,
             "template": {"id": template.id, "slug": template.slug, "name": template.name, "config": tpl_cfg},
             "source": {
@@ -147,6 +170,8 @@ class SnapshotService:
                 "page_duration_seconds": page_duration,
                 "duration_mode": duration_mode,
                 "total_duration_seconds": total_duration,
+                "columns": cols or tpl_cfg.get("columns"),
+                "rows": rows_n or tpl_cfg.get("rows"),
             },
             "pages": pages,
             "item_count": item_count,
@@ -155,7 +180,12 @@ class SnapshotService:
             "ignored_missing_price": resolved.ignored_missing_price,
             "missing_price_product_ids": resolved.missing_price_product_ids,
             "content_hash": content_hash,
+            "image_fit": cfg.get("image_fit") or tpl_cfg.get("image_fit") or "contain",
+            "show_image": bool(cfg.get("show_image", tpl_cfg.get("show_image", True))),
         }
+
+        # Empty visual boards are not publishable for TV
+        publishable_final = publishable and status == "PRONTA" and item_count > 0
 
         if persist and publishable:
             snap = DynamicRenderSnapshot(
@@ -167,7 +197,7 @@ class SnapshotService:
                 item_count=item_count,
                 page_count=page_count,
                 source_freshness=freshness,
-                publishable=publishable and status == "PRONTA",
+                publishable=publishable_final,
                 warnings=warnings,
             )
             self.db.add(snap)
@@ -215,9 +245,11 @@ class SnapshotService:
         pag = snapshot.get("pagination") or {}
         src = snapshot.get("source") or {}
         tpl = snapshot.get("template") or {}
+        ctype = snapshot.get("content_type") or "PRICE_TABLE"
         return {
             "id": content_id,
-            "type": "PRICE_TABLE",
+            "type": ctype,
+            "content_type": ctype,
             "name": name,
             "version": snapshot.get("content_hash") or snapshot.get("snapshot_id"),
             "generated_at": src.get("generated_at"),
@@ -230,6 +262,8 @@ class SnapshotService:
             "item_count": snapshot.get("item_count"),
             "status": snapshot.get("status"),
             "title": snapshot.get("title") or name,
+            "image_fit": snapshot.get("image_fit") or "contain",
+            "show_image": snapshot.get("show_image", True),
             "template": {
                 "id": tpl.get("id"),
                 "slug": tpl.get("slug"),
@@ -237,7 +271,19 @@ class SnapshotService:
                 "config": {
                     k: v
                     for k, v in (tpl.get("config") or {}).items()
-                    if k in {"columns", "emphasize_promo", "show_unit", "default_items_per_page"}
+                    if k
+                    in {
+                        "columns",
+                        "rows",
+                        "emphasize_promo",
+                        "show_unit",
+                        "show_image",
+                        "show_regular_price",
+                        "show_promo_badge",
+                        "image_fit",
+                        "hero_layout",
+                        "default_items_per_page",
+                    }
                 },
             },
             "pages": snapshot.get("pages") or [],
@@ -266,6 +312,24 @@ class SnapshotService:
         parts = []
         for r in sorted(rows, key=lambda x: x.entity):
             parts.append(f"{r.entity}:{r.watermark_value or ''}:{r.last_success_at.isoformat() if r.last_success_at else ''}")
+        # Product media changes must invalidate snapshots (hash includes image ids)
+        from sqlalchemy import func
+
+        from app.modules.retail.models import ProductMediaLink
+
+        media_max = self.db.scalar(
+            select(func.max(ProductMediaLink.updated_at)).where(
+                (ProductMediaLink.store_id == store_id) | (ProductMediaLink.store_id.is_(None)),
+                ProductMediaLink.active.is_(True),
+            )
+        )
+        media_cnt = self.db.scalar(
+            select(func.count()).select_from(ProductMediaLink).where(
+                (ProductMediaLink.store_id == store_id) | (ProductMediaLink.store_id.is_(None)),
+                ProductMediaLink.active.is_(True),
+            )
+        )
+        parts.append(f"MEDIA:{media_cnt}:{media_max.isoformat() if media_max else ''}")
         raw = "|".join(parts) or "none"
         return hashlib.sha256(raw.encode()).hexdigest()[:24]
 

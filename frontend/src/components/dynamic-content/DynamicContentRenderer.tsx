@@ -3,7 +3,11 @@ import { pageIndexFromElapsed, usePlaybackClock } from "../display/PlaybackClock
 import { fetchPlayerDynamicContent } from "../../services/dynamicContentPlayer";
 import { DynamicContentFallback } from "./DynamicContentFallback";
 import { PriceTableRenderer } from "./PriceTableRenderer";
+import { ProductGridRenderer } from "./ProductGridRenderer";
+import { ProductHeroRenderer } from "./ProductHeroRenderer";
+import { PromotionBoardRenderer } from "./PromotionBoardRenderer";
 import {
+  contentTypeOf,
   normalizePriceTableSnapshot,
   type PriceTableSnapshot,
 } from "./dynamicContentTypes";
@@ -15,7 +19,6 @@ type PlayerProps = {
   itemKey: string;
   paused: boolean;
   onFailed?: () => void;
-  /** Optional preloaded snapshot (studio). */
   snapshot?: never;
   pageIndex?: never;
 };
@@ -33,22 +36,30 @@ type PreviewProps = {
 
 type Props = PlayerProps | PreviewProps;
 
+function renderByType(snapshot: PriceTableSnapshot | null, pageIndex: number, fill: boolean) {
+  const type = contentTypeOf(snapshot);
+  switch (type) {
+    case "PRODUCT_GRID":
+      return <ProductGridRenderer snapshot={snapshot} pageIndex={pageIndex} fill={fill} />;
+    case "PRODUCT_HERO":
+      return <ProductHeroRenderer snapshot={snapshot} pageIndex={pageIndex} fill={fill} />;
+    case "PROMOTION_BOARD":
+      return <PromotionBoardRenderer snapshot={snapshot} pageIndex={pageIndex} fill={fill} />;
+    case "PRICE_TABLE":
+      return <PriceTableRenderer snapshot={snapshot} pageIndex={pageIndex} fill={fill} />;
+    default:
+      console.warn("[display] dynamic_content_skipped unknown type", type);
+      return <DynamicContentFallback />;
+  }
+}
+
 /**
- * Routes DYNAMIC content to the shared PriceTableRenderer.
- * Player mode: fetch + ETag cache + page timer via PlaybackClock.
- * Preview mode: controlled snapshot/page (admin / studio).
+ * Shared dynamic router — Admin Preview + Studio + TV.
  */
 export function DynamicContentRenderer(props: Props) {
   if (props.mode === "preview") {
-    return (
-      <PriceTableRenderer
-        snapshot={props.snapshot}
-        pageIndex={props.pageIndex ?? 0}
-        fill
-      />
-    );
+    return renderByType(props.snapshot, props.pageIndex ?? 0, true);
   }
-
   return <PlayerDynamicContent {...props} />;
 }
 
@@ -74,12 +85,32 @@ function PlayerDynamicContent({
         onFailed?.();
         return;
       }
-      setSnapshot(normalizePriceTableSnapshot(result.payload));
+      const normalized = normalizePriceTableSnapshot(result.payload);
+      if (!normalized || !normalized.pages?.length || (normalized.item_count ?? 0) === 0) {
+        console.warn("[display] dynamic_content_skipped empty", contentId);
+        setFailed(true);
+        onFailed?.();
+        return;
+      }
+      // Preload next page images lightly
+      const pages = normalized.pages || [];
+      const next = pages[1];
+      next?.items?.forEach((it) => {
+        const url = (it as { image?: { url?: string } }).image?.url;
+        if (url) {
+          const img = new Image();
+          img.src = url;
+        }
+      });
+      setSnapshot(normalized);
     })();
     return () => {
       alive = false;
     };
-  }, [contentId, token, itemKey, onFailed]);
+    // onFailed is intentionally omitted — parent often passes an inline callback
+    // and including it re-triggers fetch forever (loading flash / black frame).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contentId, token, itemKey]);
 
   const data = normalizePriceTableSnapshot(snapshot);
   const pageDur = data?.page_duration_seconds ?? 8;
@@ -101,7 +132,5 @@ function PlayerDynamicContent({
     return <div className="absolute inset-0 bg-brand-950" data-testid="dynamic-loading" />;
   }
 
-  return (
-    <PriceTableRenderer snapshot={data} pageIndex={pageIndex} fill />
-  );
+  return renderByType(data, pageIndex, true);
 }

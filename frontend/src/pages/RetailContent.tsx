@@ -8,6 +8,7 @@ import {
   EmptyState,
   MetricCard,
   PageHeader,
+  Select,
   StatusDot,
   Tabs,
 } from "../design-system";
@@ -16,6 +17,7 @@ import { useStoreContext } from "../context/StoreContext";
 import api from "../services/api";
 import { formatBrl } from "../utils/formatPrice";
 import { PriceTableBuilder } from "../components/retail/PriceTableBuilder";
+import { ProductDrawer } from "../components/retail/ProductDrawer";
 
 type Health = {
   store_id: string;
@@ -40,6 +42,7 @@ type Overview = {
 type TableRow = {
   id: string;
   name: string;
+  content_type?: string;
   selection_mode: string;
   template_name?: string;
   item_count?: number | null;
@@ -59,6 +62,9 @@ type ProductRow = {
   promotion_price?: number | null;
   quantity_tiers?: { min_qty: number; amount: number }[];
   synced_at?: string | null;
+  has_image?: boolean;
+  image_status?: string;
+  primary_image?: { url?: string } | null;
 };
 
 function statusTone(status: string): StatusDotTone {
@@ -75,6 +81,19 @@ function formatLag(sec: number | null | undefined): string {
   return `${(sec / 3600).toFixed(1)} h`;
 }
 
+function typeLabel(t?: string) {
+  switch ((t || "").toUpperCase()) {
+    case "PRODUCT_GRID":
+      return "Grade de produtos";
+    case "PRODUCT_HERO":
+      return "Produto em destaque";
+    case "PROMOTION_BOARD":
+      return "Painel promocional";
+    default:
+      return "Tabela de preços";
+  }
+}
+
 export default function RetailContent() {
   const { selectedStoreId: storeId, loading: storesLoading } = useStoreContext();
   const [tab, setTab] = useState("overview");
@@ -88,6 +107,10 @@ export default function RetailContent() {
   const [syncing, setSyncing] = useState(false);
   const [builderOpen, setBuilderOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [builderType, setBuilderType] = useState("PRICE_TABLE");
+  const [imageFilter, setImageFilter] = useState<"all" | "with" | "without">("all");
+  const [productId, setProductId] = useState<string | null>(null);
+  const [vitrineChooser, setVitrineChooser] = useState(false);
 
   const load = useCallback(async () => {
     if (!storeId) return;
@@ -97,7 +120,9 @@ export default function RetailContent() {
         api.get<Health>("/retail-data/health", { params: { store_id: storeId } }),
         api.get<Overview>("/dynamic-content/overview", { params: { store_id: storeId } }),
         api.get<TableRow[]>("/dynamic-content", { params: { store_id: storeId } }),
-        api.get<ProductRow[]>("/retail-products", { params: { store_id: storeId, limit: 50 } }),
+        api.get<ProductRow[]>("/retail-products", {
+          params: { store_id: storeId, limit: 50, has_image: imageFilter },
+        }),
       ]);
       setHealth(h.data);
       setOverview(o.data);
@@ -107,11 +132,20 @@ export default function RetailContent() {
     } catch {
       setError("Não foi possível carregar Produtos & preços.");
     }
-  }, [storeId]);
+  }, [storeId, imageFilter]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Store change: clear drafts/selections
+  useEffect(() => {
+    setBuilderOpen(false);
+    setEditId(null);
+    setProductId(null);
+    setVitrineChooser(false);
+    setMsg(null);
+  }, [storeId]);
 
   async function ensureMapping() {
     if (!storeId) return;
@@ -152,6 +186,11 @@ export default function RetailContent() {
     await load();
   }
 
+  const priceTables = tables.filter((t) => !t.content_type || t.content_type === "PRICE_TABLE");
+  const vitrines = tables.filter((t) =>
+    ["PRODUCT_GRID", "PRODUCT_HERO", "PROMOTION_BOARD"].includes((t.content_type || "").toUpperCase()),
+  );
+
   if (!storesLoading && !storeId) {
     return (
       <div className="space-y-4">
@@ -165,16 +204,27 @@ export default function RetailContent() {
     <div className="space-y-6">
       <PageHeader
         title="Produtos & preços"
-        description="Tabelas dinâmicas alimentadas pelo CISS — sem preço digitável."
+        description="Conteúdo dinâmico CISS — tabela, grade, destaque e painel promocional."
         actions={
-          <Button
-            onClick={() => {
-              setEditId(null);
-              setBuilderOpen(true);
-            }}
-          >
-            + Nova tabela
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setBuilderType("PRICE_TABLE");
+                setEditId(null);
+                setBuilderOpen(true);
+              }}
+            >
+              + Nova tabela
+            </Button>
+            <Button
+              onClick={() => {
+                setVitrineChooser(true);
+              }}
+            >
+              + Nova vitrine
+            </Button>
+          </div>
         }
       />
 
@@ -192,6 +242,7 @@ export default function RetailContent() {
           { id: "overview", label: "Visão geral" },
           { id: "products", label: "Produtos" },
           { id: "tables", label: "Tabelas" },
+          { id: "vitrines", label: "Vitrines" },
           { id: "sync", label: "Sincronização CISS" },
         ]}
       />
@@ -202,7 +253,7 @@ export default function RetailContent() {
           <MetricCard label="Na loja" value={String(overview?.store_products ?? "—")} />
           <MetricCard label="Preços regulares" value={String(overview?.active_regular_prices ?? "—")} />
           <MetricCard label="Promoções" value={String(overview?.active_promotions ?? "—")} />
-          <MetricCard label="Tabelas" value={String(overview?.tables ?? "—")} />
+          <MetricCard label="Conteúdos dinâmicos" value={String(overview?.tables ?? "—")} />
           <Card className="sm:col-span-2 lg:col-span-5">
             <CardContent className="flex flex-wrap items-center gap-3 py-4">
               <StatusDot
@@ -218,42 +269,69 @@ export default function RetailContent() {
       )}
 
       {tab === "products" && (
-        <div className="overflow-x-auto rounded-ds border border-brand-100">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-brand-50 text-brand-900">
-              <tr>
-                <th className="px-3 py-2">Produto</th>
-                <th className="px-3 py-2">SKU</th>
-                <th className="px-3 py-2">Un.</th>
-                <th className="px-3 py-2">Regular</th>
-                <th className="px-3 py-2">Promo</th>
-                <th className="px-3 py-2">Faixas</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((p) => (
-                <tr key={p.id} className="border-t border-brand-50">
-                  <td className="px-3 py-2">{p.commercial_description || p.description}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{p.source_product_id}</td>
-                  <td className="px-3 py-2">{p.unit}</td>
-                  <td className="px-3 py-2 tabular-nums">{formatBrl(p.regular_price)}</td>
-                  <td className="px-3 py-2 tabular-nums">{formatBrl(p.promotion_price)}</td>
-                  <td className="px-3 py-2 text-xs text-ink/70">
-                    {(p.quantity_tiers || [])
-                      .map((t) => `${t.min_qty}+ ${formatBrl(t.amount)}`)
-                      .join(" · ") || "—"}
-                  </td>
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="text-sm text-ink/70" htmlFor="img-filter">
+              Imagem
+            </label>
+            <Select
+              id="img-filter"
+              value={imageFilter}
+              onChange={(e) => setImageFilter(e.target.value as "all" | "with" | "without")}
+              className="w-44"
+            >
+              <option value="all">Todos</option>
+              <option value="with">Com imagem</option>
+              <option value="without">Sem imagem</option>
+            </Select>
+          </div>
+          <div className="overflow-x-auto rounded-ds border border-brand-100">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-brand-50 text-brand-900">
+                <tr>
+                  <th className="px-3 py-2">Produto</th>
+                  <th className="px-3 py-2">SKU</th>
+                  <th className="px-3 py-2">Un.</th>
+                  <th className="px-3 py-2">Regular</th>
+                  <th className="px-3 py-2">Promo</th>
+                  <th className="px-3 py-2">Imagem</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {products.length === 0 && <EmptyState title="Sem produtos" description="Sincronize o CISS nesta loja." />}
+              </thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr key={p.id} className="border-t border-brand-50">
+                    <td className="px-3 py-2">
+                      <button
+                        type="button"
+                        className="text-left font-medium text-brand-800 hover:underline"
+                        onClick={() => setProductId(p.id)}
+                      >
+                        {p.commercial_description || p.description}
+                      </button>
+                    </td>
+                    <td className="px-3 py-2 font-mono text-xs">{p.source_product_id}</td>
+                    <td className="px-3 py-2">{p.unit}</td>
+                    <td className="px-3 py-2 tabular-nums">{formatBrl(p.regular_price)}</td>
+                    <td className="px-3 py-2 tabular-nums">{formatBrl(p.promotion_price)}</td>
+                    <td className="px-3 py-2">
+                      <Badge tone={p.has_image ? "success" : "neutral"}>
+                        {p.image_status || (p.has_image ? "COM IMAGEM" : "SEM IMAGEM")}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {products.length === 0 && (
+              <EmptyState title="Sem produtos" description="Sincronize o CISS nesta loja." />
+            )}
+          </div>
         </div>
       )}
 
       {tab === "tables" && (
         <div className="grid gap-3 md:grid-cols-2">
-          {tables.map((t) => (
+          {priceTables.map((t) => (
             <Card key={t.id}>
               <CardContent className="space-y-2 py-4">
                 <div className="flex items-start justify-between gap-2">
@@ -273,6 +351,7 @@ export default function RetailContent() {
                     size="sm"
                     variant="secondary"
                     onClick={() => {
+                      setBuilderType("PRICE_TABLE");
                       setEditId(t.id);
                       setBuilderOpen(true);
                     }}
@@ -286,22 +365,59 @@ export default function RetailContent() {
               </CardContent>
             </Card>
           ))}
-          {tables.length === 0 && (
-            <EmptyState
-              title="Nenhuma tabela"
-              description="Crie a primeira tabela de preços com dados reais do CISS."
-              action={
-                <Button
-                  onClick={() => {
-                    setEditId(null);
-                    setBuilderOpen(true);
-                  }}
-                >
-                  + Nova tabela
-                </Button>
-              }
-            />
+          {priceTables.length === 0 && (
+            <EmptyState title="Nenhuma tabela" description="Crie a primeira tabela de preços." />
           )}
+        </div>
+      )}
+
+      {tab === "vitrines" && (
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button type="button" onClick={() => setVitrineChooser(true)}>
+              + Nova vitrine
+            </Button>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            {vitrines.map((t) => (
+              <Card key={t.id}>
+                <CardContent className="space-y-2 py-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-ink/50">{typeLabel(t.content_type)}</p>
+                      <h3 className="font-display text-lg text-brand-900">{t.name}</h3>
+                      <p className="text-sm text-ink/60">
+                        {t.selection_mode} · {t.template_name}
+                      </p>
+                    </div>
+                    <Badge tone={t.status === "PRONTA" ? "success" : "warning"}>{t.status || "—"}</Badge>
+                  </div>
+                  <p className="text-sm text-ink/70">
+                    {t.item_count ?? "—"} produtos · {t.page_count ?? "—"} pág. · {t.total_duration_seconds ?? "—"}s
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        setBuilderType(t.content_type || "PRODUCT_GRID");
+                        setEditId(t.id);
+                        setBuilderOpen(true);
+                      }}
+                    >
+                      Editar
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={() => void removeTable(t.id)}>
+                      Excluir
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {vitrines.length === 0 && (
+              <EmptyState title="Nenhuma vitrine" description="Crie grade, destaque ou painel promocional." />
+            )}
+          </div>
         </div>
       )}
 
@@ -344,13 +460,63 @@ export default function RetailContent() {
         </div>
       )}
 
+      {vitrineChooser && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-brand-950/40 p-4">
+          <div className="w-full max-w-lg rounded-ds bg-surface p-5 shadow-ds-md">
+            <h3 className="font-display text-xl text-brand-900">Nova vitrine</h3>
+            <p className="mt-1 text-sm text-ink/65">Escolha o tipo de conteúdo visual.</p>
+            <div className="mt-4 grid gap-3">
+              {(
+                [
+                  ["PRODUCT_GRID", "Grade de produtos", "Vários produtos em grade 2×2 / 3×2 / 4×2"],
+                  ["PRODUCT_HERO", "Produto em destaque", "Um produto por página com foto e preço"],
+                  ["PROMOTION_BOARD", "Painel promocional", "Campanha visual de ofertas"],
+                ] as const
+              ).map(([type, title, desc]) => (
+                <button
+                  key={type}
+                  type="button"
+                  className="rounded-ds border border-brand-100 p-4 text-left hover:bg-brand-50"
+                  onClick={() => {
+                    setVitrineChooser(false);
+                    setBuilderType(type);
+                    setEditId(null);
+                    setBuilderOpen(true);
+                  }}
+                >
+                  <span className="block font-semibold text-brand-900">{title}</span>
+                  <span className="mt-1 block text-xs text-ink/55">{desc}</span>
+                </button>
+              ))}
+            </div>
+            <div className="mt-4 flex justify-end">
+              <Button variant="ghost" onClick={() => setVitrineChooser(false)}>
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {storeId && (
         <PriceTableBuilder
           open={builderOpen}
           storeId={storeId}
           contentId={editId}
+          contentType={builderType}
+          titleLabel={builderType === "PRICE_TABLE" ? "tabela" : "vitrine"}
           onClose={() => setBuilderOpen(false)}
           onSaved={() => void load()}
+        />
+      )}
+
+      {storeId && (
+        <ProductDrawer
+          open={!!productId}
+          storeId={storeId}
+          productId={productId}
+          onClose={() => setProductId(null)}
+          onChanged={() => void load()}
         />
       )}
     </div>

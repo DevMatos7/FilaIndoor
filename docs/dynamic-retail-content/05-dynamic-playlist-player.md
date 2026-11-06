@@ -80,6 +80,11 @@ Sem descrição válida → item inválido. **Nunca** `source_product_id` / SKU 
 - `DELETE` com `usage_count > 0` → 409.
 - `usage_count` / `usage` aditivos na API admin.
 
-## Não implementado (Module 4+)
+## Module 4 (visual)
 
-PRODUCT_GRID / HERO / PROMOTION_BOARD / ProductMedia / WebSocket invalidation / stock filter / Proof of Play.
+`PRODUCT_GRID` / `PRODUCT_HERO` / `PROMOTION_BOARD` + `ProductMediaLink` → ver [06-product-visual-engine.md](./06-product-visual-engine.md).  
+`DynamicContentRenderer` roteia os quatro tipos; PlaybackClock / ETag / stale / override inalterados.
+
+## Não implementado (Module 5+)
+
+WebSocket invalidation / stock filter / Proof of Play / Retail Media / Automation.

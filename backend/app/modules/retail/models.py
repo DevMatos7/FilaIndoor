@@ -126,6 +126,31 @@ class RetailSyncWatermark(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow, onupdate=utcnow)
 
 
+class ProductMediaLink(Base):
+    """Associação Product → MediaAsset (sem duplicar arquivo)."""
+
+    __tablename__ = "product_media_links"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    product_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("retail_products.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    store_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    media_asset_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("media_assets.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    purpose: Mapped[str] = mapped_column(String(20), nullable=False, default="PRIMARY")  # PRIMARY|SECONDARY|BACKGROUND
+    source: Mapped[str] = mapped_column(String(20), nullable=False, default="MANUAL")  # MANUAL|CISS|SUPPLIER
+    is_primary: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow, onupdate=utcnow)
+
+
 class RetailSyncRun(Base):
     __tablename__ = "retail_sync_runs"
 

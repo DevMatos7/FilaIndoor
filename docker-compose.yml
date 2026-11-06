@@ -37,6 +37,7 @@ services:
       TOLEDO_API_BASE_URL: ""
       TOLEDO_API_KEY: ""
       ERP_PROVIDER: mock
+      RETAIL_PROVIDER: mock
       REAL_PLUS_ENABLED: "true"
     extra_hosts:
       - "host.docker.internal:host-gateway"

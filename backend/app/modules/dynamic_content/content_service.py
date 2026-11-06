@@ -74,7 +74,7 @@ class DynamicContentService:
         row = self._apply_body(DynamicContent(store_id=store_id, created_by=user_id), body, creating=True)
         self.db.add(row)
         self.db.flush()
-        self._sync_rules_products(row, body)
+        self._sync_rules_products(row, body, creating=True)
         self.db.commit()
         self.db.refresh(row)
         return self._content_detail(row)
@@ -82,7 +82,7 @@ class DynamicContentService:
     def update_content(self, content_id: str, store_id: str, body: dict[str, Any]) -> dict[str, Any]:
         row = self._get_owned(content_id, store_id)
         self._apply_body(row, body, creating=False)
-        self._sync_rules_products(row, body, replace=True)
+        self._sync_rules_products(row, body, replace=True, creating=False)
         row.updated_at = utcnow()
         self.db.commit()
         self.db.refresh(row)
@@ -213,17 +213,26 @@ class DynamicContentService:
         tpl = self.db.get(DynamicContentTemplate, template_id)
         if not tpl or not tpl.active:
             raise ValidationError("template_id inválido")
-        if tpl.content_type != "PRICE_TABLE":
-            raise ValidationError("apenas PRICE_TABLE neste módulo")
+        from app.modules.dynamic_content.templates import ALLOWED_CONTENT_TYPES
+
+        if tpl.content_type not in ALLOWED_CONTENT_TYPES:
+            raise ValidationError(f"content_type não suportado: {tpl.content_type}")
         cfg = dict(row.config or {})
         if body.get("config"):
             cfg.update(body["config"])
         # sanitize display config
         if "available_only" in cfg and cfg["available_only"]:
             raise ValidationError("available_only não permitido neste módulo")
+        # grid geometry → items_per_page
+        cols = int(cfg.get("columns") or tpl.config.get("columns") or 0)
+        rows_n = int(cfg.get("rows") or tpl.config.get("rows") or 0)
+        if tpl.content_type in {"PRODUCT_GRID", "PROMOTION_BOARD"} and cols and rows_n:
+            cfg["items_per_page"] = cols * rows_n
+        if tpl.content_type == "PRODUCT_HERO":
+            cfg["items_per_page"] = 1
         row.name = name
         row.description = body.get("description", row.description)
-        row.content_type = "PRICE_TABLE"
+        row.content_type = tpl.content_type
         row.selection_mode = mode
         row.template_id = template_id
         row.config = cfg
@@ -231,14 +240,22 @@ class DynamicContentService:
             row.active = True
         return row
 
-    def _sync_rules_products(self, row: DynamicContent, body: dict[str, Any], *, replace: bool = False) -> None:
-        if replace or "rule" in body:
+    def _sync_rules_products(
+        self, row: DynamicContent, body: dict[str, Any], *, replace: bool = False, creating: bool = False
+    ) -> None:
+        inject_promo_default = creating and row.content_type == "PROMOTION_BOARD" and "rule" not in body
+        if replace or "rule" in body or inject_promo_default:
             existing = list(
                 self.db.scalars(select(DynamicContentRule).where(DynamicContentRule.dynamic_content_id == row.id)).all()
             )
             for e in existing:
                 self.db.delete(e)
             rule_body = body.get("rule")
+            if rule_body is None and creating and row.content_type == "PROMOTION_BOARD":
+                # default promotion_only for promotion boards
+                tpl = self.db.get(DynamicContentTemplate, row.template_id)
+                default_promo = bool((tpl.config or {}).get("default_promotion_only", True)) if tpl else True
+                rule_body = {"promotion_only": default_promo, "available_only": False, "sort_mode": "NAME_ASC"}
             if rule_body:
                 if rule_body.get("available_only"):
                     raise ValidationError(
@@ -311,6 +328,7 @@ class DynamicContentService:
             "name": r.name,
             "selection_mode": r.selection_mode,
             "template_id": r.template_id,
+            "content_type": r.content_type,
             "template_name": tpl.name if tpl else None,
             "template_slug": tpl.slug if tpl else None,
             "item_count": latest.item_count if latest else None,

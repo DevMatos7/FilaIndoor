@@ -59,10 +59,16 @@ class SignageService:
             return {}
         rows = self.db.execute(
             select(PlaylistItem.asset_id, func.count())
-            .where(PlaylistItem.asset_id.in_(asset_ids))
+            .where(PlaylistItem.asset_id.in_(asset_ids), PlaylistItem.active.is_(True))
             .group_by(PlaylistItem.asset_id)
         ).all()
-        return {str(aid): int(cnt) for aid, cnt in rows}
+        counts = {str(aid): int(cnt) for aid, cnt in rows}
+        # DRC-4: ProductMediaLink also counts as usage
+        from app.modules.retail.product_media_service import ProductMediaService
+
+        for aid, cnt in ProductMediaService(self.db).count_usage_for_assets(asset_ids).items():
+            counts[aid] = counts.get(aid, 0) + cnt
+        return counts
 
     def _assert_store(self, asset: MediaAsset, store_id: str | None) -> None:
         if store_id and asset.store_id != store_id:
@@ -215,8 +221,8 @@ class SignageService:
         used = self._usage_counts([asset.id]).get(asset.id, 0)
         if used > 0:
             raise ConflictError(
-                "Este conteúdo está sendo utilizado em uma ou mais playlists. "
-                "Remova-o das playlists antes de excluir."
+                "Este conteúdo está em uso (playlist e/ou imagem de produto). "
+                "Remova as associações antes de excluir."
             )
         asset.active = False
         self.db.commit()
@@ -230,8 +236,8 @@ class SignageService:
         used = self._usage_counts([asset.id]).get(asset.id, 0)
         if used > 0:
             raise ConflictError(
-                "Este conteúdo está sendo utilizado em uma ou mais playlists. "
-                "Remova-o das playlists antes de excluir."
+                "Este conteúdo está em uso (playlist e/ou imagem de produto). "
+                "Remova as associações antes de excluir."
             )
         key = asset.storage_key
         self.db.delete(asset)

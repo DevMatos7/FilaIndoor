@@ -88,5 +88,7 @@ Format: `pt-BR` / `R$ #.##` via formatador central.
 - REAL MULTI-TIER VALIDATION: PENDING REAL CASE  
 - STOCK FILTER: DISABLED BY DESIGN  
 
+Enums `PRODUCT_GRID` / `PRODUCT_HERO` / `PROMOTION_BOARD` foram previstos aqui e implementados no **Module 4** — ver [06-product-visual-engine.md](./06-product-visual-engine.md). Preço continua exclusivo do `PriceDisplayResolver` (sem duplicar lógica nos renderers visuais).
+
 Ver também: [05-dynamic-playlist-player.md](./05-dynamic-playlist-player.md).
 

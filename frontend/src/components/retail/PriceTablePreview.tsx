@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Button } from "../../design-system";
-import { PriceTableRenderer } from "../dynamic-content/PriceTableRenderer";
+import { DynamicContentRenderer } from "../dynamic-content/DynamicContentRenderer";
 import type { PriceTableSnapshot } from "../dynamic-content/dynamicContentTypes";
 
 export type SnapshotItem = {
@@ -14,6 +14,7 @@ export type SnapshotItem = {
   formatted_display?: string | null;
   formatted_regular?: string | null;
   quantity_tiers?: { min_qty: number; amount: number; condition_text: string; formatted_amount?: string }[];
+  image?: { asset_id?: string; url?: string } | null;
 };
 
 export type SnapshotPayload = PriceTableSnapshot & {
@@ -31,7 +32,7 @@ type Props = {
   adminMeta?: boolean;
 };
 
-/** Admin chrome around the shared PriceTableRenderer (same as TV). */
+/** Admin chrome around the shared DynamicContentRenderer (same as TV). */
 export function PriceTablePreview({ snapshot, adminMeta = true }: Props) {
   const [pageIdx, setPageIdx] = useState(0);
   const [vp, setVp] = useState<(typeof VIEWPORTS)[number]>(VIEWPORTS[0]);
@@ -58,12 +59,7 @@ export function PriceTablePreview({ snapshot, adminMeta = true }: Props) {
           </Button>
         ))}
         <div className="ml-auto flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="secondary"
-            disabled={pageIdx <= 0}
-            onClick={() => setPageIdx((p) => Math.max(0, p - 1))}
-          >
+          <Button size="sm" variant="secondary" disabled={pageIdx <= 0} onClick={() => setPageIdx((p) => Math.max(0, p - 1))}>
             Anterior
           </Button>
           <span className="text-sm text-ink/70">
@@ -82,17 +78,15 @@ export function PriceTablePreview({ snapshot, adminMeta = true }: Props) {
 
       {adminMeta && (
         <p className="text-xs text-ink/60">
-          Fonte: {snapshot.source?.provider || "CISS"} · {snapshot.source?.freshness || snapshot.freshness} · status{" "}
+          {snapshot.content_type || snapshot.type || "PRICE_TABLE"} · Fonte:{" "}
+          {snapshot.source?.provider || "CISS"} · {snapshot.source?.freshness || snapshot.freshness} · status{" "}
           {snapshot.status}
-          {(snapshot.pagination?.total_duration_seconds ?? snapshot.total_duration_seconds) != null
-            ? ` · ciclo ${snapshot.pagination?.total_duration_seconds ?? snapshot.total_duration_seconds}s`
-            : ""}
         </p>
       )}
 
       <div className="overflow-hidden rounded-ds border border-brand-200 bg-black/5" style={{ height: outerH }}>
         <div style={scaleStyle} className="relative shadow-lg">
-          <PriceTableRenderer snapshot={snapshot} pageIndex={pageIdx} fill />
+          <DynamicContentRenderer mode="preview" snapshot={snapshot} pageIndex={pageIdx} />
         </div>
       </div>
     </div>
