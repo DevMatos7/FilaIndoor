@@ -14,6 +14,10 @@ sys.path.insert(0, str(ROOT))
 # SQLite em memória para testes de integração sequenciais
 os.environ["DATABASE_URL"] = "sqlite+pysqlite:///:memory:"
 os.environ["SECRET_KEY"] = "test-secret"
+# DRC-5: never start APScheduler during pytest (avoid flaky background sync)
+os.environ["RETAIL_AUTOMATION_ENABLED"] = "false"
+os.environ.setdefault("APP_ENV", "test")
+os.environ.setdefault("RETAIL_PROVIDER", "mock")
 
 from app.core.config import get_settings
 from app.core.security import hash_password

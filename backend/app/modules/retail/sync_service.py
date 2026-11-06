@@ -20,12 +20,21 @@ from app.modules.retail.models import (
     RetailSyncRun,
     RetailSyncWatermark,
 )
+from app.modules.retail.provider_guard import assert_retail_provider_safe
 from app.modules.retail.providers import get_retail_provider
 from app.modules.retail.providers.base import RetailDataProvider
+from app.modules.retail.sync_lock import retail_sync_lock
 from app.modules.retail.timezone_util import validate_iana_timezone
 
 
 ENTITIES = ("PRODUCT", "PRICE", "PROMOTION", "AVAILABILITY")
+
+ENTITY_CHANGE = {
+    "PRODUCT": "PRODUCT_CHANGED",
+    "PRICE": "PRICE_CHANGED",
+    "PROMOTION": "PROMOTION_CHANGED",
+    "AVAILABILITY": "AVAILABILITY_CHANGED",
+}
 
 
 class RetailSyncService:
@@ -92,7 +101,10 @@ class RetailSyncService:
         *,
         entities: list[str] | None = None,
         full: bool = False,
+        trigger: str = "MANUAL",
+        skip_invalidation: bool = False,
     ) -> list[dict[str, Any]]:
+        assert_retail_provider_safe(for_automation=trigger.upper() == "SCHEDULED")
         store = self.db.get(Store, store_id)
         if not store:
             raise NotFoundError("Loja não encontrada")
@@ -103,13 +115,48 @@ class RetailSyncService:
             if e not in ENTITIES:
                 raise ValidationError(f"entity inválida: {e}")
         results = []
+        all_changed: dict[str, set[str]] = {}
         for entity in wanted:
-            results.append(self._sync_entity(store, source, entity, full=full))
+            with retail_sync_lock(self.db, store_id, entity) as acquired:
+                if not acquired:
+                    results.append(
+                        {
+                            "store_id": store_id,
+                            "entity": entity,
+                            "status": "SKIPPED",
+                            "trigger": trigger.upper(),
+                            "error_summary": "sync já em execução (lock)",
+                        }
+                    )
+                    continue
+                result, changed_ids = self._sync_entity(
+                    store, source, entity, full=full, trigger=trigger.upper()
+                )
+                results.append(result)
+                if changed_ids:
+                    all_changed.setdefault(ENTITY_CHANGE[entity], set()).update(changed_ids)
+
+        if not skip_invalidation and all_changed:
+            from app.modules.dynamic_content.invalidation_service import DynamicInvalidationService
+
+            product_ids = sorted({pid for ids in all_changed.values() for pid in ids})
+            change_types = list(all_changed.keys())
+            DynamicInvalidationService(self.db).invalidate_products(
+                store_id,
+                changed_product_ids=product_ids,
+                change_types=change_types,
+            )
         return results
 
     def _sync_entity(
-        self, store: Store, source: RetailStoreSource, entity: str, *, full: bool
-    ) -> dict[str, Any]:
+        self,
+        store: Store,
+        source: RetailStoreSource,
+        entity: str,
+        *,
+        full: bool,
+        trigger: str = "MANUAL",
+    ) -> tuple[dict[str, Any], set[str]]:
         store_id = store.id
         wm = self._get_watermark(entity, store_id)
         since = None if full else self._parse_wm(wm.watermark_value if wm else None)
@@ -117,6 +164,7 @@ class RetailSyncService:
             source_system="CISS",
             entity=entity,
             store_id=store_id,
+            trigger=trigger,
             watermark_before=wm.watermark_value if wm else None,
             status="RUNNING",
         )
@@ -126,6 +174,7 @@ class RetailSyncService:
 
         inserted = updated = skipped = failed = 0
         read = 0
+        changed: set[str] = set()
         max_src: datetime | None = since
         try:
             if entity == "PRODUCT":
@@ -134,12 +183,13 @@ class RetailSyncService:
                 )
                 read = len(products)
                 for p in products:
-                    ins, upd = self._upsert_product(p)
+                    ins, upd, pid = self._upsert_product(p)
                     inserted += ins
                     updated += upd
+                    if pid:
+                        changed.add(pid)
                     if p.source_updated_at and (max_src is None or p.source_updated_at > max_src):
                         max_src = p.source_updated_at
-                # store linkage
                 store_rows = self.provider.fetch_store_products(
                     company_code=source.company_code,
                     since=since,
@@ -151,9 +201,13 @@ class RetailSyncService:
                     if not prod:
                         skipped += 1
                         continue
-                    i, u = self._upsert_store_product(store_id, source.company_code, prod.id, sp)
+                    i, u, touched = self._upsert_store_product(
+                        store_id, source.company_code, prod.id, sp
+                    )
                     inserted += i
                     updated += u
+                    if touched:
+                        changed.add(prod.id)
             elif entity == "PRICE":
                 prices = self.provider.fetch_prices(
                     company_code=source.company_code,
@@ -162,7 +216,6 @@ class RetailSyncService:
                     store_timezone=store.timezone,
                 )
                 read = len(prices)
-                # replace strategy per product kinds for idempotency in mock/db2 batch
                 touched: set[str] = set()
                 for price in prices:
                     prod = self._ensure_minimal_product(price.source_product_id)
@@ -172,6 +225,7 @@ class RetailSyncService:
                     i, u = self._upsert_price(store_id, prod.id, price)
                     inserted += i
                     updated += u
+                    changed.add(prod.id)
                     if price.source_updated_at and (max_src is None or price.source_updated_at > max_src):
                         max_src = price.source_updated_at
             elif entity == "PROMOTION":
@@ -182,7 +236,7 @@ class RetailSyncService:
                     store_timezone=store.timezone,
                 )
                 read = len(promos)
-                touched: set[str] = set()
+                touched = set()
                 for promo in promos:
                     prod = self._ensure_minimal_product(promo.source_product_id)
                     if promo.source_product_id not in touched:
@@ -191,6 +245,7 @@ class RetailSyncService:
                     i, u = self._upsert_promotion(store_id, prod.id, promo)
                     inserted += i
                     updated += u
+                    changed.add(prod.id)
                     if promo.source_updated_at and (max_src is None or promo.source_updated_at > max_src):
                         max_src = promo.source_updated_at
             elif entity == "AVAILABILITY":
@@ -205,9 +260,13 @@ class RetailSyncService:
                     if not prod:
                         skipped += 1
                         continue
-                    i, u = self._upsert_store_product(store_id, source.company_code, prod.id, sp)
+                    i, u, touched_flag = self._upsert_store_product(
+                        store_id, source.company_code, prod.id, sp
+                    )
                     inserted += i
                     updated += u
+                    if touched_flag:
+                        changed.add(prod.id)
 
             wm_after = max_src.isoformat() if max_src else (wm.watermark_value if wm else None)
             self._set_watermark(entity, store_id, wm_after, ok=True)
@@ -222,7 +281,6 @@ class RetailSyncService:
             self.db.commit()
         except Exception as exc:  # noqa: BLE001
             self.db.rollback()
-            # re-attach run
             run = self.db.get(RetailSyncRun, run.id) or run
             run.status = "FAILED"
             run.error_summary = str(exc)[:500]
@@ -237,7 +295,9 @@ class RetailSyncService:
             self.db.commit()
             raise
 
-        return self._run_dict(run)
+        payload = self._run_dict(run)
+        payload["changed_product_ids"] = sorted(changed)
+        return payload, changed
 
     def _ensure_minimal_product(self, source_product_id: str) -> RetailProduct:
         existing = self._get_product_by_source(source_product_id)
@@ -262,10 +322,22 @@ class RetailSyncService:
             )
         )
 
-    def _upsert_product(self, p: CanonicalProduct) -> tuple[int, int]:
+    def _upsert_product(self, p: CanonicalProduct) -> tuple[int, int, str | None]:
+        """Returns (inserted, updated, product_id_if_changed)."""
         row = self._get_product_by_source(p.source_product_id)
         now = utcnow()
         if row:
+            before = (
+                row.description,
+                row.commercial_description,
+                row.gtin,
+                row.unit,
+                row.section_code,
+                row.group_code,
+                row.subgroup_code,
+                row.brand,
+                row.active,
+            )
             row.description = p.description
             row.commercial_description = p.commercial_description
             row.gtin = p.gtin
@@ -281,32 +353,44 @@ class RetailSyncService:
             row.source_updated_at = p.source_updated_at
             row.synced_at = now
             row.updated_at = now
-            return 0, 1
-        self.db.add(
-            RetailProduct(
-                source_system="CISS",
-                source_product_id=p.source_product_id,
-                description=p.description,
-                commercial_description=p.commercial_description,
-                gtin=p.gtin,
-                unit=p.unit,
-                section_code=p.section_code,
-                section_name=p.section_name,
-                group_code=p.group_code,
-                group_name=p.group_name,
-                subgroup_code=p.subgroup_code,
-                subgroup_name=p.subgroup_name,
-                brand=p.brand,
-                active=p.active,
-                source_updated_at=p.source_updated_at,
-                synced_at=now,
+            after = (
+                row.description,
+                row.commercial_description,
+                row.gtin,
+                row.unit,
+                row.section_code,
+                row.group_code,
+                row.subgroup_code,
+                row.brand,
+                row.active,
             )
+            return 0, 1, row.id if before != after else None
+        row = RetailProduct(
+            source_system="CISS",
+            source_product_id=p.source_product_id,
+            description=p.description,
+            commercial_description=p.commercial_description,
+            gtin=p.gtin,
+            unit=p.unit,
+            section_code=p.section_code,
+            section_name=p.section_name,
+            group_code=p.group_code,
+            group_name=p.group_name,
+            subgroup_code=p.subgroup_code,
+            subgroup_name=p.subgroup_name,
+            brand=p.brand,
+            active=p.active,
+            source_updated_at=p.source_updated_at,
+            synced_at=now,
         )
-        return 1, 0
+        self.db.add(row)
+        self.db.flush()
+        return 1, 0, row.id
 
     def _upsert_store_product(
         self, store_id: str, company_code: str, product_id: str, sp: CanonicalStoreProduct
-    ) -> tuple[int, int]:
+    ) -> tuple[int, int, bool]:
+        """Returns (inserted, updated, changed)."""
         row = self.db.scalar(
             select(RetailStoreProduct).where(
                 RetailStoreProduct.store_id == store_id,
@@ -315,6 +399,7 @@ class RetailSyncService:
         )
         now = utcnow()
         if row:
+            before = (row.sellable, row.available, row.current_stock_qty)
             row.sellable = sp.sellable
             row.available = sp.available
             if sp.stock_qty is not None:
@@ -322,7 +407,8 @@ class RetailSyncService:
             row.source_company_code = company_code
             row.source_updated_at = sp.source_updated_at
             row.synced_at = now
-            return 0, 1
+            after = (row.sellable, row.available, row.current_stock_qty)
+            return 0, 1, before != after
         self.db.add(
             RetailStoreProduct(
                 store_id=store_id,
@@ -335,7 +421,7 @@ class RetailSyncService:
                 synced_at=now,
             )
         )
-        return 1, 0
+        return 1, 0, True
 
     def _deactivate_prices(self, store_id: str, product_id: str) -> None:
         rows = self.db.scalars(
@@ -417,6 +503,7 @@ class RetailSyncService:
                 watermark_value=value if ok else None,
                 last_success_at=now if ok else None,
                 last_error_at=None if ok else now,
+                consecutive_failures=0 if ok else 1,
                 updated_at=now,
             )
             self.db.add(row)
@@ -424,8 +511,10 @@ class RetailSyncService:
         if ok:
             row.watermark_value = value
             row.last_success_at = now
+            row.consecutive_failures = 0
         else:
             row.last_error_at = now
+            row.consecutive_failures = int(row.consecutive_failures or 0) + 1
         row.updated_at = now
 
     @staticmethod
@@ -455,6 +544,7 @@ class RetailSyncService:
             "source_system": run.source_system,
             "entity": run.entity,
             "store_id": run.store_id,
+            "trigger": getattr(run, "trigger", None) or "MANUAL",
             "status": run.status,
             "started_at": run.started_at.isoformat() + "Z" if run.started_at else None,
             "finished_at": run.finished_at.isoformat() + "Z" if run.finished_at else None,

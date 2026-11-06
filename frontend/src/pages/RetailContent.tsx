@@ -26,8 +26,39 @@ type Health = {
   timezone_valid: boolean;
   source: string;
   status: string;
+  provider_label?: string;
   mapping: { configured: boolean; company_code: string | null; location_code: string | null };
-  entities: { entity: string; count: number; last_success_at: string | null; lag_seconds: number | null; status: string }[];
+  entities: {
+    entity: string;
+    count: number;
+    last_success_at: string | null;
+    last_failure_at?: string | null;
+    consecutive_failures?: number;
+    lag_seconds: number | null;
+    status: string;
+  }[];
+  alerts?: string[];
+  scheduler?: {
+    enabled: boolean;
+    running: boolean;
+    provider: string;
+    intervals_seconds: Record<string, number>;
+    jobs: { id: string; next_run_at: string | null }[];
+  };
+  stock_filter?: string;
+  stock_commercial_source?: string;
+};
+
+type SyncRun = {
+  id: string;
+  entity: string;
+  trigger?: string;
+  status: string;
+  started_at?: string | null;
+  finished_at?: string | null;
+  records_updated?: number;
+  records_inserted?: number;
+  error_summary?: string | null;
 };
 
 type Overview = {
@@ -98,6 +129,7 @@ export default function RetailContent() {
   const { selectedStoreId: storeId, loading: storesLoading } = useStoreContext();
   const [tab, setTab] = useState("overview");
   const [health, setHealth] = useState<Health | null>(null);
+  const [syncRuns, setSyncRuns] = useState<SyncRun[]>([]);
   const [overview, setOverview] = useState<Overview | null>(null);
   const [tables, setTables] = useState<TableRow[]>([]);
   const [products, setProducts] = useState<ProductRow[]>([]);
@@ -116,15 +148,17 @@ export default function RetailContent() {
     if (!storeId) return;
     setError(null);
     try {
-      const [h, o, t, p] = await Promise.all([
+      const [h, o, t, p, runs] = await Promise.all([
         api.get<Health>("/retail-data/health", { params: { store_id: storeId } }),
         api.get<Overview>("/dynamic-content/overview", { params: { store_id: storeId } }),
         api.get<TableRow[]>("/dynamic-content", { params: { store_id: storeId } }),
         api.get<ProductRow[]>("/retail-products", {
           params: { store_id: storeId, limit: 50, has_image: imageFilter },
         }),
+        api.get<SyncRun[]>("/retail-data/sync-runs", { params: { store_id: storeId, limit: 12 } }),
       ]);
       setHealth(h.data);
+      setSyncRuns(runs.data || []);
       setOverview(o.data);
       setTables(t.data);
       setProducts(p.data);
@@ -343,6 +377,11 @@ export default function RetailContent() {
                   </div>
                   <Badge tone={t.status === "PRONTA" ? "success" : "warning"}>{t.status || "—"}</Badge>
                 </div>
+                {(health?.status === "STALE" || health?.status === "FAILED") && (
+                  <Alert variant="warning" role="status">
+                    Dados desatualizados — não será exibido nas TVs
+                  </Alert>
+                )}
                 <p className="text-sm text-ink/70">
                   {t.item_count ?? "—"} produtos · {t.page_count ?? "—"} pág. · {t.total_duration_seconds ?? "—"}s
                 </p>
@@ -392,6 +431,11 @@ export default function RetailContent() {
                     </div>
                     <Badge tone={t.status === "PRONTA" ? "success" : "warning"}>{t.status || "—"}</Badge>
                   </div>
+                  {(health?.status === "STALE" || health?.status === "FAILED") && (
+                    <Alert variant="warning" role="status">
+                      Dados desatualizados — não será exibido nas TVs
+                    </Alert>
+                  )}
                   <p className="text-sm text-ink/70">
                     {t.item_count ?? "—"} produtos · {t.page_count ?? "—"} pág. · {t.total_duration_seconds ?? "—"}s
                   </p>
@@ -423,8 +467,33 @@ export default function RetailContent() {
 
       {tab === "sync" && (
         <div className="space-y-4">
+          {(health?.alerts || []).map((a) => (
+            <Alert key={a} variant="warning" role="alert">
+              {a}
+            </Alert>
+          ))}
+          {health?.status === "STALE" || health?.status === "FAILED" ? (
+            <Alert variant="danger" role="alert">
+              Preços desatualizados. Conteúdos comerciais foram retirados automaticamente das TVs até a
+              sincronização ser restabelecida.
+            </Alert>
+          ) : null}
           <Card>
             <CardContent className="space-y-3 py-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge tone={health?.provider_label === "MOCK" ? "warning" : "success"}>
+                  Fonte: {health?.provider_label || health?.source || "—"}
+                </Badge>
+                <Badge tone="neutral">
+                  Automação:{" "}
+                  {health?.scheduler?.running
+                    ? "ativa"
+                    : health?.scheduler?.enabled
+                      ? "parada"
+                      : "desligada"}
+                </Badge>
+                <Badge tone="neutral">Estoque: {health?.stock_filter || "DISABLED_BY_DESIGN"}</Badge>
+              </div>
               <p className="text-sm">
                 Mapeamento:{" "}
                 {health?.mapping.configured
@@ -445,15 +514,46 @@ export default function RetailContent() {
                   {syncing ? "Sincronizando…" : "Sincronizar agora"}
                 </Button>
               </div>
-              <ul className="space-y-1 text-sm">
-                {(health?.entities || []).map((e) => (
-                  <li key={e.entity} className="flex items-center gap-2">
-                    <StatusDot
-                      tone={statusTone(e.status)}
-                      label={`${e.entity}: ${e.count} · ${e.status} · lag ${formatLag(e.lag_seconds)}`}
-                    />
+              <ul className="space-y-2 text-sm" data-testid="retail-entity-health">
+                {(health?.entities || []).map((e) => {
+                  const interval = health?.scheduler?.intervals_seconds?.[e.entity];
+                  const job = health?.scheduler?.jobs?.find((j) =>
+                    j.id.toLowerCase().includes(e.entity.toLowerCase()),
+                  );
+                  return (
+                    <li key={e.entity} className="rounded-ds border border-brand-50 px-3 py-2">
+                      <StatusDot tone={statusTone(e.status)} label={`${e.entity}: ${e.status}`} />
+                      <p className="mt-1 text-xs text-ink/60">
+                        Último sucesso {e.last_success_at || "—"} · lag {formatLag(e.lag_seconds)}
+                        {interval != null ? ` · automático a cada ${interval}s` : ""}
+                        {job?.next_run_at ? ` · próxima ${job.next_run_at}` : ""}
+                        {e.consecutive_failures
+                          ? ` · falhas consecutivas ${e.consecutive_failures}`
+                          : ""}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="space-y-2 py-4">
+              <h3 className="font-medium text-brand-900">Histórico de sincronização</h3>
+              <ul className="space-y-1 text-sm" data-testid="retail-sync-history">
+                {syncRuns.map((r) => (
+                  <li key={r.id} className="flex flex-wrap gap-2 border-b border-brand-50 py-1">
+                    <Badge tone="neutral">{r.trigger || "MANUAL"}</Badge>
+                    <span>{r.entity}</span>
+                    <span>{r.status}</span>
+                    <span className="text-ink/55">{r.started_at}</span>
+                    <span className="text-ink/55">
+                      +{r.records_inserted || 0}/~{r.records_updated || 0}
+                    </span>
+                    {r.error_summary ? <span className="text-danger-700">{r.error_summary}</span> : null}
                   </li>
                 ))}
+                {syncRuns.length === 0 && <li className="text-ink/50">Sem execuções recentes.</li>}
               </ul>
             </CardContent>
           </Card>

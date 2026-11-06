@@ -87,7 +87,18 @@ def retail_sync(
     db: Session = Depends(get_db),
     _: User = Depends(require_permissions(RETAIL_DATA_SYNC, RETAIL_CONTENT_ADMIN)),
 ):
-    return RetailSyncService(db).sync_store(body.store_id, entities=body.entities, full=body.full)
+    return RetailSyncService(db).sync_store(
+        body.store_id, entities=body.entities, full=body.full, trigger="MANUAL"
+    )
+
+
+@router.get("/retail-data/scheduler")
+def retail_scheduler_status(
+    _: User = Depends(require_permissions(RETAIL_DATA_VIEWER, RETAIL_CONTENT_VIEWER, RETAIL_CONTENT_ADMIN)),
+):
+    from app.modules.retail.scheduler import scheduler_status
+
+    return scheduler_status()
 
 
 @router.get("/retail-data/sync-runs")

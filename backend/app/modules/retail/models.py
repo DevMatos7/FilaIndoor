@@ -123,6 +123,7 @@ class RetailSyncWatermark(Base):
     watermark_value: Mapped[str | None] = mapped_column(String(120), nullable=True)
     last_success_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     last_error_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    consecutive_failures: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow, onupdate=utcnow)
 
 
@@ -158,6 +159,7 @@ class RetailSyncRun(Base):
     source_system: Mapped[str] = mapped_column(String(40), nullable=False, default="CISS")
     entity: Mapped[str] = mapped_column(String(40), nullable=False)
     store_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("stores.id", ondelete="SET NULL"), nullable=True, index=True)
+    trigger: Mapped[str] = mapped_column(String(20), nullable=False, default="MANUAL")  # MANUAL|SCHEDULED|CLI
     started_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="RUNNING")

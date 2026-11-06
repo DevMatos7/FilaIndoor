@@ -57,6 +57,8 @@ class RetailHealthService:
                 "entity": entity,
                 "count": count,
                 "last_success_at": last.isoformat() + "Z" if last else None,
+                "last_failure_at": wm.last_error_at.isoformat() + "Z" if wm and wm.last_error_at else None,
+                "consecutive_failures": int(wm.consecutive_failures or 0) if wm else 0,
                 "lag_seconds": lag_seconds(last),
                 "status": status,
             }
@@ -101,6 +103,19 @@ class RetailHealthService:
         else:
             overall = "FRESH"
 
+        from app.modules.retail.provider_guard import provider_label
+        from app.modules.retail.scheduler import scheduler_status
+
+        alerts: list[str] = []
+        for b in blocks:
+            lag = b.get("lag_seconds")
+            if b["status"] == "STALE":
+                alerts.append(f"{b['entity']}: dados desatualizados (lag {int(lag or 0)}s)")
+            elif b["status"] == "FAILED":
+                alerts.append(f"{b['entity']}: falha de sincronização ({b.get('consecutive_failures') or 0} consecutivas)")
+            elif b["status"] == "DEGRADED" and lag and lag > 60:
+                alerts.append(f"{b['entity']}: sincronização atrasada há {int(lag)}s")
+
         return {
             "store_id": store_id,
             "store_name": store.name,
@@ -108,6 +123,7 @@ class RetailHealthService:
             "timezone_valid": tz_ok,
             "timezone_error": tz_error,
             "source": "CISS",
+            "provider_label": provider_label(),
             "mapping": {
                 "configured": bool(source),
                 "company_code": source.company_code if source else None,
@@ -115,4 +131,8 @@ class RetailHealthService:
             },
             "status": overall if source else "UNKNOWN",
             "entities": blocks,
+            "alerts": alerts,
+            "scheduler": scheduler_status(),
+            "stock_filter": "DISABLED_BY_DESIGN",
+            "stock_commercial_source": "NOT_CONFIRMED",
         }

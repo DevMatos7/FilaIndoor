@@ -20,6 +20,7 @@ import {
   sendDisplayHeartbeat,
   speakTicket,
 } from "../services/displayPlayer";
+import { publishDynamicInvalidation } from "../services/dynamicInvalidationBus";
 
 /**
  * UX-6C — Display + Layout Engine + Screen Override Engine
@@ -195,6 +196,14 @@ export default function Display() {
           }
           if (evt.event === "queue.updated") {
             void loadConfig();
+          }
+          if (evt.event === "dynamic_content.invalidated") {
+            const data = evt.data as Record<string, unknown>;
+            publishDynamicInvalidation({
+              dynamic_content_id: String(data.dynamic_content_id || ""),
+              reason: String(data.reason || ""),
+              version: String(data.version || ""),
+            });
           }
         } catch {
           // ignore malformed

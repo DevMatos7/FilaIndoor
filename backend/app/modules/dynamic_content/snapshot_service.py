@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import select
@@ -155,6 +156,7 @@ class SnapshotService:
 
         payload = {
             "content_type": content_type,
+            "store_id": store.id,
             "title": cfg.get("title") or content.name,
             "template": {"id": template.id, "slug": template.slug, "name": template.name, "config": tpl_cfg},
             "source": {
@@ -254,7 +256,7 @@ class SnapshotService:
             "version": snapshot.get("content_hash") or snapshot.get("snapshot_id"),
             "generated_at": src.get("generated_at"),
             "freshness": src.get("freshness"),
-            "valid_until": self._valid_until(src.get("freshness")),
+            "valid_until": self._valid_until_for_snapshot(snapshot, src.get("freshness")),
             "duration_mode": pag.get("duration_mode"),
             "page_duration_seconds": pag.get("page_duration_seconds"),
             "total_duration_seconds": pag.get("total_duration_seconds"),
@@ -292,13 +294,70 @@ class SnapshotService:
         }
 
     def _valid_until(self, freshness: str | None) -> str:
-        """MVP TTL window for offline cache — not indefinite prices."""
+        return self._valid_until_for_snapshot({}, freshness)
+
+    def _valid_until_for_snapshot(self, snapshot: dict[str, Any], freshness: str | None) -> str:
+        """
+        Snapshot never valid past:
+        - freshness hard-stop window
+        - next promotion start/end among display items (store-local instants stored as naive UTC)
+        End inclusive: after expires_at end-of-day, promo must not remain.
+        """
         from datetime import timedelta
 
+        from app.core.config import get_settings
+
         now = utcnow()
-        # FRESH/DEGRADED: 15 min; otherwise immediate expiry signal
-        minutes = 15 if freshness in {"FRESH", "DEGRADED", None} else 0
-        return (now + timedelta(minutes=minutes)).isoformat() + "Z"
+        if freshness in {"STALE", "FAILED"}:
+            return now.isoformat() + "Z"
+
+        settings = get_settings()
+        # Cap by hard-stop age remaining (approx): warn/hard are absolute ages from last sync;
+        # for cache TTL use min(warn_after, 15min) as soft window when FRESH.
+        soft = min(900, max(60, int(settings.retail_warn_after_seconds or 300)))
+        candidates = [now + timedelta(seconds=soft)]
+
+        for page in snapshot.get("pages") or []:
+            for item in page.get("items") or []:
+                # promotion temporal fields may be present on display item via resolver
+                for key in ("promotion_starts_at", "promotion_expires_at", "starts_at", "expires_at"):
+                    raw = item.get(key)
+                    if not raw:
+                        continue
+                    try:
+                        dt = datetime.fromisoformat(str(raw).replace("Z", ""))
+                    except ValueError:
+                        continue
+                    if dt > now:
+                        candidates.append(dt)
+
+        # Also scan active promotions for products in snapshot (authoritative)
+        product_ids = [
+            it.get("product_id")
+            for page in snapshot.get("pages") or []
+            for it in page.get("items") or []
+            if it.get("product_id")
+        ]
+        store_id = snapshot.get("store_id")
+        if product_ids:
+            from app.modules.retail.models import RetailPromotion
+
+            stmt = select(RetailPromotion).where(
+                RetailPromotion.product_id.in_(product_ids),
+                RetailPromotion.active.is_(True),
+            )
+            if store_id:
+                stmt = stmt.where(RetailPromotion.store_id == store_id)
+            promos = list(self.db.scalars(stmt).all())
+            for promo in promos:
+                if promo.starts_at and promo.starts_at > now:
+                    candidates.append(promo.starts_at)
+                if promo.expires_at and promo.expires_at >= now:
+                    # end inclusive → cut over at the next second after expires_at
+                    candidates.append(promo.expires_at + timedelta(seconds=1))
+
+        until = min(candidates)
+        return until.isoformat() + "Z"
 
     def _data_version(self, store_id: str) -> str:
         rows = list(

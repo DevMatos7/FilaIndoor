@@ -1,5 +1,6 @@
 import type { PriceTableSnapshot } from "../components/dynamic-content/dynamicContentTypes";
 import { cacheKey } from "./edgeOffline";
+import { clearDynamicDirty, isDynamicDirty } from "./dynamicInvalidationBus";
 
 const apiBase = () => import.meta.env.VITE_API_URL || "/api/v1";
 
@@ -29,8 +30,18 @@ function writeDynamicCache(id: string, entry: CachedDynamic) {
   }
 }
 
-function isCacheValid(entry: CachedDynamic | null): entry is CachedDynamic {
+export function clearDynamicContentCache(id: string) {
+  try {
+    localStorage.removeItem(cacheKey("dynamic_content", id));
+  } catch {
+    /* ignore */
+  }
+  clearDynamicDirty(id);
+}
+
+function isCacheValid(entry: CachedDynamic | null, contentId?: string): entry is CachedDynamic {
   if (!entry?.payload || !entry.valid_until) return false;
+  if (contentId && isDynamicDirty(contentId)) return false;
   const until = Date.parse(entry.valid_until);
   if (Number.isNaN(until)) return false;
   return Date.now() <= until;
@@ -64,21 +75,22 @@ export async function fetchPlayerDynamicContent(
     });
 
     if (res.status === 304) {
-      if (isCacheValid(cached)) {
+      if (isCacheValid(cached, contentId)) {
         console.info("[display] dynamic_content_cache_hit", contentId);
         return { ok: true, payload: cached.payload, etag: cached.etag, fromCache: true };
       }
-      console.warn("[display] dynamic_content_stale", contentId);
+      console.warn("[display] dynamic_content_cache.expired", contentId);
       return { ok: false, reason: "stale" };
     }
 
     if (res.status === 403 || res.status === 404 || res.status === 422) {
       console.warn("[display] dynamic_content_skipped", contentId, res.status);
+      clearDynamicContentCache(contentId);
       return { ok: false, reason: "forbidden" };
     }
 
     if (!res.ok) {
-      if (isCacheValid(cached)) {
+      if (isCacheValid(cached, contentId)) {
         console.info("[display] dynamic_content_cache_hit", contentId);
         return { ok: true, payload: cached.payload, etag: cached.etag, fromCache: true };
       }
@@ -91,6 +103,7 @@ export async function fetchPlayerDynamicContent(
     const freshness = payload.freshness || payload.source?.freshness;
     if (freshness === "STALE" || freshness === "FAILED") {
       console.warn("[display] dynamic_content_stale", contentId);
+      clearDynamicContentCache(contentId);
       return { ok: false, reason: "stale" };
     }
 
@@ -101,10 +114,11 @@ export async function fetchPlayerDynamicContent(
       valid_until: payload.valid_until,
       saved_at: Date.now(),
     });
+    clearDynamicDirty(contentId);
     console.info("[display] dynamic_content_cache_miss", contentId);
     return { ok: true, payload, etag, fromCache: false };
   } catch {
-    if (isCacheValid(cached)) {
+    if (isCacheValid(cached, contentId)) {
       console.info("[display] dynamic_content_cache_hit", contentId);
       return { ok: true, payload: cached.payload, etag: cached.etag, fromCache: true };
     }

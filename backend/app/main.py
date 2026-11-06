@@ -49,6 +49,25 @@ async def _bind_realtime_loop():
 
     hub.bind_loop(asyncio.get_running_loop())
     media_root()  # garante pasta de storage
+    # DRC-5: retail automation (disabled when RETAIL_AUTOMATION_ENABLED=false / tests)
+    try:
+        from app.modules.retail.scheduler import start_retail_scheduler
+
+        start_retail_scheduler()
+    except Exception:  # noqa: BLE001
+        import logging
+
+        logging.getLogger(__name__).exception("retail.scheduler.startup_failed")
+
+
+@app.on_event("shutdown")
+async def _shutdown_retail_scheduler():
+    try:
+        from app.modules.retail.scheduler import shutdown_retail_scheduler
+
+        shutdown_retail_scheduler()
+    except Exception:  # noqa: BLE001
+        pass
 
 app.add_middleware(
     CORSMiddleware,

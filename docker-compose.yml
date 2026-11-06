@@ -24,6 +24,7 @@ services:
       dockerfile: Dockerfile
     container_name: filaindoor_api
     environment:
+      APP_ENV: development
       DATABASE_URL: postgresql+psycopg://fila:fila@db:5432/filaindoor
       SECRET_KEY: dev-secret
       CORS_ORIGINS: http://localhost:5180,http://127.0.0.1:5180
@@ -37,7 +38,9 @@ services:
       TOLEDO_API_BASE_URL: ""
       TOLEDO_API_KEY: ""
       ERP_PROVIDER: mock
+      # DEV/QA only — production MUST use ciss_db2 (startup guard rejects mock when APP_ENV=production)
       RETAIL_PROVIDER: mock
+      RETAIL_AUTOMATION_ENABLED: "true"
       REAL_PLUS_ENABLED: "true"
     extra_hosts:
       - "host.docker.internal:host-gateway"

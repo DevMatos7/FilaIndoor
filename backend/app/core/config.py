@@ -56,6 +56,18 @@ class Settings(BaseSettings):
     retail_sync_product_limit: int = 2000
     retail_sync_price_limit: int = 5000
 
+    # DRC-5 Automation — intervals independent from freshness thresholds
+    retail_automation_enabled: bool = True
+    retail_sync_product_seconds: int = 900
+    retail_sync_price_seconds: int = 60
+    retail_sync_promotion_seconds: int = 60
+    retail_sync_availability_seconds: int = 180
+    retail_allow_mock_in_production: bool = False
+
+    @property
+    def is_production(self) -> bool:
+        return (self.app_env or "").strip().lower() in {"production", "prod"}
+
     # Toledo (S13 discovery + S14 adapter)
     toledo_enabled: bool = False
     toledo_mode: str = "NATIVE"  # NATIVE | TOLEDO_DISPLAY | TOLEDO_SYNC | TOLEDO_FULL

@@ -81,6 +81,8 @@ class ProductMediaService:
             self._clear_other_primaries(product_id, store_id=store_id, keep_id=link.id, purpose=purpose)
         self.db.commit()
         self.db.refresh(link)
+        if link.is_primary and store_id:
+            self._invalidate_visual(store_id, product_id)
         return self._link_dict(link)
 
     def patch_link(
@@ -113,16 +115,35 @@ class ProductMediaService:
         link.updated_at = utcnow()
         self.db.commit()
         self.db.refresh(link)
+        sid = store_id or link.store_id
+        if sid and link.is_primary:
+            self._invalidate_visual(sid, product_id)
         return self._link_dict(link)
 
     def detach(self, product_id: str, link_id: str, *, store_id: str | None = None) -> dict[str, Any]:
         link = self._get_link(product_id, link_id)
         if store_id is not None and link.store_id not in (None, store_id):
             raise ForbiddenError("Vínculo de outra loja")
+        was_primary = link.is_primary
+        sid = store_id or link.store_id
         link.active = False
         link.updated_at = utcnow()
         self.db.commit()
+        if was_primary and sid:
+            self._invalidate_visual(sid, product_id)
         return {"id": link_id, "active": False}
+
+    def _invalidate_visual(self, store_id: str, product_id: str) -> None:
+        try:
+            from app.modules.dynamic_content.invalidation_service import DynamicInvalidationService
+
+            DynamicInvalidationService(self.db).invalidate_products(
+                store_id,
+                changed_product_ids=[product_id],
+                change_types=["IMAGE_CHANGED"],
+            )
+        except Exception:  # noqa: BLE001
+            pass
 
     def resolve_primary_image(self, product_id: str, store_id: str) -> dict[str, Any] | None:
         """store PRIMARY → global PRIMARY → None."""

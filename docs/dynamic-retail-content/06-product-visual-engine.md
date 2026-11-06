@@ -1,7 +1,7 @@
 # Module 4 — Product Visual Engine
 
-**Status:** READY FOR HOMOLOGATION  
-**Commit alvo:** `feat(dynamic-retail): product visual engine`  
+**Status:** HOMOLOGATED  
+**Commit:** `4c7e9b9` · `feat(dynamic-retail): product visual engine`  
 **Base:** `6491eb4` (Module 3) · templates/enums já previstos no Module 2
 
 ## Objetivo
@@ -119,7 +119,9 @@ Imagens de SKU devem representar o produto real.
 
 ## Fora de escopo (STOP)
 
-stock filtering · WebSocket invalidation · Proof of Play · Retail Media · campaign advertiser · AI image/selection · Device Commands · Template Builder livre · Module 5.
+stock filtering · Proof of Play · Retail Media · campaign advertiser · AI image/selection · Device Commands · Template Builder livre · Module 6.
+
+Automação / invalidação WS / `valid_until` → [07-automation-resilience.md](./07-automation-resilience.md).
 
 ## Travas preservadas
 

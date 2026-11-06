@@ -85,6 +85,10 @@ Sem descrição válida → item inválido. **Nunca** `source_product_id` / SKU 
 `PRODUCT_GRID` / `PRODUCT_HERO` / `PROMOTION_BOARD` + `ProductMediaLink` → ver [06-product-visual-engine.md](./06-product-visual-engine.md).  
 `DynamicContentRenderer` roteia os quatro tipos; PlaybackClock / ETag / stale / override inalterados.
 
-## Não implementado (Module 5+)
+## Module 5 (automação)
+
+Invalidação WS `dynamic_content.invalidated`, cache por `valid_until`, prefetch no boundary de página e STALE skip urgente — ver [07-automation-resilience.md](./07-automation-resilience.md).
+
+## Não implementado (Module 6+)
 
 WebSocket invalidation / stock filter / Proof of Play / Retail Media / Automation.

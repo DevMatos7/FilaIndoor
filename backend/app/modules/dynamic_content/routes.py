@@ -124,6 +124,19 @@ def resolve_content(
     return DynamicContentService(db).resolve(content_id, store_id)
 
 
+@router.post("/dynamic-content/{content_id}/invalidate")
+def invalidate_content(
+    content_id: str,
+    store_id: str = Query(...),
+    reason: str = Query("MANUAL"),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permissions(RETAIL_CONTENT_ADMIN, RETAIL_CONTENT_EDITOR)),
+):
+    from app.modules.dynamic_content.invalidation_service import DynamicInvalidationService
+
+    return DynamicInvalidationService(db).invalidate_content(content_id, store_id=store_id, reason=reason)
+
+
 @router.post("/dynamic-content/{content_id}/preview")
 def preview_content(
     content_id: str,
