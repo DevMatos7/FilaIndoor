@@ -177,6 +177,83 @@ class SnapshotService:
 
         return payload
 
+    def ensure_current_snapshot(
+        self,
+        content: DynamicContent,
+        store: Store,
+        *,
+        allow_stale: bool = False,
+    ) -> dict[str, Any]:
+        """Return publishable payload regenerated when data_version drifts."""
+        if content.store_id != store.id:
+            raise ValidationError("conteúdo de outra loja")
+        if not content.active:
+            raise ValidationError("conteúdo inativo")
+
+        current_version = self._data_version(store.id)
+        latest = self.db.scalar(
+            select(DynamicRenderSnapshot)
+            .where(DynamicRenderSnapshot.dynamic_content_id == content.id)
+            .order_by(DynamicRenderSnapshot.generated_at.desc())
+            .limit(1)
+        )
+        if (
+            latest
+            and latest.data_version == current_version
+            and latest.publishable
+            and isinstance(latest.payload, dict)
+            and (latest.payload.get("source") or {}).get("freshness") not in {"STALE", "FAILED"}
+        ):
+            payload = dict(latest.payload)
+            payload["snapshot_id"] = latest.id
+            return payload
+
+        return self.generate(content, store, persist=True, allow_stale=allow_stale)
+
+    def player_payload(self, snapshot: dict[str, Any], *, content_id: str, name: str) -> dict[str, Any]:
+        """Strip admin-only meta for Display Player."""
+        pag = snapshot.get("pagination") or {}
+        src = snapshot.get("source") or {}
+        tpl = snapshot.get("template") or {}
+        return {
+            "id": content_id,
+            "type": "PRICE_TABLE",
+            "name": name,
+            "version": snapshot.get("content_hash") or snapshot.get("snapshot_id"),
+            "generated_at": src.get("generated_at"),
+            "freshness": src.get("freshness"),
+            "valid_until": self._valid_until(src.get("freshness")),
+            "duration_mode": pag.get("duration_mode"),
+            "page_duration_seconds": pag.get("page_duration_seconds"),
+            "total_duration_seconds": pag.get("total_duration_seconds"),
+            "page_count": pag.get("page_count"),
+            "item_count": snapshot.get("item_count"),
+            "status": snapshot.get("status"),
+            "title": snapshot.get("title") or name,
+            "template": {
+                "id": tpl.get("id"),
+                "slug": tpl.get("slug"),
+                "name": tpl.get("name"),
+                "config": {
+                    k: v
+                    for k, v in (tpl.get("config") or {}).items()
+                    if k in {"columns", "emphasize_promo", "show_unit", "default_items_per_page"}
+                },
+            },
+            "pages": snapshot.get("pages") or [],
+            "content_hash": snapshot.get("content_hash"),
+            "data_version": src.get("data_version"),
+        }
+
+    def _valid_until(self, freshness: str | None) -> str:
+        """MVP TTL window for offline cache — not indefinite prices."""
+        from datetime import timedelta
+
+        now = utcnow()
+        # FRESH/DEGRADED: 15 min; otherwise immediate expiry signal
+        minutes = 15 if freshness in {"FRESH", "DEGRADED", None} else 0
+        return (now + timedelta(minutes=minutes)).isoformat() + "Z"
+
     def _data_version(self, store_id: str) -> str:
         rows = list(
             self.db.scalars(

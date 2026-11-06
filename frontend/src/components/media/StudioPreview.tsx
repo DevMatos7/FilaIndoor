@@ -1,15 +1,20 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PlaylistItem } from "../display/types";
 import { hostOf } from "../../lib/signageFormat";
+import { DynamicContentRenderer } from "../dynamic-content/DynamicContentRenderer";
+import type { PriceTableSnapshot } from "../dynamic-content/dynamicContentTypes";
+import api from "../../services/api";
 
 type Props = {
   item: PlaylistItem | null;
   playing: boolean;
+  storeId?: string;
 };
 
-/** Admin preview — reuses MediaPlayer semantics without WS/heartbeat; muted; no surprise audio. */
-export function StudioPreview({ item, playing }: Props) {
+/** Admin preview — shared renderers; muted; no surprise audio. */
+export function StudioPreview({ item, playing, storeId }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [dynSnap, setDynSnap] = useState<PriceTableSnapshot | null>(null);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -21,10 +26,39 @@ export function StudioPreview({ item, playing }: Props) {
     }
   }, [playing, item?.id]);
 
+  useEffect(() => {
+    if (!item || (item.item_type !== "DYNAMIC" && item.type !== "DYNAMIC" && item.type !== "PRICE_TABLE")) {
+      setDynSnap(null);
+      return;
+    }
+    const contentId = item.dynamic_content?.id || item.id;
+    if (!storeId || !contentId) return;
+    let alive = true;
+    api
+      .post(`/dynamic-content/${contentId}/preview`, null, { params: { store_id: storeId } })
+      .then((res) => {
+        if (alive) setDynSnap(res.data as PriceTableSnapshot);
+      })
+      .catch(() => {
+        if (alive) setDynSnap(null);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [item?.id, item?.item_type, item?.type, item?.dynamic_content?.id, storeId]);
+
   if (!item) {
     return (
       <div className="flex h-full items-center justify-center p-4 text-center text-sm text-white/60">
         Sem conteúdos para pré-visualizar
+      </div>
+    );
+  }
+
+  if (item.item_type === "DYNAMIC" || item.type === "DYNAMIC" || item.type === "PRICE_TABLE") {
+    return (
+      <div className="absolute inset-0">
+        <DynamicContentRenderer mode="preview" snapshot={dynSnap} pageIndex={0} />
       </div>
     );
   }

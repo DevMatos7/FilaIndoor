@@ -7,11 +7,18 @@ export type DisplayTicket = {
 
 export type PlaylistItem = {
   id: string;
+  item_id?: string;
+  item_type?: "MEDIA" | "DYNAMIC" | string;
   name: string;
   type: string;
   url: string;
   mime_type?: string | null;
   duration_seconds: number;
+  dynamic_content?: {
+    id: string;
+    content_type?: string;
+    name?: string;
+  } | null;
 };
 
 import type { ResolvedLayout } from "./layoutTypes";

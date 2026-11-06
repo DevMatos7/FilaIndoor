@@ -5,7 +5,7 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import NotFoundError, ValidationError
+from app.core.exceptions import ConflictError, NotFoundError, ValidationError
 from app.modules.dynamic_content.models import (
     DynamicContent,
     DynamicContentProduct,
@@ -19,6 +19,7 @@ from app.modules.dynamic_content.templates import ensure_system_templates
 from app.modules.org.models.entities import Store
 from app.modules.retail.models import RetailPrice, RetailProduct, RetailPromotion, RetailStoreProduct
 from app.modules.retail.timezone_util import validate_iana_timezone
+from app.modules.signage.models import PlaylistItem
 
 
 class DynamicContentService:
@@ -89,10 +90,30 @@ class DynamicContentService:
 
     def soft_delete(self, content_id: str, store_id: str) -> dict[str, Any]:
         row = self._get_owned(content_id, store_id)
+        usage = self._usage_count(content_id)
+        if usage > 0:
+            raise ConflictError(
+                f"Este conteúdo dinâmico está em uso em {usage} item(ns) de playlist. "
+                "Remova-o das playlists antes de excluir."
+            )
         row.active = False
         row.updated_at = utcnow()
         self.db.commit()
         return {"id": row.id, "active": False}
+
+    def _usage_count(self, content_id: str) -> int:
+        return int(
+            self.db.scalar(
+                select(func.count())
+                .select_from(PlaylistItem)
+                .where(
+                    PlaylistItem.dynamic_content_id == content_id,
+                    PlaylistItem.active.is_(True),
+                    PlaylistItem.item_type == "DYNAMIC",
+                )
+            )
+            or 0
+        )
 
     def preview(self, content_id: str, store_id: str) -> dict[str, Any]:
         row = self._get_owned(content_id, store_id)
@@ -283,6 +304,7 @@ class DynamicContentService:
             .order_by(DynamicRenderSnapshot.generated_at.desc())
             .limit(1)
         )
+        usage = self._usage_count(r.id)
         return {
             "id": r.id,
             "store_id": r.store_id,
@@ -297,8 +319,11 @@ class DynamicContentService:
             if latest
             else None,
             "status": (latest.payload or {}).get("status") if latest else "ATENÇÃO",
+            "freshness": (latest.payload or {}).get("source", {}).get("freshness") if latest else None,
             "updated_at": r.updated_at.isoformat() + "Z" if r.updated_at else None,
             "active": r.active,
+            "usage_count": usage,
+            "usage": {"playlist_item_count": usage, "usage_count": usage},
         }
 
     def _content_detail(self, r: DynamicContent) -> dict[str, Any]:

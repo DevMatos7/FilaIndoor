@@ -81,8 +81,24 @@ class PriceDisplayResolver:
 
     def resolve_product(self, store: Store, product: RetailProduct) -> PriceDisplay:
         tz = validate_iana_timezone(store.timezone)
-        desc = (product.commercial_description or product.description or "").strip() or product.source_product_id
+        # TV / player: never use SKU / source_product_id / GTIN as commercial label
+        desc = (product.commercial_description or product.description or "").strip()
         unit = (product.unit or "").strip() or None
+
+        if not desc:
+            return PriceDisplay(
+                product_id=product.id,
+                description="",
+                unit=unit,
+                regular_price=None,
+                display_price=None,
+                is_promotion=False,
+                show_from_to=False,
+                promotion_price=None,
+                quantity_tiers=[],
+                displayable=False,
+                reason="missing_description",
+            )
 
         regular_row = self.db.scalar(
             select(RetailPrice).where(

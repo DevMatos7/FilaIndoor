@@ -10,6 +10,8 @@ type Props = {
   department: string;
   current: DisplayTicket | null;
   lastCalled: DisplayTicket[];
+  paused?: boolean;
+  displayToken?: string;
 };
 
 /**
@@ -23,6 +25,8 @@ export function LayoutResolver({
   department,
   current,
   lastCalled,
+  paused = false,
+  displayToken = "",
 }: Props) {
   const resolved = useMemo(() => {
     if (isValidLayout(layout)) return layout;
@@ -60,6 +64,8 @@ export function LayoutResolver({
           department={department}
           current={current}
           lastCalled={lastCalled}
+          paused={paused}
+          displayToken={displayToken}
         />
       ))}
     </div>

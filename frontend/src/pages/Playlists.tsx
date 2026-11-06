@@ -12,6 +12,7 @@ import {
   ChevronUp,
   Clock,
   GripVertical,
+  Image as ImageIcon,
   ListVideo,
   MoreVertical,
   Pause,
@@ -20,6 +21,7 @@ import {
   Plus,
   SkipBack,
   SkipForward,
+  Table2,
   Trash2,
 } from "lucide-react";
 import {
@@ -35,6 +37,7 @@ import {
   Select,
   Skeleton,
 } from "../design-system";
+import { DynamicPicker } from "../components/media/DynamicPicker";
 import { MediaPicker } from "../components/media/MediaPicker";
 import { MediaThumb } from "../components/media/MediaThumb";
 import { StudioPreview } from "../components/media/StudioPreview";
@@ -46,10 +49,23 @@ import api from "../services/api";
 
 type PlaylistItemRow = {
   id: string;
-  asset_id: string;
+  item_type?: "MEDIA" | "DYNAMIC" | string;
+  asset_id: string | null;
+  dynamic_content_id?: string | null;
   position: number;
   duration_seconds: number;
+  duration_source?: string | null;
+  effective_duration_seconds?: number | null;
   asset: MediaItem | null;
+  dynamic_content?: {
+    id: string;
+    name: string;
+    content_type?: string;
+    status?: string | null;
+    page_count?: number | null;
+    item_count?: number | null;
+    total_duration_seconds?: number | null;
+  } | null;
 };
 
 type Playlist = {
@@ -73,9 +89,29 @@ type Playlist = {
 type SaveState = "idle" | "saving" | "saved" | "error";
 
 function toPlayerSlide(item: PlaylistItemRow): PlayerSlide | null {
+  const itype = (item.item_type || "MEDIA").toUpperCase();
+  if (itype === "DYNAMIC") {
+    if (!item.dynamic_content && !item.dynamic_content_id) return null;
+    return {
+      id: item.dynamic_content?.id || item.dynamic_content_id || item.id,
+      item_id: item.id,
+      item_type: "DYNAMIC",
+      name: item.dynamic_content?.name || "Tabela",
+      type: "DYNAMIC",
+      url: "",
+      mime_type: null,
+      duration_seconds: effectiveItemDuration(item),
+      dynamic_content: {
+        id: item.dynamic_content?.id || item.dynamic_content_id || "",
+        content_type: item.dynamic_content?.content_type || "PRICE_TABLE",
+        name: item.dynamic_content?.name,
+      },
+    };
+  }
   if (!item.asset) return null;
   return {
     id: item.id,
+    item_type: "MEDIA",
     name: item.asset.name,
     type: item.asset.media_type,
     url: item.asset.public_url,
@@ -102,6 +138,8 @@ export default function Playlists() {
   const [renameValue, setRenameValue] = useState("");
   const [deletePl, setDeletePl] = useState<Playlist | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [dynamicPickerOpen, setDynamicPickerOpen] = useState(false);
+  const [addChooserOpen, setAddChooserOpen] = useState(false);
   const [pickerBusy, setPickerBusy] = useState(false);
 
   const [dragId, setDragId] = useState<string | null>(null);
@@ -333,6 +371,30 @@ export default function Playlists() {
         ? `${assets.length} conteúdos adicionados`
         : "Conteúdo adicionado",
     );
+  }
+
+  async function onDynamicConfirm(ids: string[]) {
+    if (!selectedId || ids.length === 0) return;
+    setPickerBusy(true);
+    const data = await withSave(() =>
+      api
+        .post<Playlist>(`/playlists/${selectedId}/items/bulk`, {
+          items: ids.map((id) => ({
+            item_type: "DYNAMIC",
+            dynamic_content_id: id,
+          })),
+          store_id: storeId,
+        })
+        .then((r) => r.data),
+    );
+    setPickerBusy(false);
+    if (!data) {
+      setError("Não foi possível adicionar a tabela dinâmica.");
+      return;
+    }
+    applyPlaylist(data);
+    setDynamicPickerOpen(false);
+    setToast(ids.length > 1 ? `${ids.length} tabelas adicionadas` : "Tabela adicionada");
   }
 
   async function removeItem(itemId: string) {
@@ -630,7 +692,7 @@ export default function Playlists() {
                       <Trash2 className="h-3.5 w-3.5" aria-hidden />
                       Excluir
                     </Button>
-                    <Button type="button" size="sm" onClick={() => setPickerOpen(true)}>
+                    <Button type="button" size="sm" onClick={() => setAddChooserOpen(true)}>
                       <Plus className="h-3.5 w-3.5" aria-hidden />
                       Adicionar conteúdo
                     </Button>
@@ -657,7 +719,7 @@ export default function Playlists() {
                         aspect === "16:9" ? "aspect-video max-w-xl" : "aspect-[9/16] max-w-[220px]"
                       }`}
                     >
-                      <StudioPreview item={previewSlide} playing={previewPlaying} />
+                      <StudioPreview item={previewSlide} playing={previewPlaying} storeId={storeId} />
                     </div>
                     <div className="flex flex-wrap items-center justify-center gap-2">
                       <IconButton
@@ -698,10 +760,17 @@ export default function Playlists() {
                         }}
                       />
                     </div>
-                    {previewItem?.asset && (
+                    {previewItem && (
                       <p className="text-center text-xs text-ink/55">
-                        {String(previewIndex + 1).padStart(2, "0")} · {previewItem.asset.name} ·{" "}
-                        {formatClockDuration(effectiveItemDuration(previewItem))}
+                        {String(previewIndex + 1).padStart(2, "0")} ·{" "}
+                        {(previewItem.item_type || "MEDIA").toUpperCase() === "DYNAMIC"
+                          ? previewItem.dynamic_content?.name || "PRICE TABLE"
+                          : previewItem.asset?.name || "Conteúdo"}{" "}
+                        · {formatClockDuration(effectiveItemDuration(previewItem))}
+                        {(previewItem.item_type || "").toUpperCase() === "DYNAMIC" &&
+                        (previewItem.duration_source || "SOURCE").toUpperCase() === "SOURCE"
+                          ? " automático"
+                          : ""}
                       </p>
                     )}
                   </div>
@@ -711,9 +780,9 @@ export default function Playlists() {
                     {selected.items.length === 0 ? (
                       <EmptyState
                         title="Esta playlist ainda não possui conteúdos"
-                        description="Adicione imagens, vídeos ou páginas Web para montar a sequência."
+                        description="Adicione mídias ou tabelas dinâmicas CISS para montar a sequência."
                         action={
-                          <Button type="button" onClick={() => setPickerOpen(true)}>
+                          <Button type="button" onClick={() => setAddChooserOpen(true)}>
                             <Plus className="h-4 w-4" aria-hidden />
                             Adicionar conteúdo
                           </Button>
@@ -724,6 +793,15 @@ export default function Playlists() {
                         {selected.items.map((item, idx) => {
                           const active = idx === previewIndex % selected.items.length;
                           const dur = effectiveItemDuration(item);
+                          const isDynamic = (item.item_type || "MEDIA").toUpperCase() === "DYNAMIC";
+                          const label = isDynamic
+                            ? item.dynamic_content?.name || "PRICE TABLE"
+                            : item.asset?.name || "Conteúdo";
+                          const typeLabel = isDynamic
+                            ? "PRICE TABLE"
+                            : item.asset?.media_type || "MEDIA";
+                          const autoDur =
+                            isDynamic && (item.duration_source || "SOURCE").toUpperCase() === "SOURCE";
                           return (
                             <li
                               key={item.id}
@@ -740,7 +818,7 @@ export default function Playlists() {
                               <button
                                 type="button"
                                 className="hidden cursor-grab touch-none text-ink/35 sm:block"
-                                aria-label={`Reordenar ${item.asset?.name || "item"}`}
+                                aria-label={`Reordenar ${label}`}
                                 onClick={(e) => e.preventDefault()}
                               >
                                 <GripVertical className="h-4 w-4" />
@@ -756,25 +834,51 @@ export default function Playlists() {
                                 <span className="w-6 shrink-0 text-xs font-semibold tabular-nums text-ink/50">
                                   {active ? "▶" : String(idx + 1).padStart(2, "0")}
                                 </span>
-                                <div className="h-12 w-20 shrink-0 overflow-hidden rounded-ds border border-brand-100 bg-brand-50">
-                                  <MediaThumb
-                                    mediaType={item.asset?.media_type || "IMAGE"}
-                                    url={item.asset?.public_url}
-                                    name={item.asset?.name}
-                                  />
+                                <div className="flex h-12 w-20 shrink-0 items-center justify-center overflow-hidden rounded-ds border border-brand-100 bg-brand-50">
+                                  {isDynamic ? (
+                                    <Table2 className="h-6 w-6 text-brand-700" aria-hidden />
+                                  ) : (
+                                    <MediaThumb
+                                      mediaType={item.asset?.media_type || "IMAGE"}
+                                      url={item.asset?.public_url}
+                                      name={item.asset?.name}
+                                    />
+                                  )}
                                 </div>
                                 <div className="min-w-0">
                                   <p className="truncate text-sm font-semibold text-brand-900">
-                                    {item.asset?.name || "Conteúdo"}
+                                    {label}
                                   </p>
                                   <p className="text-xs text-ink/55">
-                                    {item.asset?.media_type || "—"} · {formatClockDuration(dur)}
+                                    {isDynamic ? (
+                                      <>
+                                        <Table2 className="mr-1 inline h-3 w-3 align-text-bottom" aria-hidden />
+                                        {typeLabel}
+                                        {item.dynamic_content?.page_count
+                                          ? ` · ${item.dynamic_content.page_count} páginas`
+                                          : ""}
+                                        {" · "}
+                                        {formatClockDuration(dur)}
+                                        {autoDur ? " automático" : ""}
+                                      </>
+                                    ) : (
+                                      <>
+                                        {typeLabel} · {formatClockDuration(dur)}
+                                      </>
+                                    )}
                                   </p>
                                 </div>
                               </button>
 
                               <div className="relative flex shrink-0 items-center gap-1">
-                                {durationEditId === item.id ? (
+                                {autoDur ? (
+                                  <span
+                                    className="rounded-ds px-2 py-1 text-xs font-medium text-ink/55"
+                                    title="Duração automática do conteúdo"
+                                  >
+                                    {formatClockDuration(dur)}
+                                  </span>
+                                ) : durationEditId === item.id ? (
                                   <Input
                                     aria-label="Duração em segundos"
                                     type="number"
@@ -803,7 +907,7 @@ export default function Playlists() {
                                   </button>
                                 )}
                                 <IconButton
-                                  label={`Ações de ${item.asset?.name || "item"}`}
+                                  label={`Ações de ${label}`}
                                   icon={<MoreVertical className="h-4 w-4" />}
                                   onClick={() =>
                                     setMenuItemId((id) => (id === item.id ? null : item.id))
@@ -834,18 +938,20 @@ export default function Playlists() {
                                       <ChevronDown className="h-3.5 w-3.5" aria-hidden />
                                       Mover para baixo
                                     </button>
-                                    <button
-                                      type="button"
-                                      role="menuitem"
-                                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-brand-50"
-                                      onClick={() => {
-                                        setMenuItemId(null);
-                                        setDurationEditId(item.id);
-                                      }}
-                                    >
-                                      <Clock className="h-3.5 w-3.5" aria-hidden />
-                                      Editar duração
-                                    </button>
+                                    {!autoDur && (
+                                      <button
+                                        type="button"
+                                        role="menuitem"
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-brand-50"
+                                        onClick={() => {
+                                          setMenuItemId(null);
+                                          setDurationEditId(item.id);
+                                        }}
+                                      >
+                                        <Clock className="h-3.5 w-3.5" aria-hidden />
+                                        Editar duração
+                                      </button>
+                                    )}
                                     <button
                                       type="button"
                                       role="menuitem"
@@ -962,12 +1068,59 @@ export default function Playlists() {
         danger={!(deletePl && (deletePl.usage_count || 0) > 0)}
       />
 
+      <Modal
+        open={addChooserOpen}
+        onClose={() => setAddChooserOpen(false)}
+        title="Adicionar conteúdo"
+        footer={
+          <Button type="button" variant="ghost" onClick={() => setAddChooserOpen(false)}>
+            Fechar
+          </Button>
+        }
+      >
+        <p className="mb-3 text-sm text-ink/65">Escolha mídia da biblioteca ou tabela dinâmica CISS.</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            className="flex flex-col items-start gap-2 rounded-ds border border-brand-100 p-4 text-left hover:bg-brand-50"
+            onClick={() => {
+              setAddChooserOpen(false);
+              setPickerOpen(true);
+            }}
+          >
+            <ImageIcon className="h-6 w-6 text-brand-700" aria-hidden />
+            <span className="font-semibold text-brand-900">Mídia</span>
+            <span className="text-xs text-ink/55">Imagem, vídeo ou Web</span>
+          </button>
+          <button
+            type="button"
+            className="flex flex-col items-start gap-2 rounded-ds border border-brand-100 p-4 text-left hover:bg-brand-50"
+            onClick={() => {
+              setAddChooserOpen(false);
+              setDynamicPickerOpen(true);
+            }}
+          >
+            <Table2 className="h-6 w-6 text-brand-700" aria-hidden />
+            <span className="font-semibold text-brand-900">Dinâmico</span>
+            <span className="text-xs text-ink/55">Tabela de preços CISS</span>
+          </button>
+        </div>
+      </Modal>
+
       <MediaPicker
         open={pickerOpen}
         onClose={() => !pickerBusy && setPickerOpen(false)}
         storeId={storeId}
         busy={pickerBusy}
         onConfirm={onPickerConfirm}
+      />
+
+      <DynamicPicker
+        open={dynamicPickerOpen}
+        onClose={() => !pickerBusy && setDynamicPickerOpen(false)}
+        storeId={storeId}
+        busy={pickerBusy}
+        onConfirm={onDynamicConfirm}
       />
     </div>
   );

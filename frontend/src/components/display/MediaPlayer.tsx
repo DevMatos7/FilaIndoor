@@ -4,19 +4,32 @@ import { DisplayFallback } from "./DisplayFallback";
 
 type Props = {
   item: PlaylistItem | null;
+  paused?: boolean;
   onMediaFailed?: (item: PlaylistItem) => void;
 };
 
 /**
  * Renders IMAGE | VIDEO | WEB for the media zone.
  * Failures advance via onMediaFailed — no technical errors on screen.
+ * When paused (override covering): VIDEO pauses; IMAGE holds; WEB clock pauses in parent.
  */
-export function MediaPlayer({ item, onMediaFailed }: Props) {
+export function MediaPlayer({ item, paused = false, onMediaFailed }: Props) {
   const failedRef = useRef<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     failedRef.current = null;
   }, [item?.id]);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || item?.type !== "VIDEO") return;
+    if (paused) {
+      v.pause();
+    } else {
+      void v.play().catch(() => undefined);
+    }
+  }, [paused, item?.id, item?.type]);
 
   function fail(slide: PlaylistItem) {
     if (failedRef.current === slide.id) return;
@@ -43,9 +56,10 @@ export function MediaPlayer({ item, onMediaFailed }: Props) {
       {item.type === "VIDEO" && (
         <video
           key={item.id}
+          ref={videoRef}
           src={item.url}
           className="absolute inset-0 h-full w-full object-cover"
-          autoPlay
+          autoPlay={!paused}
           muted
           playsInline
           preload="auto"

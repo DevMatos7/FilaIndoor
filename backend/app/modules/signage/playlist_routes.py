@@ -1,5 +1,7 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
 
 from app.core.permissions import QUEUE_ADMIN, QUEUE_MANAGER, SIGNAGE_ADMIN, SIGNAGE_EDITOR, SIGNAGE_VIEWER
@@ -27,18 +29,47 @@ class PlaylistUpdate(BaseModel):
 
 
 class PlaylistItemCreate(BaseModel):
-    asset_id: str
+    item_type: str | None = None  # MEDIA | DYNAMIC — default inferred
+    asset_id: str | None = None
+    dynamic_content_id: str | None = None
     duration_seconds: int | None = Field(default=None, ge=1, le=86400)
+    duration_source: str | None = None
     position: int | None = None
+
+    @model_validator(mode="after")
+    def validate_xor(self):
+        itype = (self.item_type or ("DYNAMIC" if self.dynamic_content_id else "MEDIA")).upper()
+        if itype == "MEDIA":
+            if not self.asset_id:
+                raise ValueError("asset_id obrigatório para MEDIA")
+            if self.dynamic_content_id:
+                raise ValueError("dynamic_content_id não permitido para MEDIA")
+        elif itype == "DYNAMIC":
+            if not self.dynamic_content_id:
+                raise ValueError("dynamic_content_id obrigatório para DYNAMIC")
+            if self.asset_id:
+                raise ValueError("asset_id não permitido para DYNAMIC")
+        else:
+            raise ValueError("item_type inválido")
+        self.item_type = itype
+        return self
 
 
 class PlaylistItemsBulkCreate(BaseModel):
-    asset_ids: list[str] = Field(min_length=1)
+    asset_ids: list[str] | None = None
+    items: list[dict[str, Any]] | None = None
     store_id: str | None = None
+
+    @model_validator(mode="after")
+    def require_one(self):
+        if not self.asset_ids and not self.items:
+            raise ValueError("Informe asset_ids ou items")
+        return self
 
 
 class PlaylistItemUpdate(BaseModel):
     duration_seconds: int | None = Field(default=None, ge=1, le=86400)
+    duration_source: str | None = None
     active: bool | None = None
     store_id: str | None = None
 
@@ -117,7 +148,10 @@ def add_items_bulk(
     _: User = Depends(require_permissions(SIGNAGE_EDITOR, SIGNAGE_ADMIN, QUEUE_MANAGER, QUEUE_ADMIN)),
 ):
     return PlaylistService(db).add_items(
-        playlist_id, asset_ids=body.asset_ids, store_id=body.store_id
+        playlist_id,
+        asset_ids=body.asset_ids,
+        items=body.items,
+        store_id=body.store_id,
     )
 
 

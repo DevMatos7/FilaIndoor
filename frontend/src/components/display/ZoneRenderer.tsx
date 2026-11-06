@@ -1,5 +1,5 @@
 import { CSSProperties, ReactNode } from "react";
-import { MediaPlayer } from "./MediaPlayer";
+import { ContentRenderer } from "./ContentRenderer";
 import { QueueZone } from "./QueueZone";
 import { TextZone } from "./TextZone";
 import { ClockZone } from "./ClockZone";
@@ -9,13 +9,15 @@ import type { DisplayTicket, PlaylistItem } from "./types";
 
 type Props = {
   zone: LayoutZone;
-  /** First MEDIA zone only receives the shared MediaPlayer. */
+  /** First MEDIA zone only receives the shared content sequence. */
   isPrimaryMedia?: boolean;
   mediaItem: PlaylistItem | null;
   onMediaFailed?: (item: PlaylistItem) => void;
   department: string;
   current: DisplayTicket | null;
   lastCalled: DisplayTicket[];
+  paused?: boolean;
+  displayToken?: string;
 };
 
 export function ZoneRenderer({
@@ -26,6 +28,8 @@ export function ZoneRenderer({
   department,
   current,
   lastCalled,
+  paused = false,
+  displayToken = "",
 }: Props) {
   const style: CSSProperties = {
     position: "absolute",
@@ -42,7 +46,12 @@ export function ZoneRenderer({
     case "MEDIA":
       content = isPrimaryMedia ? (
         <div className="relative h-full w-full">
-          <MediaPlayer item={mediaItem} onMediaFailed={onMediaFailed} />
+          <ContentRenderer
+            item={mediaItem}
+            paused={paused}
+            displayToken={displayToken}
+            onMediaFailed={onMediaFailed}
+          />
         </div>
       ) : null;
       if (!isPrimaryMedia) {

@@ -5,6 +5,7 @@ import { DisplayBoot } from "../components/display/DisplayBoot";
 import { DisplayUnavailable } from "../components/display/DisplayUnavailable";
 import { LayoutResolver } from "../components/display/LayoutResolver";
 import { OverrideRenderer } from "../components/display/OverrideRenderer";
+import { usePlaybackClock } from "../components/display/PlaybackClock";
 import { useOverrideManager } from "../components/display/useOverrideManager";
 import type {
   DisplayTicket,
@@ -238,20 +239,44 @@ export default function Display() {
   }, [config?.playlist, skipIds]);
 
   const slide = playlist.length > 0 ? playlist[slideIndex % playlist.length] : null;
+  const overrideActive = !!overrides.current;
 
   useEffect(() => {
     setSlideIndex(0);
     setSkipIds(new Set());
   }, [config?.store_id, config?.config_version, config?.playlist?.length]);
 
+  // Playlist item timer uses active_elapsed — pauses under any override
+  const slideKey = slide?.item_id || slide?.id || null;
+  const advancedForKey = useRef<string | null>(null);
+  const itemClock = usePlaybackClock({
+    resetKey: slideKey,
+    paused: overrideActive || !slide,
+    enabled: !!slide && playlist.length > 0,
+  });
+
   useEffect(() => {
-    if (!slide || playlist.length === 0) return;
+    advancedForKey.current = null;
+  }, [slideKey]);
+
+  useEffect(() => {
+    if (!slide || playlist.length === 0 || !slideKey) return;
     const ms = Math.max(3, slide.duration_seconds || 10) * 1000;
-    const id = window.setTimeout(() => {
-      setSlideIndex((i) => (i + 1) % playlist.length);
-    }, ms);
-    return () => window.clearTimeout(id);
-  }, [slide, playlist.length]);
+    if (itemClock.activeElapsedMs < ms) return;
+    if (advancedForKey.current === slideKey) return;
+    advancedForKey.current = slideKey;
+    setSlideIndex((i) => (i + 1) % playlist.length);
+  }, [itemClock.activeElapsedMs, slide, playlist.length, slideKey]);
+
+  // Loop protection — if everything skipped, clear and wait for next config cycle
+  useEffect(() => {
+    if (!config?.playlist?.length) return;
+    if (skipIds.size > 0 && skipIds.size >= config.playlist.length) {
+      console.warn("[display] all playlist items skipped — fallback until refresh");
+      setSkipIds(new Set());
+      setUiState("fallback");
+    }
+  }, [skipIds, config?.playlist?.length]);
 
   function handleMediaFailed(item: PlaylistItem) {
     setSkipIds((prev) => {
@@ -293,6 +318,8 @@ export default function Display() {
           department={department}
           current={current}
           lastCalled={lastCalled}
+          paused={overrideActive}
+          displayToken={token}
         />
         <OverrideRenderer override={overrides.current} />
       </div>

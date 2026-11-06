@@ -81,8 +81,12 @@ Format: `pt-BR` / `R$ #.##` via formatador central.
 
 `store_id NULL` + índice parcial unique(slug) WHERE store_id IS NULL.
 
-## Validações pendentes (não bloqueiam M2)
+## Validações
 
+- VISUAL VALIDATION: fechada no **Module 3** via `PriceTableRenderer` compartilhado (admin = TV).
 - REAL ACTIVE PROMOTION VALIDATION: PENDING REAL CASE  
 - REAL MULTI-TIER VALIDATION: PENDING REAL CASE  
 - STOCK FILTER: DISABLED BY DESIGN  
+
+Ver também: [05-dynamic-playlist-player.md](./05-dynamic-playlist-player.md).
+

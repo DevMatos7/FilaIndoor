@@ -71,16 +71,23 @@ class PlaylistItem(Base):
     playlist_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("playlists.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    asset_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("media_assets.id", ondelete="CASCADE"), nullable=False, index=True
+    item_type: Mapped[str] = mapped_column(String(20), nullable=False, default="MEDIA")  # MEDIA | DYNAMIC
+    asset_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("media_assets.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    dynamic_content_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("dynamic_contents.id", ondelete="RESTRICT"), nullable=True, index=True
     )
     position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     duration_seconds: Mapped[int] = mapped_column(Integer, nullable=False, default=10)
+    # SOURCE = compute from content; OVERRIDE = use duration_seconds as absolute
+    duration_source: Mapped[str] = mapped_column(String(20), nullable=False, default="SOURCE")
+    config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
 
     playlist: Mapped[Playlist] = relationship(back_populates="items")
-    asset: Mapped[MediaAsset] = relationship()
+    asset: Mapped[MediaAsset | None] = relationship()
 
 
 class LayoutTemplate(Base):
