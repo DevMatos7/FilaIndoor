@@ -284,8 +284,10 @@ class RetailSyncService:
             elif entity == "PRODUCT_IMAGE":
                 from app.modules.retail.ciss_image_importer import CissProductImageImporter
 
+                # Cap per cycle; fingerprint/meta probe avoids full BLOB re-read on unchanged SKUs.
+                img_limit = min(200, int(self.settings.retail_sync_product_limit or 200))
                 result = CissProductImageImporter(self.db, provider=self.provider).import_store_products(
-                    store_id, limit=min(200, int(self.settings.retail_sync_product_limit or 200))
+                    store_id, limit=img_limit
                 )
                 read = int(result.get("read") or 0)
                 inserted = int(result.get("inserted") or 0)
@@ -293,6 +295,15 @@ class RetailSyncService:
                 skipped = int(result.get("skipped") or 0)
                 failed = int(result.get("failed") or 0)
                 changed.update(result.get("changed_product_ids") or [])
+                # Persist load metrics for Module 6 / ops (no secrets)
+                run.error_summary = (
+                    f"image_sync blob_reads={result.get('blob_reads', 0)} "
+                    f"bytes={result.get('bytes_transferred', 0)} "
+                    f"meta_probes={result.get('meta_probes', 0)} "
+                    f"unchanged={result.get('unchanged', 0)} "
+                    f"placeholders={result.get('placeholders_ignored', 0)} "
+                    f"missing_ciss={result.get('candidates_missing_ciss', 0)}"
+                )
             elif entity == "PRICE_CHAIN":
                 from app.modules.retail.offer_sync_service import RetailOfferSyncService
 
@@ -334,13 +345,17 @@ class RetailSyncService:
         return payload, changed
 
     def _ensure_minimal_product(self, source_product_id: str) -> RetailProduct:
+        """Placeholder product until PRODUCT sync fills commercial fields.
+
+        NEVER use source_product_id / GTIN as TV description (Module 6 P0).
+        """
         existing = self._get_product_by_source(source_product_id)
         if existing:
             return existing
         row = RetailProduct(
             source_system="CISS",
             source_product_id=source_product_id,
-            description=source_product_id,
+            description="",  # never expose source id on TV; PRODUCT sync fills later
             active=True,
             synced_at=utcnow(),
         )

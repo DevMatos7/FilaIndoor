@@ -195,6 +195,89 @@ def test_image_importer_skips_without_provider_blob(seeded):
     assert out["status"] == "SKIPPED"
 
 
+class _FakeImageProvider:
+    """Minimal provider for incremental PRODUCT_IMAGE fingerprint skip."""
+
+    PLACEHOLDER_IMAGE_LENGTH = 4912
+
+    def __init__(self, jpeg_bytes: bytes):
+        self.jpeg_bytes = jpeg_bytes
+        self.blob_calls = 0
+        self.meta_calls = 0
+        self.fingerprint = f"{len(jpeg_bytes)}:{jpeg_bytes[:32].hex()}"
+        self.sha = checksum(jpeg_bytes)
+
+    def fetch_product_image_meta(self, *, source_product_id=None, gtin=None):
+        self.meta_calls += 1
+        return {
+            "usable": True,
+            "idcodbarprod": gtin or "1",
+            "source_product_id": source_product_id,
+            "length": len(self.jpeg_bytes),
+            "head_hex": self.jpeg_bytes[:32].hex(),
+            "fingerprint": self.fingerprint,
+        }
+
+    def fetch_product_image_blob(self, *, source_product_id=None, gtin=None):
+        self.blob_calls += 1
+        return {
+            "idcodbarprod": gtin or "1",
+            "source_product_id": source_product_id,
+            "bytes": self.jpeg_bytes,
+            "sha256": self.sha,
+            "length": len(self.jpeg_bytes),
+            "format": "JPEG",
+            "mime_type": "image/jpeg",
+            "fingerprint": self.fingerprint,
+        }
+
+
+def test_image_importer_skips_blob_on_second_sync(seeded, tmp_path, monkeypatch):
+    """Second import with same fingerprint must NOT re-read BLOB."""
+    from app.core.config import get_settings
+
+    monkeypatch.setenv("MEDIA_ROOT", str(tmp_path))
+    get_settings.cache_clear()
+
+    # minimal valid JPEG
+    jpeg = (
+        b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00"
+        b"\xff\xdb\x00C\x00" + bytes([8] * 64) + b"\xff\xd9"
+    )
+    provider = _FakeImageProvider(jpeg)
+
+    db = seeded["db"]
+    store_id = seeded["store"].id
+    svc = RetailSyncService(db, provider=MockRetailDataProvider())
+    svc.upsert_store_source(store_id, company_code="1")
+    svc.sync_store(store_id, entities=["PRODUCT"], full=True, skip_invalidation=True)
+    product = db.scalars(select(RetailProduct)).first()
+    assert product
+
+    importer = CissProductImageImporter(db, provider=provider)
+    first = importer.import_for_product(product.id, store_id=store_id)
+    assert first["status"] == "UPDATED"
+    assert first["blob_reads"] == 1
+    assert provider.blob_calls == 1
+
+    second = importer.import_for_product(product.id, store_id=store_id)
+    assert second["status"] == "UNCHANGED"
+    assert second["blob_reads"] == 0
+    assert provider.blob_calls == 1  # no additional full BLOB transfer
+    assert provider.meta_calls >= 2
+
+    # Import remaining active products once, then second batch must be meta-only
+    products = list(db.scalars(select(RetailProduct).where(RetailProduct.active.is_(True))).all())
+    for p in products:
+        importer.import_for_product(p.id, store_id=store_id)
+    blobs_after_fill = provider.blob_calls
+    batch = importer.import_store_products(store_id, limit=50)
+    assert batch["blob_reads"] == 0
+    assert batch["unchanged"] >= 1
+    assert provider.blob_calls == blobs_after_fill
+    get_settings.cache_clear()
+
+
 def test_entities_include_offer_and_image():
     from app.modules.retail.sync_service import ENTITIES
 

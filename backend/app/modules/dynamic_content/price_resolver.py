@@ -84,6 +84,14 @@ class PriceDisplayResolver:
         # TV / player: never use SKU / source_product_id / GTIN as commercial label
         desc = (product.commercial_description or product.description or "").strip()
         unit = (product.unit or "").strip() or None
+        banned = {
+            (product.source_product_id or "").strip(),
+            (product.gtin or "").strip(),
+            (getattr(product, "sku", None) or "").strip(),
+        }
+        banned.discard("")
+        if desc and desc in banned:
+            desc = ""
 
         if not desc:
             return PriceDisplay(

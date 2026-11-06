@@ -12,7 +12,7 @@
 | CISS IMAGE BLOB SOURCE | **USABLE** (`PRODUTO_ESPECIFICACAO_TECNICA.FOTOPRINCIPAL` BLOB JPEG) |
 | OBSESPECIFIC FOR DISPLAY | **PARTIAL** (27/40 BETTER, mas mistura rótulo nutricional/CNPJ) → **NOT_ADOPTED** como precedência default |
 | PROMOCAO_GESTAO | **CONFIRMED** |
-| CISS OFFER SOURCE | **CONFIRMED** (+ `PROMOCAO_GESTAO_EMPRESA` por `IDEMPRESA`) |
+| CISS OFFER SOURCE | **CONFIRMED** (+ `PROMOCAO_GESTAO_EMPRESA` por `IDEMPRESA`; **Module 6:** se a empresa não tem vínculos EMPRESA vigentes — caso IDEMPRESA=1 — fallback por itens com `POLITICA_PRECO` na empresa) |
 | PRICE CHAIN | **CONFIRMED** (`PRODUTO_CADEIA_PRECO`) |
 | REAL ACTIVE PROMOTION | **PASS** (campanhas vigentes encontradas; sync → `RetailOfferCampaign`) |
 

@@ -485,6 +485,93 @@ class CissDb2RetailProvider(RetailDataProvider):
     PLACEHOLDER_IMAGE_SHA256 = "0c2cba5fa5aa8a4552672c5aee88bd011e706ebd671596e7e5d268988923ce5e"
     PLACEHOLDER_IMAGE_LENGTH = 4912
 
+    def _resolve_image_idcod(
+        self, cur, *, source_product_id: str | None = None, gtin: str | None = None
+    ) -> tuple[str, int, str | None] | None:
+        """Return (idcodbarprod, length, source_product_id) or None."""
+        spid = source_product_id
+        if source_product_id:
+            try:
+                idprod, idsub = [int(x) for x in source_product_id.split(":", 1)]
+            except ValueError:
+                return None
+            cur.execute(
+                f"""
+                SELECT CAST(G.IDCODBARPROD AS VARCHAR(32)), LENGTH(PET.FOTOPRINCIPAL)
+                FROM {self.schema}.PRODUTO_GRADE G
+                JOIN {self.schema}.PRODUTO_ESPECIFICACAO_TECNICA PET
+                  ON PET.IDCODBARPROD = G.IDCODBARPROD
+                WHERE G.IDPRODUTO=? AND G.IDSUBPRODUTO=?
+                  AND PET.FOTOPRINCIPAL IS NOT NULL
+                FETCH FIRST 1 ROW ONLY
+                """,
+                idprod,
+                idsub,
+            )
+        elif gtin:
+            cur.execute(
+                f"""
+                SELECT CAST(IDCODBARPROD AS VARCHAR(32)), LENGTH(FOTOPRINCIPAL)
+                FROM {self.schema}.PRODUTO_ESPECIFICACAO_TECNICA
+                WHERE CAST(IDCODBARPROD AS VARCHAR(32)) = ?
+                  AND FOTOPRINCIPAL IS NOT NULL
+                FETCH FIRST 1 ROW ONLY
+                """,
+                str(gtin),
+            )
+        else:
+            return None
+        row = cur.fetchone()
+        if not row:
+            return None
+        return str(row[0]), int(row[1] or 0), spid
+
+    def fetch_product_image_meta(
+        self, *, source_product_id: str | None = None, gtin: str | None = None
+    ) -> dict[str, Any] | None:
+        """
+        Cheap probe: LENGTH + first 32 bytes hex. Does NOT transfer full BLOB.
+        fingerprint = "{length}:{head_hex}"
+        """
+        cn = self._connect()
+        try:
+            cur = cn.cursor()
+            resolved = self._resolve_image_idcod(cur, source_product_id=source_product_id, gtin=gtin)
+            if not resolved:
+                return None
+            idcod, length, spid = resolved
+            if length <= 0:
+                return {"usable": False, "reason": "empty", "length": length}
+            if length == self.PLACEHOLDER_IMAGE_LENGTH:
+                return {
+                    "usable": False,
+                    "reason": "placeholder_4912",
+                    "length": length,
+                    "idcodbarprod": idcod,
+                    "source_product_id": spid,
+                    "fingerprint": f"{length}:PLACEHOLDER",
+                }
+            cur.execute(
+                f"""
+                SELECT CAST(HEX(SUBSTR(FOTOPRINCIPAL,1,32)) AS VARCHAR(64))
+                FROM {self.schema}.PRODUTO_ESPECIFICACAO_TECNICA
+                WHERE CAST(IDCODBARPROD AS VARCHAR(32)) = ?
+                """,
+                idcod,
+            )
+            hx_row = cur.fetchone()
+            head = str(hx_row[0]).strip().lower() if hx_row and hx_row[0] else ""
+            return {
+                "usable": True,
+                "idcodbarprod": idcod,
+                "source_product_id": spid,
+                "length": length,
+                "head_hex": head,
+                "fingerprint": f"{length}:{head}",
+            }
+        finally:
+            cn.close()
+
     def fetch_product_image_blob(
         self, *, source_product_id: str | None = None, gtin: str | None = None
     ) -> dict[str, Any] | None:
@@ -497,57 +584,25 @@ class CissDb2RetailProvider(RetailDataProvider):
         cn = self._connect()
         try:
             cur = cn.cursor()
-            idcod = None
-            spid = source_product_id
-            if source_product_id:
-                try:
-                    idprod, idsub = [int(x) for x in source_product_id.split(":", 1)]
-                except ValueError:
-                    return None
-                cur.execute(
-                    f"""
-                    SELECT CAST(IDCODBARPROD AS VARCHAR(32)), LENGTH(PET.FOTOPRINCIPAL)
-                    FROM {self.schema}.PRODUTO_GRADE G
-                    JOIN {self.schema}.PRODUTO_ESPECIFICACAO_TECNICA PET
-                      ON PET.IDCODBARPROD = G.IDCODBARPROD
-                    WHERE G.IDPRODUTO=? AND G.IDSUBPRODUTO=?
-                      AND PET.FOTOPRINCIPAL IS NOT NULL
-                    FETCH FIRST 1 ROW ONLY
-                    """,
-                    idprod,
-                    idsub,
-                )
-            elif gtin:
-                cur.execute(
-                    f"""
-                    SELECT CAST(IDCODBARPROD AS VARCHAR(32)), LENGTH(FOTOPRINCIPAL)
-                    FROM {self.schema}.PRODUTO_ESPECIFICACAO_TECNICA
-                    WHERE CAST(IDCODBARPROD AS VARCHAR(32)) = ?
-                      AND FOTOPRINCIPAL IS NOT NULL
-                    FETCH FIRST 1 ROW ONLY
-                    """,
-                    str(gtin),
-                )
-            else:
+            resolved = self._resolve_image_idcod(cur, source_product_id=source_product_id, gtin=gtin)
+            if not resolved:
                 return None
-            row = cur.fetchone()
-            if not row:
-                return None
-            idcod, length = str(row[0]), int(row[1] or 0)
+            idcod, length, spid = resolved
             if length <= 0 or length == self.PLACEHOLDER_IMAGE_LENGTH:
                 return None
 
-            chunk = 2000
+            # DB2 HEX(SUBSTR(blob, ?, ?)) rejects bound offsets (SQL0171N).
+            # Inline integer literals; keep idcod as the only bind param.
+            chunk = 512  # HEX expands 1:2 → VARCHAR(1024) fits safely
             parts: list[str] = []
             for start in range(1, length + 1, chunk):
+                n = min(chunk, length - start + 1)
                 cur.execute(
                     f"""
-                    SELECT CAST(HEX(SUBSTR(FOTOPRINCIPAL, ?, ?)) AS VARCHAR(4000))
+                    SELECT CAST(HEX(SUBSTR(FOTOPRINCIPAL, {int(start)}, {int(n)})) AS VARCHAR(1024))
                     FROM {self.schema}.PRODUTO_ESPECIFICACAO_TECNICA
                     WHERE CAST(IDCODBARPROD AS VARCHAR(32)) = ?
                     """,
-                    start,
-                    min(chunk, length - start + 1),
                     idcod,
                 )
                 hx = cur.fetchone()
@@ -568,6 +623,7 @@ class CissDb2RetailProvider(RetailDataProvider):
                 fmt, mime = "PNG", "image/png"
             else:
                 return None
+            head = raw[:32].hex()
             return {
                 "idcodbarprod": idcod,
                 "source_product_id": spid,
@@ -576,6 +632,7 @@ class CissDb2RetailProvider(RetailDataProvider):
                 "length": len(raw),
                 "format": fmt,
                 "mime_type": mime,
+                "fingerprint": f"{len(raw)}:{head}",
             }
         finally:
             cn.close()
@@ -583,25 +640,79 @@ class CissDb2RetailProvider(RetailDataProvider):
     def fetch_offer_campaigns(
         self, *, company_code: str, active_only: bool = True, limit: int = 50
     ) -> list[dict[str, Any]]:
-        """PROMOCAO_GESTAO scoped by PROMOCAO_GESTAO_EMPRESA."""
-        limit = max(1, min(limit, 200))
-        sql = f"""
-            SELECT PG.IDPROMOCAO, PG.DESCRPROMOCAO, PG.DTINIPROMOCAO, PG.DTFIMPROMOCAO,
-                   PG.FLAGINATIVO, PG.DTALTERACAO
-            FROM {self.schema}.PROMOCAO_GESTAO PG
-            JOIN {self.schema}.PROMOCAO_GESTAO_EMPRESA PE
-              ON PE.IDPROMOCAO = PG.IDPROMOCAO
-             AND PE.IDEMPRESA = ?
-             AND PE.FLAGINATIVO = 'F'
-            WHERE PG.FLAGINATIVO = 'F'
+        """PROMOCAO_GESTAO scoped for a company.
+
+        Primary: PROMOCAO_GESTAO_EMPRESA.IDEMPRESA.
+        Fallback: when the company has no *active-window* EMPRESA links (observed for
+        IDEMPRESA=1 / Supermercado Real), include vigente campaigns that have at least
+        one item with POLITICA_PRECO_PRODUTO for that IDEMPRESA. Never invents rows.
         """
+        limit = max(1, min(limit, 200))
+        company = int(company_code)
+        window_sql = ""
         if active_only:
-            sql += " AND PG.DTINIPROMOCAO <= CURRENT TIMESTAMP AND PG.DTFIMPROMOCAO >= CURRENT TIMESTAMP"
-        sql += " ORDER BY PG.DTINIPROMOCAO DESC FETCH FIRST ? ROWS ONLY"
+            window_sql = (
+                " AND PG.DTINIPROMOCAO <= CURRENT TIMESTAMP"
+                " AND PG.DTFIMPROMOCAO >= CURRENT TIMESTAMP"
+            )
         cn = self._connect()
         try:
             cur = cn.cursor()
-            cur.execute(sql, int(company_code), limit)
+            # Does this company use EMPRESA junction for current window?
+            cur.execute(
+                f"""
+                SELECT COUNT(*)
+                FROM {self.schema}.PROMOCAO_GESTAO_EMPRESA PE
+                JOIN {self.schema}.PROMOCAO_GESTAO PG ON PG.IDPROMOCAO = PE.IDPROMOCAO
+                WHERE PE.IDEMPRESA = ?
+                  AND PE.FLAGINATIVO = 'F'
+                  AND PG.FLAGINATIVO = 'F'
+                  AND PG.DTINIPROMOCAO <= CURRENT TIMESTAMP
+                  AND PG.DTFIMPROMOCAO >= CURRENT TIMESTAMP
+                """,
+                company,
+            )
+            empresa_active_links = int((cur.fetchone() or [0])[0] or 0)
+
+            if empresa_active_links > 0:
+                sql = f"""
+                    SELECT PG.IDPROMOCAO, PG.DESCRPROMOCAO, PG.DTINIPROMOCAO, PG.DTFIMPROMOCAO,
+                           PG.FLAGINATIVO, PG.DTALTERACAO
+                    FROM {self.schema}.PROMOCAO_GESTAO PG
+                    JOIN {self.schema}.PROMOCAO_GESTAO_EMPRESA PE
+                      ON PE.IDPROMOCAO = PG.IDPROMOCAO
+                     AND PE.IDEMPRESA = ?
+                     AND PE.FLAGINATIVO = 'F'
+                    WHERE PG.FLAGINATIVO = 'F'
+                    {window_sql}
+                    ORDER BY PG.DTINIPROMOCAO DESC
+                    FETCH FIRST ? ROWS ONLY
+                """
+                cur.execute(sql, company, limit)
+            else:
+                # Company does not publish EMPRESA links for current offers —
+                # scope by priced items at IDEMPRESA (Campo Novo / emp 1 pattern).
+                sql = f"""
+                    SELECT PG.IDPROMOCAO, PG.DESCRPROMOCAO, PG.DTINIPROMOCAO, PG.DTFIMPROMOCAO,
+                           PG.FLAGINATIVO, PG.DTALTERACAO
+                    FROM {self.schema}.PROMOCAO_GESTAO PG
+                    WHERE PG.FLAGINATIVO = 'F'
+                    {window_sql}
+                      AND EXISTS (
+                        SELECT 1
+                        FROM {self.schema}.PROMOCAO_GESTAO_PRODUTO PGP
+                        JOIN {self.schema}.POLITICA_PRECO_PRODUTO PPP
+                          ON PPP.IDPRODUTO = PGP.IDPRODUTO
+                         AND PPP.IDSUBPRODUTO = PGP.IDSUBPRODUTO
+                         AND PPP.IDEMPRESA = ?
+                        WHERE PGP.IDPROMOCAO = PG.IDPROMOCAO
+                          AND PGP.FLAGINATIVO = 'F'
+                      )
+                    ORDER BY PG.DTINIPROMOCAO DESC
+                    FETCH FIRST ? ROWS ONLY
+                """
+                cur.execute(sql, company, limit)
+
             out = []
             for r in cur.fetchall():
                 out.append(
@@ -612,6 +723,7 @@ class CissDb2RetailProvider(RetailDataProvider):
                         "expires_at": _to_dt(r[3]),
                         "active": not _flag_inactive(r[4]),
                         "source_updated_at": _to_dt(r[5]),
+                        "scope_mode": "EMPRESA" if empresa_active_links > 0 else "PRICED_ITEMS",
                     }
                 )
             return out
